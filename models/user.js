@@ -60,7 +60,8 @@ module.exports = (sequelize, Sequelize) => {
       type: Sequelize.ENUM("user", "admin", "merchant", "customer"),
     },
     status: {
-      type: Sequelize.BOOLEAN,
+      type: Sequelize.ENUM("pending", "active", "inactive", "archived"),
+      defaultValue: "pending",
     },
     password: {
       type: Sequelize.STRING,
