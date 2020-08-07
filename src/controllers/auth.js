@@ -1,8 +1,10 @@
 const express = require("express");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 const db = require("../../models");
+
 const router = express.Router();
-const jwt = require('jsonwebtoken');
+
 router.post("/signup", async (req, res) => {
   try {
     const { firstName, lastName, contactNumber } = req.body;
@@ -124,8 +126,37 @@ router.post("/login", async (req, res) => {
 
     return res.status(200).json({ token, userName, role: isUserExist.role });
   } catch (error) {
-    console.log(error)
     return res.sendStatus(500);
+  }
+});
+
+router.post("/forget-password", async (req, res) => {
+  try {
+    const email = req.body.email;
+    // 1. check whether user exists and active
+    const isUserExist = await db.user.findOne({
+      where: {
+        email,
+        status: "active",
+      },
+    });
+    // if not exist
+    if (!isUserExist) {
+      return res.sendStatus(422);
+    }
+    const passwordResetToken = Math.floor(1000 + Math.random() * 9000);
+    await db.user.update({
+      passwordResetToken
+    },{
+      where:{
+        email
+      }
+    })
+
+    res.sendStatus(200);
+  } catch (error) {
+    console.log(error)
+    res.sendStatus(500);
   }
 });
 
