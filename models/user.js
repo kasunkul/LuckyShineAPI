@@ -79,6 +79,10 @@ module.exports = (sequelize, Sequelize) => {
 
         // allowNull:false
       },
+      isAppUser:{
+        type: Sequelize.BOOLEAN,
+        defaultValue: true,
+      }
     },
     {
       sequelize,

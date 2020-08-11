@@ -10,7 +10,8 @@ module.exports = (sequelize, Sequelize) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      // define association here
+      laundry_order.belongsTo(models.user,{foreignKey:'customerId',as:'customer'}),
+      laundry_order.belongsTo(models.user,{foreignKey:'customerId',as:'driver'})
     }
   };
   laundry_order.init({
@@ -39,8 +40,21 @@ module.exports = (sequelize, Sequelize) => {
       type: Sequelize.STRING
     },
     status:{
-      type:Sequelize.ENUM('Pending','InQueue', 'Completed')
+      type:Sequelize.STRING
     },
+    driverId:{
+      type: Sequelize.INTEGER,
+    },
+    assignDate: {
+      type: Sequelize.DATE,
+    },
+    startLocation:{
+      type: Sequelize.STRING,
+    },
+    notes:{
+      type: Sequelize.STRING,
+    }
+
   }, {
     sequelize,
     modelName: 'laundry_order',

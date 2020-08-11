@@ -1,4 +1,5 @@
 const express = require('express');
+const bcrypt = require('bcrypt');
 
 const router = express.Router();
 const db = require('../../models');
@@ -16,6 +17,8 @@ router.post('/', async (req, res) => {
     if (isExists) {
       return res.sendStatus(422);
     }
+    const salt = bcrypt.genSaltSync(10);
+    req.body.password = bcrypt.hashSync(req.body.password, salt);
     await db.user.create(req.body);
 
     return res.sendStatus(200);
@@ -46,6 +49,49 @@ router.put('/:id', async (req, res) => {
     });
 
     return res.sendStatus(200);
+  } catch (error) {
+    return res.sendStatus(500);
+  }
+});
+
+router.get('/', async (req, res) => {
+  try {
+    // Total employees and active employees
+
+    const [totalEmp, activeEmp] = await Promise.all([
+      db.user.count({
+        where: {
+          role: {
+            [Op.ne]: 'customer',
+          },
+        },
+      }),
+      db.user.count({
+        where: {
+          role: {
+            [Op.ne]: 'customer',
+          },
+          status: 'active',
+        },
+      }),
+
+    ]);
+
+    const itemsPerEmp = 0;
+
+    // Monthly top performers
+
+    const performers = await db.user.findAll({
+      where: {
+        role: {
+          [Op.ne]: 'customer',
+        },
+      },
+    });
+
+    return res.status(200).json({
+      totalEmp, activeEmp, itemsPerEmp, performers,
+    });
   } catch (error) {
     return res.sendStatus(500);
   }

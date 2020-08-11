@@ -51,4 +51,27 @@ router.put('/:id', async (req, res) => {
   }
 });
 
+router.get('/', async (req, res) => {
+  try {
+    // Total laundry items
+    const [itemsCount] = await Promise.all([db.laundry_item.count()]);
+
+    await db.laundry_item.update(req.body, {
+      where: {
+        id: req.params.id,
+      },
+    });
+    const highestSale = 25;
+    const leastSale = 50;
+
+    const items = await db.laundry_item.findAll();
+
+    return res.status(200).json({
+      itemsCount, highestSale, leastSale, items,
+    });
+  } catch (error) {
+    return res.sendStatus(500);
+  }
+});
+
 module.exports = router;
