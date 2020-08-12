@@ -1,12 +1,12 @@
-const express = require('express');
-const bcrypt = require('bcrypt');
+const express = require("express");
+const bcrypt = require("bcrypt");
 
 const router = express.Router();
-const db = require('../../models');
+const db = require("../../models");
 
 const { Op } = db.Sequelize;
 
-router.post('/', async (req, res) => {
+router.post("/", async (req, res) => {
   try {
     // check fiscal code uniqueness
     const isExists = await db.user.findOne({
@@ -27,7 +27,7 @@ router.post('/', async (req, res) => {
   }
 });
 
-router.put('/:id', async (req, res) => {
+router.put("/:id", async (req, res) => {
   try {
     // check fiscal code uniqueness
     const isExists = await db.user.findOne({
@@ -54,7 +54,7 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-router.get('/', async (req, res) => {
+router.get("/", async (req, res) => {
   try {
     // Total employees and active employees
 
@@ -62,19 +62,18 @@ router.get('/', async (req, res) => {
       db.user.count({
         where: {
           role: {
-            [Op.ne]: 'customer',
+            [Op.ne]: "customer",
           },
         },
       }),
       db.user.count({
         where: {
           role: {
-            [Op.ne]: 'customer',
+            [Op.ne]: "customer",
           },
-          status: 'active',
+          status: "active",
         },
       }),
-
     ]);
 
     const itemsPerEmp = 0;
@@ -84,14 +83,31 @@ router.get('/', async (req, res) => {
     const performers = await db.user.findAll({
       where: {
         role: {
-          [Op.ne]: 'customer',
+          [Op.ne]: "customer",
         },
       },
     });
 
     return res.status(200).json({
-      totalEmp, activeEmp, itemsPerEmp, performers,
+      totalEmp,
+      activeEmp,
+      itemsPerEmp,
+      performers,
     });
+  } catch (error) {
+    return res.sendStatus(500);
+  }
+});
+
+router.get("/:id", async (req, res) => {
+  try {
+    const data = await db.user.findOne({
+      where: {
+        id: req.params.id,
+      },
+    });
+
+    return res.status(200).json(data);
   } catch (error) {
     return res.sendStatus(500);
   }
