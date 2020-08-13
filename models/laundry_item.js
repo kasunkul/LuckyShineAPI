@@ -8,7 +8,9 @@ module.exports = (sequelize, Sequelize) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      // define association here
+      laundry_item.belongsTo(models.item_category, {
+        foreignKey: "itemCategoryId",
+      });
     }
   }
   laundry_item.init(

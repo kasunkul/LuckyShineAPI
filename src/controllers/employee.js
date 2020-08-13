@@ -4,7 +4,6 @@ const bcrypt = require('bcrypt');
 const router = express.Router();
 const db = require('../../models');
 
-
 const { Op } = db.Sequelize;
 
 router.post('/with-password', async (req, res) => {
@@ -49,8 +48,6 @@ router.post('/', async (req, res) => {
     return res.sendStatus(500);
   }
 });
-
-
 
 router.put('/:id', async (req, res) => {
   try {

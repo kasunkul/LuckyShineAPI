@@ -51,6 +51,18 @@ router.put('/:id', async (req, res) => {
   }
 });
 
+router.get('/list', async (req, res) => {
+  try {
+    const data = await db.laundry_item.findAll({
+      include:[{model:db.item_category}]
+    });
+
+    return res.status(200).json(data);
+  } catch (error) {
+    return res.sendStatus(500);
+  }
+});
+
 router.get('/', async (req, res) => {
   try {
     // Total laundry items
