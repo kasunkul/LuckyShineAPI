@@ -41,4 +41,19 @@ router.get('/', async (req, res) => {
   }
 });
 
+router.get('/list', async (req, res) => {
+  try {
+    const data = await db.user.findAll({
+      order: db.sequelize.literal('id DESC'),
+      where: {
+        role: 'customer',
+      },
+    });
+
+    return res.status(200).json(data);
+  } catch (error) {
+    return res.sendStatus(500);
+  }
+});
+
 module.exports = router;

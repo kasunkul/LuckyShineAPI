@@ -1,12 +1,13 @@
-const express = require("express");
-const bcrypt = require("bcrypt");
+const express = require('express');
+const bcrypt = require('bcrypt');
 
 const router = express.Router();
-const db = require("../../models");
+const db = require('../../models');
+
 
 const { Op } = db.Sequelize;
 
-router.post("/", async (req, res) => {
+router.post('/with-password', async (req, res) => {
   try {
     // check fiscal code uniqueness
     const isExists = await db.user.findOne({
@@ -27,7 +28,31 @@ router.post("/", async (req, res) => {
   }
 });
 
-router.put("/:id", async (req, res) => {
+router.post('/', async (req, res) => {
+  try {
+    // check fiscal code uniqueness
+    const isExists = await db.user.findOne({
+      where: {
+        email: req.body.email,
+      },
+    });
+    if (isExists) {
+      return res.sendStatus(422);
+    }
+    delete req.body.password;
+    // const salt = bcrypt.genSaltSync(10);
+    // req.body.password = bcrypt.hashSync(req.body.password, salt);
+    await db.user.create(req.body);
+
+    return res.sendStatus(200);
+  } catch (error) {
+    return res.sendStatus(500);
+  }
+});
+
+
+
+router.put('/:id', async (req, res) => {
   try {
     // check fiscal code uniqueness
     const isExists = await db.user.findOne({
@@ -54,7 +79,7 @@ router.put("/:id", async (req, res) => {
   }
 });
 
-router.get("/", async (req, res) => {
+router.get('/', async (req, res) => {
   try {
     // Total employees and active employees
 
@@ -62,16 +87,16 @@ router.get("/", async (req, res) => {
       db.user.count({
         where: {
           role: {
-            [Op.ne]: "customer",
+            [Op.ne]: 'customer',
           },
         },
       }),
       db.user.count({
         where: {
           role: {
-            [Op.ne]: "customer",
+            [Op.ne]: 'customer',
           },
-          status: "active",
+          status: 'active',
         },
       }),
     ]);
@@ -83,7 +108,7 @@ router.get("/", async (req, res) => {
     const performers = await db.user.findAll({
       where: {
         role: {
-          [Op.ne]: "customer",
+          [Op.ne]: 'customer',
         },
       },
     });
@@ -99,7 +124,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.get("/:id", async (req, res) => {
+router.get('/:id', async (req, res) => {
   try {
     const data = await db.user.findOne({
       where: {

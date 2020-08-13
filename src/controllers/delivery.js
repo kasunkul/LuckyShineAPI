@@ -24,14 +24,17 @@ router.get('/', async (req, res) => {
       db.laundry_order.findAll({
         where: {
           [Op.and]: [
-            db.Sequelize.literal(`MONTH(laundry_order.createdAt) = MONTH(CURDATE())
+            db.Sequelize
+              .literal(`MONTH(laundry_order.createdAt) = MONTH(CURDATE())
                 AND YEAR(laundry_order.createdAt) = YEAR(CURDATE())`),
           ],
         },
-        include: [{
-          model: db.user,
-          as: 'driver',
-        }],
+        include: [
+          {
+            model: db.user,
+            as: 'driver',
+          },
+        ],
         order: db.sequelize.literal('laundry_order.id DESC'),
 
         // logging: true,
@@ -48,6 +51,22 @@ router.get('/', async (req, res) => {
   }
 });
 
+router.get('/list', async (req, res) => {
+  try {
+    const data = await db.laundry_order.findAll({
+      order: db.sequelize.literal('laundry_order.id DESC'),
+      include: [
+        {
+          model: db.user,
+          as: 'driver',
+        },
+      ],
+    });
 
+    return res.status(200).json(data);
+  } catch (error) {
+    return res.sendStatus(500);
+  }
+});
 
 module.exports = router;
