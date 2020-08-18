@@ -54,7 +54,7 @@ router.put('/:id', async (req, res) => {
 router.get('/list', async (req, res) => {
   try {
     const data = await db.laundry_item.findAll({
-      include:[{model:db.item_category}]
+      include: [{ model: db.item_category }],
     });
 
     return res.status(200).json(data);
@@ -79,7 +79,10 @@ router.get('/', async (req, res) => {
     const items = await db.laundry_item.findAll();
 
     return res.status(200).json({
-      itemsCount, highestSale, leastSale, items,
+      itemsCount,
+      highestSale,
+      leastSale,
+      items,
     });
   } catch (error) {
     return res.sendStatus(500);
