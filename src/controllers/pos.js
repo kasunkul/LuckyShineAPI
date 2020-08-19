@@ -41,7 +41,6 @@ router.post('/', async (req, res) => {
     await db.laundry_order.create(orderData);
     res.sendStatus(200);
   } catch (error) {
-    console.log(error);
     res.sendStatus(500);
   }
 });
@@ -57,8 +56,8 @@ router.get('/itemList', async (req, res) => {
       ],
       raw: true,
     });
-    data.forEach((element) => {
-      element.qty = 1;
+    data.forEach((element, i, a) => {
+      a[i].qty = 1;
       element.needIron = false;
     });
     res.status(200).json(data);

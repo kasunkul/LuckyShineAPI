@@ -2,7 +2,7 @@ const express = require('express');
 
 const router = express.Router();
 const db = require('../../models');
-
+const checkAuth = require('../middleware/auth');
 // const { Op } = db.Sequelize;
 router.get('/', async (req, res) => {
   try {
@@ -41,7 +41,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-router.get('/list', async (req, res) => {
+router.get('/list', checkAuth, async (req, res) => {
   try {
     const data = await db.user.findAll({
       order: db.sequelize.literal('id DESC'),
