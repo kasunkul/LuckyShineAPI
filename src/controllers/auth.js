@@ -1,11 +1,11 @@
-const express = require("express");
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
-const db = require("../../models");
+const express = require('express');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const db = require('../../models');
 
 const router = express.Router();
 
-router.post("/signup", async (req, res) => {
+router.post('/signup', async (req, res) => {
   try {
     const { firstName, lastName, contactNumber } = req.body;
 
@@ -31,7 +31,7 @@ router.post("/signup", async (req, res) => {
   }
 });
 
-router.post("/signup-verify", async (req, res) => {
+router.post('/signup-verify', async (req, res) => {
   try {
     const { resetToken, id } = req.body;
 
@@ -49,13 +49,13 @@ router.post("/signup-verify", async (req, res) => {
 
     await db.user.update(
       {
-        status: "active",
+        status: 'active',
       },
       {
         where: {
           id,
         },
-      }
+      },
     );
     return res.sendStatus(200);
   } catch (error) {
@@ -63,7 +63,7 @@ router.post("/signup-verify", async (req, res) => {
   }
 });
 
-router.put("/set-password", async (req, res) => {
+router.put('/set-password', async (req, res) => {
   try {
     const { resetToken, id } = req.body;
     const isExists = await db.user.findOne({
@@ -86,7 +86,7 @@ router.put("/set-password", async (req, res) => {
         where: {
           id,
         },
-      }
+      },
     );
     return res.sendStatus(200);
   } catch (error) {
@@ -94,13 +94,13 @@ router.put("/set-password", async (req, res) => {
   }
 });
 
-router.post("/login", async (req, res) => {
+router.post('/login', async (req, res) => {
   try {
     // 1. check whether user exists and active
     const isUserExist = await db.user.findOne({
       where: {
         email: req.body.email,
-        status: "active",
+        status: 'active',
       },
     });
     // if not exist
@@ -121,29 +121,45 @@ router.post("/login", async (req, res) => {
       {
         id,
       },
-      process.env.JWT_KEY
+      process.env.JWT_KEY,
     );
+    let redirectUrl;
+    if (isUserExist.role === 'admin') {
+      redirectUrl = '/dashboard';
+    } else if (isUserExist.role === 'labManager') {
+      redirectUrl = '/laundry';
+    } else {
+      redirectUrl = '/pos';
+    }
 
     return res.status(200).json({
       access_token: token,
-      role: [isUserExist.role],
+      // role: [isUserExist.role],
       user: {
-        displayName: userName,
+        role: [isUserExist.role],
+        data: {
+          displayName: userName,
+          photoURL: 'assets/images/avatars/Velazquez.jpg',
+          email: 'johndoe@withinpixels.com',
+          shortcuts: [],
+          redirectUrl,
+        },
       },
     });
   } catch (error) {
+    console.log(error);
     return res.sendStatus(500);
   }
 });
 
-router.post("/forget-password", async (req, res) => {
+router.post('/forget-password', async (req, res) => {
   try {
     const { email } = req.body;
     // 1. check whether user exists and active
     const isUserExist = await db.user.findOne({
       where: {
         email,
-        status: "active",
+        status: 'active',
       },
     });
     // if not exist
@@ -159,7 +175,7 @@ router.post("/forget-password", async (req, res) => {
         where: {
           email,
         },
-      }
+      },
     );
 
     return res.sendStatus(200);
