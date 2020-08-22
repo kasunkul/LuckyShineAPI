@@ -1,11 +1,11 @@
-const express = require('express');
+const express = require("express");
 
 const router = express.Router();
-const db = require('../../models');
+const db = require("../../models");
 
 const { Op } = db.Sequelize;
 
-router.post('/', async (req, res) => {
+router.post("/", async (req, res) => {
   try {
     // check category name uniqueness
     const isExists = await db.laundry_item.findOne({
@@ -24,7 +24,7 @@ router.post('/', async (req, res) => {
   }
 });
 
-router.put('/:id', async (req, res) => {
+router.put("/:id", async (req, res) => {
   try {
     // check fiscal code uniqueness
     const isExists = await db.laundry_item.findOne({
@@ -51,7 +51,7 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-router.get('/list', async (req, res) => {
+router.get("/list", async (req, res) => {
   try {
     const data = await db.laundry_item.findAll({
       include: [{ model: db.item_category }],
@@ -63,7 +63,7 @@ router.get('/list', async (req, res) => {
   }
 });
 
-router.get('/', async (req, res) => {
+router.get("/", async (req, res) => {
   try {
     // Total laundry items
     const [itemsCount] = await Promise.all([db.laundry_item.count()]);
@@ -84,6 +84,20 @@ router.get('/', async (req, res) => {
       leastSale,
       items,
     });
+  } catch (error) {
+    return res.sendStatus(500);
+  }
+});
+
+router.get("/:id", async (req, res) => {
+  try {
+    const data = await db.laundry_item.findOne({
+      where: {
+        id: req.params.id,
+      },
+    });
+
+    return res.status(200).json(data);
   } catch (error) {
     return res.sendStatus(500);
   }

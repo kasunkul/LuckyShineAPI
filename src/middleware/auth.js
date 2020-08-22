@@ -4,7 +4,7 @@ const db = require('../../models');
 module.exports = async (req, res, next) => {
   try {
     const token = req.headers.authorization.split(' ')[1];
-    const decoded = jwt.verify(token, process.env.JWT_KEY);
+    const decoded = jwt.verify(token, 'lavup');
     req.user = decoded;
     // const { id } = req.user;
 

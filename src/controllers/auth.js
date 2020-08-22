@@ -114,6 +114,8 @@ router.post('/login', async (req, res) => {
       return res.sendStatus(401);
     }
 
+    console.log('JWT',process.env.JWT_KEY)
+
     // 3. issue a JWT
     const { id } = isUserExist;
     const userName = `${isUserExist.firstName} ${isUserExist.lastName}`;
@@ -121,7 +123,7 @@ router.post('/login', async (req, res) => {
       {
         id,
       },
-      process.env.JWT_KEY,
+      'lavup',
     );
     let redirectUrl;
     if (isUserExist.role === 'admin') {
