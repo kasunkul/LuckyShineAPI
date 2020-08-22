@@ -1,24 +1,24 @@
-const express = require('express');
+const express = require("express");
 
 const router = express.Router();
-const db = require('../../models');
+const db = require("../../models");
 
 const { Op } = db.Sequelize;
 
-router.get('/', async (req, res) => {
+router.get("/", async (req, res) => {
   try {
     // Total delivery orders and items
     const [deliveryCount, returnedDelivery, items] = await Promise.all([
       db.laundry_order.count({
         where: {
           status: {
-            [Op.in]: ['pending', 'inQueue'],
+            [Op.in]: ["pending", "inQueue"],
           },
         },
       }),
       db.laundry_order.count({
         where: {
-          status: 'returned',
+          status: "returned",
         },
       }),
       db.laundry_order.findAll({
@@ -32,10 +32,11 @@ router.get('/', async (req, res) => {
         include: [
           {
             model: db.user,
-            as: 'driver',
+            as: "driver",
+            required: true,
           },
         ],
-        order: db.sequelize.literal('laundry_order.id DESC'),
+        order: db.sequelize.literal("laundry_order.id DESC"),
 
         // logging: true,
       }),
@@ -51,14 +52,15 @@ router.get('/', async (req, res) => {
   }
 });
 
-router.get('/list', async (req, res) => {
+router.get("/list", async (req, res) => {
   try {
     const data = await db.laundry_order.findAll({
-      order: db.sequelize.literal('laundry_order.id DESC'),
+      order: db.sequelize.literal("laundry_order.id DESC"),
       include: [
         {
           model: db.user,
-          as: 'driver',
+          as: "driver",
+          required:true
         },
       ],
     });
