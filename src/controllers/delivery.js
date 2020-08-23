@@ -60,7 +60,7 @@ router.get("/list", async (req, res) => {
         {
           model: db.user,
           as: "driver",
-          required:true
+          // required:true
         },
       ],
     });

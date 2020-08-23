@@ -31,7 +31,7 @@ router.post('/', async (req, res) => {
     };
 
     if (!customerId) {
-      delete orderData.customerId;
+       orderData.customerId = 4
     }
     if (!driverId) {
       delete orderData.driverId;
