@@ -79,10 +79,16 @@ module.exports = (sequelize, Sequelize) => {
 
         // allowNull:false
       },
-      isAppUser:{
+      isAppUser: {
         type: Sequelize.BOOLEAN,
         defaultValue: true,
-      }
+      },
+      fullName: {
+        type: Sequelize.VIRTUAL,
+        get() {
+          return `${this.firstName} ${this.lastName}`;
+        },
+      },
     },
     {
       sequelize,

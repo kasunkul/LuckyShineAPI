@@ -56,13 +56,27 @@ router.get("/list", async (req, res) => {
   try {
     const data = await db.laundry_order.findAll({
       order: db.sequelize.literal("laundry_order.id DESC"),
+      raw: true,
       include: [
         {
           model: db.user,
           as: "driver",
+          attributes: ["firstName", "lastName"],
+          // required:true
+        },
+        {
+          model: db.user,
+          as: "customer",
+          attributes: ["firstName", "lastName"],
           // required:true
         },
       ],
+    });
+
+    data.forEach((element) => {
+      element.driver = element["driver.firstName"] + " "+element["driver.lastName"];
+      element.customer =
+        element["customer.firstName"] +" "+ element["customer.lastName"];
     });
 
     return res.status(200).json(data);
