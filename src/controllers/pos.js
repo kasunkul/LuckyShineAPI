@@ -41,6 +41,7 @@ router.post('/', async (req, res) => {
     await db.laundry_order.create(orderData);
     res.sendStatus(200);
   } catch (error) {
+    console.log('error',error)
     res.sendStatus(500);
   }
 });

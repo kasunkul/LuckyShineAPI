@@ -14,9 +14,9 @@ module.exports = (sequelize, DataTypes) => {
     }
   };
   shop.init({
-    firstName: DataTypes.STRING,
-    lastName: DataTypes.STRING,
-    email: DataTypes.STRING
+    name: {
+      type: DataTypes.STRING
+    },
   }, {
     sequelize,
     modelName: 'shop',
