@@ -114,7 +114,7 @@ router.post('/login', async (req, res) => {
       return res.sendStatus(401);
     }
 
-    console.log('JWT',process.env.JWT_KEY)
+    console.log('JWT', process.env.JWT_KEY);
 
     // 3. issue a JWT
     const { id } = isUserExist;

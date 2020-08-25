@@ -41,22 +41,31 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.get("/list", checkAuth, async (req, res) => {
+router.get("/list/:type", checkAuth, async (req, res) => {
   try {
-    const data = await db.user.findAll({
-      attributes: ["firstName", "lastName", "fullName", "id"],
+    const type = req.params.type;
+
+    let query = {
+      attributes: ["firstName", "lastName", "fullName", "id","contactNumber","status"],
       order: db.sequelize.literal("id DESC"),
       where: {
         role: "customer",
       },
       raw: true,
-    });
+    };
+
+    if (type === "active") {
+      query.where.status = "active";
+    }
+    if (type === "inactive") {
+      query.where.status = "inactive";
+    }
+
+    const data = await db.user.findAll(query);
 
     data.forEach((element) => {
-      element.fullName = element.firstName + " " + element.lastName;
+      element.fullName = `${element.firstName} ${element.lastName}`;
     });
-
-    console.log("data", data);
 
     return res.status(200).json(data);
   } catch (error) {
@@ -76,10 +85,8 @@ router.get("/drivers", checkAuth, async (req, res) => {
     });
 
     data.forEach((element) => {
-      element.fullName = element.firstName + " " + element.lastName;
+      element.fullName = `${element.firstName} ${element.lastName}`;
     });
-
-   
 
     return res.status(200).json(data);
   } catch (error) {

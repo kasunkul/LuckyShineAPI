@@ -32,6 +32,16 @@ module.exports = (sequelize, Sequelize) => {
     subTotal: {
       type: Sequelize.DOUBLE(11,2)
     },
+    itemId: {
+      type: Sequelize.INTEGER,
+      references:{
+        model:'laundry_items',
+        key:'id'
+      },
+      onDelete:'cascade',
+      onUpdate:'cascade'
+
+    }
   }, {
     sequelize,
     modelName: 'laundry_order_item',

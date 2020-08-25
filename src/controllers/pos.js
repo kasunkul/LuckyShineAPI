@@ -1,9 +1,9 @@
-const express = require('express');
+const express = require("express");
 
 const router = express.Router();
-const db = require('../../models');
+const db = require("../../models");
 
-router.post('/', async (req, res) => {
+router.post("/", async (req, res) => {
   try {
     const {
       customerId,
@@ -15,7 +15,7 @@ router.post('/', async (req, res) => {
       cart,
     } = req.body;
     const orderValue = cart.map((e) => e.price).reduce((a, b) => a + b);
-    const status = 'pending';
+    const status = "pending";
 
     const orderData = {
       customerId,
@@ -31,29 +31,38 @@ router.post('/', async (req, res) => {
     };
 
     if (!customerId) {
-       orderData.customerId = 4
+      orderData.customerId = 4;
     }
     if (!driverId) {
       delete orderData.driverId;
       delete orderData.assignDate;
       delete orderData.notes;
     }
-    await db.laundry_order.create(orderData);
+    const data = await db.laundry_order.create(orderData);
+    cart.forEach((element) => {
+      element.laundryOrderId = data.dataValues.id;
+      element.unitsPurchased = element.qty;
+      element.subTotal = element.qty * element.price;
+      element.itemId = element.id;
+      delete element.id;
+    });
+   
+    await db.laundry_order_item.bulkCreate(cart);
     res.sendStatus(200);
   } catch (error) {
-    console.log('error',error)
+    console.log(error)
     res.sendStatus(500);
   }
 });
 
-router.get('/itemList', async (req, res) => {
+router.get("/itemList", async (req, res) => {
   try {
     const data = await db.laundry_item.findAll({
       attributes: [
-        ['itemName', 'name'],
-        'id',
-        ['unitPrice', 'price'],
-        'unitPrice',
+        ["itemName", "name"],
+        "id",
+        ["unitPrice", "price"],
+        "unitPrice",
       ],
       raw: true,
     });
