@@ -39,18 +39,28 @@ router.post("/", async (req, res) => {
       delete orderData.notes;
     }
     const data = await db.laundry_order.create(orderData);
-    cart.forEach((element) => {
-      element.laundryOrderId = data.dataValues.id;
-      element.unitsPurchased = element.qty;
-      element.subTotal = element.qty * element.price;
-      element.itemId = element.id;
-      delete element.id;
+    const cartBulk = [];
+    cart.forEach((e) => {
+      for (let index = 0; index < e.qty; index++) {
+        cartBulk.push({
+          laundryOrderId: data.dataValues.id,
+          unitPrice: e.unitPrice,
+          itemId: e.id,
+        });
+      }
     });
-   
-    await db.laundry_order_item.bulkCreate(cart);
+    // cart.forEach((element) => {
+    //   element.laundryOrderId = data.dataValues.id;
+    //   element.unitsPurchased = element.qty;
+    //   element.subTotal = element.qty * element.price;
+    //   element.itemId = element.id;
+    //   delete element.id;
+    // });
+
+    await db.laundry_order_item.bulkCreate(cartBulk);
     res.sendStatus(200);
   } catch (error) {
-    console.log(error)
+    console.log(error);
     res.sendStatus(500);
   }
 });
