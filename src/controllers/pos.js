@@ -13,6 +13,8 @@ router.post("/", async (req, res) => {
       assignDate,
       notes,
       cart,
+      orderPayed,
+      shopId,
     } = req.body;
     const orderValue = cart.map((e) => e.price).reduce((a, b) => a + b);
     const status = "pending";
