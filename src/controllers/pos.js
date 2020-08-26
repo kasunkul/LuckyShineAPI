@@ -28,7 +28,10 @@ router.post("/", async (req, res) => {
       assignDate,
       notes,
       status,
-      toPrint:1
+      toPrint:1,
+      orderPayed,
+      shopId,
+      deliveryDate:assignDate
     };
 
     if (!customerId) {

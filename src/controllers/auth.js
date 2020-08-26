@@ -186,4 +186,13 @@ router.post('/forget-password', async (req, res) => {
   }
 });
 
+router.get('/access-token', async (req, res) => {
+  try {
+      console.log('this has called',req)
+    return res.sendStatus(200);
+  } catch (error) {
+    return res.sendStatus(500);
+  }
+});
+
 module.exports = router;
