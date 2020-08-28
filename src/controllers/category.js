@@ -51,6 +51,19 @@ router.put('/:id', async (req, res) => {
   }
 });
 
+router.get('/:id', async (req, res) => {
+  try {
+    const data = await db.item_category.findOne({
+      where:{
+        id:req.params.id
+      }
+    });
+    res.status(200).json(data);
+  } catch (error) {
+    res.sendStatus(500);
+  }
+});
+
 router.get('/', async (req, res) => {
   try {
     const data = await db.item_category.findAll();
