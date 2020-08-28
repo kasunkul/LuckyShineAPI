@@ -1,28 +1,28 @@
-const express = require("express");
+const express = require('express');
 
 const router = express.Router();
-const db = require("../../models");
-const checkAuth = require("../middleware/auth");
+const db = require('../../models');
+const checkAuth = require('../middleware/auth');
 // const { Op } = db.Sequelize;
-router.get("/", async (req, res) => {
+router.get('/', async (req, res) => {
   try {
     // Total delivery orders and items
     const [inactiveCount, activeCount, items] = await Promise.all([
       db.user.count({
         where: {
-          status: "inactive",
-          role: "customer",
+          status: 'inactive',
+          role: 'customer',
         },
       }),
       db.user.count({
         where: {
-          status: "active",
-          role: "customer",
+          status: 'active',
+          role: 'customer',
         },
       }),
       db.user.findAll({
         where: {
-          role: "customer",
+          role: 'customer',
         },
       }),
     ]);
@@ -41,24 +41,24 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.get("/list/:type", checkAuth, async (req, res) => {
+router.get('/list/:type', checkAuth, async (req, res) => {
   try {
-    const type = req.params.type;
+    const { type } = req.params;
 
-    let query = {
-      attributes: ["firstName", "lastName", "fullName", "id","contactNumber","status"],
-      order: db.sequelize.literal("id DESC"),
+    const query = {
+      attributes: ['firstName', 'lastName', 'fullName', 'id', 'contactNumber', 'status'],
+      order: db.sequelize.literal('id DESC'),
       where: {
-        role: "customer",
+        role: 'customer',
       },
       raw: true,
     };
 
-    if (type === "active") {
-      query.where.status = "active";
+    if (type === 'active') {
+      query.where.status = 'active';
     }
-    if (type === "inactive") {
-      query.where.status = "inactive";
+    if (type === 'inactive') {
+      query.where.status = 'inactive';
     }
 
     const data = await db.user.findAll(query);
@@ -73,13 +73,13 @@ router.get("/list/:type", checkAuth, async (req, res) => {
   }
 });
 
-router.get("/drivers", checkAuth, async (req, res) => {
+router.get('/drivers', checkAuth, async (req, res) => {
   try {
     const data = await db.user.findAll({
-      attributes: ["firstName", "lastName", "fullName", "id"],
-      order: db.sequelize.literal("id DESC"),
+      attributes: ['firstName', 'lastName', 'fullName', 'id'],
+      order: db.sequelize.literal('id DESC'),
       where: {
-        role: "driver",
+        role: 'driver',
       },
       raw: true,
     });

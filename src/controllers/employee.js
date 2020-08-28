@@ -78,7 +78,7 @@ router.put('/:id', async (req, res) => {
     if (isExists) {
       return res.sendStatus(422);
     }
-    delete req.body.password
+    delete req.body.password;
     await db.user.update(req.body, {
       where: {
         id: req.params.id,

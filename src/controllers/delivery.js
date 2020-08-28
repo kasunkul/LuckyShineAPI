@@ -88,8 +88,6 @@ router.get('/list/:type', async (req, res) => {
       element.customer = `${element['customer.firstName']} ${element['customer.lastName']}`;
     });
 
-   
-
     return res.status(200).json(data);
   } catch (error) {
     return res.sendStatus(500);

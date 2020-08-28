@@ -1,9 +1,9 @@
-const express = require("express");
+const express = require('express');
 
 const router = express.Router();
-const db = require("../../models");
+const db = require('../../models');
 
-router.post("/", async (req, res) => {
+router.post('/', async (req, res) => {
   try {
     const {
       customerId,
@@ -17,7 +17,12 @@ router.post("/", async (req, res) => {
       shopId,
     } = req.body;
     const orderValue = cart.map((e) => e.price).reduce((a, b) => a + b);
-    const status = "pending";
+    const status = 'pending';
+
+    let deliveryDate = null;
+    if (assignDate) {
+      deliveryDate = assignDate
+    }
 
     const orderData = {
       customerId,
@@ -30,10 +35,10 @@ router.post("/", async (req, res) => {
       assignDate,
       notes,
       status,
-      toPrint:1,
+      toPrint: 1,
       orderPayed,
       shopId,
-      deliveryDate:assignDate
+      deliveryDate,
     };
 
     if (!customerId) {
@@ -66,19 +71,19 @@ router.post("/", async (req, res) => {
     await db.laundry_order_item.bulkCreate(cartBulk);
     res.sendStatus(200);
   } catch (error) {
-    console.log(error);
+   
     res.sendStatus(500);
   }
 });
 
-router.get("/itemList", async (req, res) => {
+router.get('/itemList', async (req, res) => {
   try {
     const data = await db.laundry_item.findAll({
       attributes: [
-        ["itemName", "name"],
-        "id",
-        ["unitPrice", "price"],
-        "unitPrice",
+        ['itemName', 'name'],
+        'id',
+        ['unitPrice', 'price'],
+        'unitPrice',
       ],
       raw: true,
     });
