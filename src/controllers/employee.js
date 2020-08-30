@@ -1,12 +1,12 @@
-const express = require('express');
-const bcrypt = require('bcrypt');
+const express = require("express");
+const bcrypt = require("bcrypt");
 
 const router = express.Router();
-const db = require('../../models');
+const db = require("../../models");
 
 const { Op } = db.Sequelize;
 
-router.post('/with-password', async (req, res) => {
+router.post("/with-password", async (req, res) => {
   try {
     // check fiscal code uniqueness
     const isExists = await db.user.findOne({
@@ -27,7 +27,7 @@ router.post('/with-password', async (req, res) => {
   }
 });
 
-router.post('/', async (req, res) => {
+router.post("/", async (req, res) => {
   try {
     // check fiscal code uniqueness
     const isExists = await db.user.findOne({
@@ -49,7 +49,7 @@ router.post('/', async (req, res) => {
   }
 });
 
-router.put('/status/:id', async (req, res) => {
+router.put("/status/:id", async (req, res) => {
   try {
     await db.user.update(req.body, {
       where: {
@@ -63,7 +63,7 @@ router.put('/status/:id', async (req, res) => {
   }
 });
 
-router.put('/:id', async (req, res) => {
+router.put("/:id", async (req, res) => {
   try {
     // check fiscal code uniqueness
     const isExists = await db.user.findOne({
@@ -91,7 +91,7 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-router.get('/', async (req, res) => {
+router.get("/", async (req, res) => {
   try {
     // Total employees and active employees
 
@@ -99,16 +99,16 @@ router.get('/', async (req, res) => {
       db.user.count({
         where: {
           role: {
-            [Op.in]: ['admin', 'labManager', 'storeManager'],
+            [Op.in]: ["admin", "labManager", "storeManager"],
           },
         },
       }),
       db.user.count({
         where: {
           role: {
-            [Op.in]: ['admin', 'labManager', 'storeManager'],
+            [Op.in]: ["admin", "labManager", "storeManager"],
           },
-          status: 'active',
+          status: "active",
         },
       }),
     ]);
@@ -116,14 +116,24 @@ router.get('/', async (req, res) => {
     const itemsPerEmp = 0;
 
     // Monthly top performers
+    const query = `SELECT 
+    CONCAT(firstName, ' ', lastName) AS name,
+    id,
+    status,
+    DATE_FORMAT(CONVERT_TZ(lastSignOff, '+00:00', '+02:00'),
+            '%Y-%m-%d %h:%i %p') AS signOff,
+    DATE_FORMAT(CONVERT_TZ(lastSignIn, '+00:00', '+02:00'),
+            '%Y-%m-%d %h:%i %p') AS signIn,
+    TIMESTAMPDIFF(HOUR,
+        lastSignIn,
+        lastSignOff) AS hours
+FROM
+    lavup_db.users
+WHERE
+    role IN ('admin' , 'labManager', 'storeManager', 'driver') limit 5`;
 
-    const performers = await db.user.findAll({
-      where: {
-        role: {
-          [Op.in]: ['admin', 'labManager', 'storeManager'],
-        },
-      },
-      limit: 5,
+    const performers = await db.sequelize.query(query, {
+      type: db.sequelize.QueryTypes.SELECT,
     });
 
     return res.status(200).json({
@@ -137,22 +147,33 @@ router.get('/', async (req, res) => {
   }
 });
 
-router.get('/list/:type', async (req, res) => {
+router.get("/list/:type", async (req, res) => {
   try {
     const { type } = req.params;
     // type can be all and active
-    console.log('type', type);
-    const query = {
-      where: {
-        role: {
-          [Op.in]: ['admin', 'labManager', 'storeManager'],
-        },
-      },
-    };
-    if (type === 'active') {
-      query.where.status = 'active';
+
+    const query = `SELECT 
+    CONCAT(firstName, ' ', lastName) AS name,
+    id,
+    status,
+    DATE_FORMAT(CONVERT_TZ(lastSignOff, '+00:00', '+02:00'),
+            '%Y-%m-%d %h:%i %p') AS signOff,
+    DATE_FORMAT(CONVERT_TZ(lastSignIn, '+00:00', '+02:00'),
+            '%Y-%m-%d %h:%i %p') AS signIn,
+    TIMESTAMPDIFF(HOUR,
+        lastSignIn,
+        lastSignOff) AS hours
+FROM
+    lavup_db.users
+WHERE
+    role IN ('admin' , 'labManager', 'storeManager', 'driver')`;
+    if (type === "active") {
+      query += " AND status = 'active'";
     }
-    const data = await db.user.findAll(query);
+
+    const data = await db.sequelize.query(query, {
+      type: db.sequelize.QueryTypes.SELECT,
+    });
 
     return res.status(200).json(data);
   } catch (error) {
@@ -160,7 +181,7 @@ router.get('/list/:type', async (req, res) => {
   }
 });
 
-router.get('/:id', async (req, res) => {
+router.get("/:id", async (req, res) => {
   try {
     const data = await db.user.findOne({
       where: {

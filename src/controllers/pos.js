@@ -21,7 +21,7 @@ router.post('/', async (req, res) => {
 
     let deliveryDate = null;
     if (assignDate) {
-      deliveryDate = assignDate
+      deliveryDate = assignDate;
     }
 
     const orderData = {
@@ -71,7 +71,6 @@ router.post('/', async (req, res) => {
     await db.laundry_order_item.bulkCreate(cartBulk);
     res.sendStatus(200);
   } catch (error) {
-   
     res.sendStatus(500);
   }
 });

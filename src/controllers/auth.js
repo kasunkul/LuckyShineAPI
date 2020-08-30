@@ -3,6 +3,8 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const db = require('../../models');
 
+const { Op } = db.Sequelize;
+
 const router = express.Router();
 
 router.post('/signup', async (req, res) => {
@@ -101,6 +103,9 @@ router.post('/login', async (req, res) => {
       where: {
         email: req.body.email,
         status: 'active',
+        role: {
+          [Op.in]: ['admin', 'storeManager', 'labManager'],
+        },
       },
     });
     // if not exist
