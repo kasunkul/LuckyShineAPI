@@ -39,6 +39,10 @@ module.exports = (sequelize, Sequelize) => {
       lastUsedDate: {
         type: Sequelize.DATE,
       },
+      status: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: true,
+      }
     },
     {
       sequelize,

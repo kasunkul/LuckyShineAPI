@@ -52,4 +52,63 @@ router.get('/list', async (req, res) => {
   }
 });
 
+router.get('/available-slots', async (req, res) => {
+  try {
+    const query = `SELECT 
+*
+FROM
+slots
+WHERE
+uniqueId NOT IN (SELECT 
+        slotId
+    FROM
+        laundry_orders
+    WHERE
+        slotId IS NOT NULL
+    GROUP BY slotId)`;
+    const data = await db.sequelize.query(query, {
+      type: db.sequelize.QueryTypes.SELECT,
+    });
+
+    return res.status(200).json(data);
+  } catch (error) {
+    return res.sendStatus(500);
+  }
+});
+
+router.get('/:id', async (req, res) => {
+  try {
+    const data = await db.laundry_order.findOne({
+      where: {
+        id: req.params.id,
+      },
+      include: [
+        {
+          model: db.laundry_order_item,
+        },
+      ],
+    });
+
+    return res.status(200).json(data);
+  } catch (error) {
+    console.log(error);
+    return res.sendStatus(500);
+  }
+});
+
+router.put('/:id', async (req, res) => {
+  try {
+   
+    await db.laundry_order.update(req.body, {
+      where: {
+        id: req.params.id,
+      },
+    });
+
+    return res.sendStatus(200);
+  } catch (error) {
+    return res.sendStatus(500);
+  }
+});
+
 module.exports = router;
