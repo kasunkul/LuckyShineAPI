@@ -24,6 +24,20 @@ router.post('/', async (req, res) => {
   }
 });
 
+router.put('/status/:id', async (req, res) => {
+  try {
+    await db.laundry_item.update(req.body, {
+      where: {
+        id: req.params.id,
+      },
+    });
+
+    return res.sendStatus(200);
+  } catch (error) {
+    return res.sendStatus(500);
+  }
+});
+
 router.put('/:id', async (req, res) => {
   try {
     // check fiscal code uniqueness

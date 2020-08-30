@@ -1,33 +1,58 @@
-const express = require('express');
+const express = require("express");
 
 const router = express.Router();
-const db = require('../../models');
-const checkAuth = require('../middleware/auth');
-// const { Op } = db.Sequelize;
-router.get('/', async (req, res) => {
+const db = require("../../models");
+const checkAuth = require("../middleware/auth");
+const { Sequelize } = require("../../models");
+const { Op } = db.Sequelize;
+router.get("/", async (req, res) => {
   try {
+    // query
+    const query =`select * from (SELECT 
+      CONCAT(users.firstName, ' ', lastName) AS name,
+      customerId AS id,
+      users.contactNumber,
+      users.status,
+      SUM(totalOrderAmount) AS value
+  FROM
+      lavup_db.laundry_orders
+          INNER JOIN
+      users ON laundry_orders.customerId = users.id
+  WHERE
+      MONTH(laundry_orders.createdAt) = MONTH(CURDATE())
+          AND YEAR(laundry_orders.createdAt) = YEAR(CURDATE())
+  GROUP BY customerId) k order by k.value desc;`
     // Total delivery orders and items
-    const [inactiveCount, activeCount, items] = await Promise.all([
+    const [
+      inactiveCount,
+      activeCount,
+      items,
+      totalCustomerVisits,
+    ] = await Promise.all([
       db.user.count({
         where: {
-          status: 'inactive',
-          role: 'customer',
+          status: "inactive",
+          role: "customer",
         },
       }),
       db.user.count({
         where: {
-          status: 'active',
-          role: 'customer',
+          status: "active",
+          role: "customer",
         },
       }),
-      db.user.findAll({
+     db.sequelize.query(query,{
+       type:db.sequelize.QueryTypes.SELECT
+     }),
+      db.laundry_order.count({
         where: {
-          role: 'customer',
+          shopId: {
+            [Op.ne]: null,
+          },
         },
+        logging: true,
       }),
     ]);
-
-    const totalCustomerVisits = 0;
 
     return res.status(200).json({
       inactiveCount,
@@ -36,50 +61,57 @@ router.get('/', async (req, res) => {
       totalCustomerVisits,
     });
   } catch (error) {
-    // console.log(error);
+    console.log(error);
     return res.sendStatus(500);
   }
 });
 
-router.get('/list/:type', checkAuth, async (req, res) => {
+router.get("/list/:type", checkAuth, async (req, res) => {
   try {
     const { type } = req.params;
 
-    const query = {
-      attributes: ['firstName', 'lastName', 'fullName', 'id', 'contactNumber', 'status'],
-      order: db.sequelize.literal('id DESC'),
-      where: {
-        role: 'customer',
-      },
-      raw: true,
-    };
+    const query = `SELECT 
+    users.id,
+    contactNumber,
+    users.status,
+    CONCAT(firstName, ' ', lastName) AS fullName,
+    k.d
+FROM
+    users
+        LEFT JOIN
+    (SELECT 
+        COALESCE(MAX(createdAt)) AS d, customerId
+    FROM
+        laundry_orders
+    GROUP BY customerId) AS k ON k.customerId = users.id
+WHERE
+    role = 'customer'`;
 
-    if (type === 'active') {
-      query.where.status = 'active';
+    if (type === "active") {
+      query += " and user.status = 'active'";
     }
-    if (type === 'inactive') {
-      query.where.status = 'inactive';
+    if (type === "inactive") {
+      query += " and user.status = 'inactive'";
     }
 
-    const data = await db.user.findAll(query);
-
-    data.forEach((element) => {
-      element.fullName = `${element.firstName} ${element.lastName}`;
-    });
+    const data = await db.sequelize.query(query,{
+      type: db.sequelize.QueryTypes.SELECT,
+    })
 
     return res.status(200).json(data);
   } catch (error) {
+    console.log(error)
     return res.sendStatus(500);
   }
 });
 
-router.get('/drivers', checkAuth, async (req, res) => {
+router.get("/drivers", checkAuth, async (req, res) => {
   try {
     const data = await db.user.findAll({
-      attributes: ['firstName', 'lastName', 'fullName', 'id'],
-      order: db.sequelize.literal('id DESC'),
+      attributes: ["firstName", "lastName", "fullName", "id"],
+      order: db.sequelize.literal("id DESC"),
       where: {
-        role: 'driver',
+        role: "driver",
       },
       raw: true,
     });
