@@ -108,6 +108,7 @@ router.get('/drivers', checkAuth, async (req, res) => {
     const data = await db.user.findAll({
       attributes: ['firstName', 'lastName', 'fullName', 'id'],
       order: db.sequelize.literal('id DESC'),
+      logging: console.log,
       where: {
         role: 'driver',
       },
@@ -120,6 +121,7 @@ router.get('/drivers', checkAuth, async (req, res) => {
 
     return res.status(200).json(data);
   } catch (error) {
+    // console.log('data',data)
     return res.sendStatus(500);
   }
 });

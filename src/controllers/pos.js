@@ -28,8 +28,8 @@ router.post('/', checkAuth, async (req, res) => {
     const orderData = {
       customerId,
       orderValue,
-      tax: 0,
-      totalOrderAmount: orderValue,
+      tax: orderValue * (22 / 100),
+      totalOrderAmount: orderValue + (orderValue * (22 / 100)),
       totalItems,
       orderType,
       driverId,
