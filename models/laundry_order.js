@@ -77,9 +77,7 @@ module.exports = (sequelize, Sequelize) => {
       shopId: {
         type: Sequelize.INTEGER,
       },
-      slotId: {
-        type: Sequelize.STRING,
-      }
+    
     },
     {
       sequelize,

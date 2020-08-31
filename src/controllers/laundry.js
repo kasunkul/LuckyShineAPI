@@ -80,39 +80,80 @@ router.get('/list', checkAuth, async (req, res) => {
 
 router.get('/', checkAuth, async (req, res) => {
   try {
-    // Total laundry items
-    const [itemsCount] = await Promise.all([db.laundry_item.count()]);
+    const highestItemQuery = `SELECT 
+    itemName, tb2.c, tb2.total
+FROM
+    laundry_items
+        INNER JOIN
+    (SELECT 
+        itemId, SUM(unitPrice) AS total, COUNT(*) AS c
+    FROM
+        lavup_db.laundry_order_items
+    WHERE
+        MONTH(laundry_order_items.createdAt) = MONTH(CURDATE())
+            AND YEAR(laundry_order_items.createdAt) = YEAR(CURDATE())
+    GROUP BY itemId
+    ORDER BY total DESC
+    LIMIT 1) AS tb2 ON laundry_items.id = tb2.itemId`;
 
-    await db.laundry_item.update(req.body, {
-      where: {
-        id: req.params.id,
-      },
-    });
-    const highestSale = 25;
-    const leastSale = 50;
+    const leastItemQuery = `SELECT 
+    itemName, tb2.c, tb2.total
+FROM
+    laundry_items
+        INNER JOIN
+    (SELECT 
+        itemId, SUM(unitPrice) AS total, COUNT(*) AS c
+    FROM
+        lavup_db.laundry_order_items
+    WHERE
+        MONTH(laundry_order_items.createdAt) = MONTH(CURDATE())
+            AND YEAR(laundry_order_items.createdAt) = YEAR(CURDATE())
+    GROUP BY itemId
+    ORDER BY total
+    LIMIT 1) AS tb2 ON laundry_items.id = tb2.itemId`;
 
     const query = `SELECT 
-    itemId,
-    COUNT(*) AS numberOfUnits,
-    laundry_items.itemName,
-    laundry_items.unitPrice
+    t1.*, 
+    DATE_FORMAT(CONVERT_TZ(t2.d, '+00:00', '+02:00'),
+            '%Y-%m-%d %h:%i %p') AS d
 FROM
-    lavup_db.laundry_order_items
+    (SELECT 
+        laundry_order_items.itemId,
+            COUNT(*) AS numberOfUnits,
+            laundry_items.itemName,
+            laundry_items.unitPrice
+    FROM
+        lavup_db.laundry_order_items
+    INNER JOIN laundry_items ON laundry_order_items.itemId = laundry_items.id
+    WHERE
+        MONTH(laundry_order_items.createdAt) = MONTH(CURDATE())
+            AND YEAR(laundry_order_items.createdAt) = YEAR(CURDATE())
+    GROUP BY itemId) AS t1
         INNER JOIN
-    laundry_items ON laundry_order_items.itemId = laundry_items.id
-WHERE
-    MONTH(laundry_order_items.createdAt) = MONTH(CURDATE())
-        AND YEAR(laundry_order_items.createdAt) = YEAR(CURDATE())
-GROUP BY itemId;`;
+    ((SELECT 
+        COALESCE(MAX(createdAt)) AS d, itemId
+    FROM
+        laundry_order_items
+    GROUP BY itemId)) AS t2 ON t1.itemId = t2.itemId`;
 
-    const items = await db.sequelize.query(query, {
-      type: db.sequelize.QueryTypes.SELECT,
-    });
+    const [itemsCount, items, highestSale, leastSale] = await Promise.all([
+      db.laundry_item.count(),
+      db.sequelize.query(query, {
+        type: db.sequelize.QueryTypes.SELECT,
+      }),
+      db.sequelize.query(highestItemQuery, {
+        type: db.sequelize.QueryTypes.SELECT,
+      }),
+      db.sequelize.query(leastItemQuery, {
+        type: db.sequelize.QueryTypes.SELECT,
+      }),
+
+    ]);
 
     return res.status(200).json({
       itemsCount,
-      highestSale,
-      leastSale,
+      highestSale: highestSale[0],
+      leastSale: leastSale[0],
       items,
     });
   } catch (error) {

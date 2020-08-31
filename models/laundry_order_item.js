@@ -41,6 +41,9 @@ module.exports = (sequelize, Sequelize) => {
       onDelete:'cascade',
       onUpdate:'cascade'
 
+    },
+    slotId: {
+      type: Sequelize.STRING,
     }
   }, {
     sequelize,

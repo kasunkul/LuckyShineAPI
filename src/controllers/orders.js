@@ -1,19 +1,19 @@
-const express = require('express');
+const express = require("express");
 
 const router = express.Router();
-const db = require('../../models');
+const db = require("../../models");
 
 const { Op } = db.Sequelize;
-const checkAuth = require('../middleware/auth');
+const checkAuth = require("../middleware/auth");
 
-router.get('/', checkAuth, async (req, res) => {
+router.get("/", checkAuth, async (req, res) => {
   try {
     // Total order
     const [itemsCount, pendingCount] = await Promise.all([
       db.laundry_order.count(),
       db.laundry_order.count({
         where: {
-          status: 'pending',
+          status: "pending",
         },
       }),
     ]);
@@ -41,10 +41,10 @@ router.get('/', checkAuth, async (req, res) => {
   }
 });
 
-router.get('/list', checkAuth, async (req, res) => {
+router.get("/list", checkAuth, async (req, res) => {
   try {
     const data = await db.laundry_order.findAll({
-      order: db.sequelize.literal('laundry_order.id DESC'),
+      order: db.sequelize.literal("laundry_order.id DESC"),
     });
 
     return res.status(200).json(data);
@@ -53,20 +53,20 @@ router.get('/list', checkAuth, async (req, res) => {
   }
 });
 
-router.get('/available-slots', checkAuth, async (req, res) => {
+router.get("/available-slots", checkAuth, async (req, res) => {
   try {
     const query = `SELECT 
-*
+    *
 FROM
-slots
+    slots
 WHERE
-uniqueId NOT IN (SELECT 
-        slotId
-    FROM
-        laundry_orders
-    WHERE
-        slotId IS NOT NULL
-    GROUP BY slotId)`;
+    uniqueId NOT IN (SELECT 
+            slotId
+        FROM
+            laundry_order_items
+        WHERE
+            slotId IS NOT NULL
+        GROUP BY slotId)`;
     const data = await db.sequelize.query(query, {
       type: db.sequelize.QueryTypes.SELECT,
     });
@@ -77,7 +77,7 @@ uniqueId NOT IN (SELECT
   }
 });
 
-router.get('/:id', checkAuth, async (req, res) => {
+router.get("/:id", checkAuth, async (req, res) => {
   try {
     const data = await db.laundry_order.findOne({
       where: {
@@ -96,7 +96,63 @@ router.get('/:id', checkAuth, async (req, res) => {
   }
 });
 
-router.put('/:id', checkAuth, async (req, res) => {
+router.put("/update-status", checkAuth, async (req, res) => {
+  try {
+    const { id, status, items } = req.body;
+
+    // update status in the order
+    await db.laundry_order.update(
+      {
+        status,
+      },
+      {
+        where: {
+          id,
+        },
+      }
+    );
+
+    if (status === "inQueue") {
+      console.log('if statement')
+      for (const iterator of items) {
+        const { id, slotId } = iterator;
+        db.laundry_order_item.update(
+          {
+            slotId,
+          },
+          {
+            where: {
+              id,
+            },
+          }
+        );
+      }
+    }
+
+    if (status === "completed") {
+      for (const iterator of items) {
+        const { id, slotId } = iterator;
+        db.laundry_order_item.update(
+          {
+            slotId: null,
+          },
+          {
+            where: {
+              id,
+            },
+          }
+        );
+      }
+    }
+
+    return res.sendStatus(200);
+  } catch (error) {
+    console.log(error);
+    return res.sendStatus(500);
+  }
+});
+
+router.put("/:id", checkAuth, async (req, res) => {
   try {
     await db.laundry_order.update(req.body, {
       where: {
