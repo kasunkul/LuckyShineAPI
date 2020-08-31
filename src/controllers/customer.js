@@ -1,14 +1,14 @@
-const express = require("express");
+const express = require('express');
 
 const router = express.Router();
-const db = require("../../models");
-const checkAuth = require("../middleware/auth");
-const { Sequelize } = require("../../models");
+const db = require('../../models');
+const checkAuth = require('../middleware/auth');
+
 const { Op } = db.Sequelize;
-router.get("/", async (req, res) => {
+router.get('/', checkAuth, async (req, res) => {
   try {
     // query
-    const query =`select * from (SELECT 
+    const query = `select * from (SELECT 
       CONCAT(users.firstName, ' ', lastName) AS name,
       customerId AS id,
       users.contactNumber,
@@ -21,7 +21,7 @@ router.get("/", async (req, res) => {
   WHERE
       MONTH(laundry_orders.createdAt) = MONTH(CURDATE())
           AND YEAR(laundry_orders.createdAt) = YEAR(CURDATE())
-  GROUP BY customerId) k order by k.value desc;`
+  GROUP BY customerId) k order by k.value desc;`;
     // Total delivery orders and items
     const [
       inactiveCount,
@@ -31,19 +31,19 @@ router.get("/", async (req, res) => {
     ] = await Promise.all([
       db.user.count({
         where: {
-          status: "inactive",
-          role: "customer",
+          status: 'inactive',
+          role: 'customer',
         },
       }),
       db.user.count({
         where: {
-          status: "active",
-          role: "customer",
+          status: 'active',
+          role: 'customer',
         },
       }),
-     db.sequelize.query(query,{
-       type:db.sequelize.QueryTypes.SELECT
-     }),
+      db.sequelize.query(query, {
+        type: db.sequelize.QueryTypes.SELECT,
+      }),
       db.laundry_order.count({
         where: {
           shopId: {
@@ -61,16 +61,15 @@ router.get("/", async (req, res) => {
       totalCustomerVisits,
     });
   } catch (error) {
-    console.log(error);
     return res.sendStatus(500);
   }
 });
 
-router.get("/list/:type", checkAuth, async (req, res) => {
+router.get('/list/:type', checkAuth, async (req, res) => {
   try {
     const { type } = req.params;
 
-    const query = `SELECT 
+    let query = `SELECT 
     users.id,
     contactNumber,
     users.status,
@@ -87,31 +86,30 @@ FROM
 WHERE
     role = 'customer'`;
 
-    if (type === "active") {
+    if (type === 'active') {
       query += " and user.status = 'active'";
     }
-    if (type === "inactive") {
+    if (type === 'inactive') {
       query += " and user.status = 'inactive'";
     }
 
-    const data = await db.sequelize.query(query,{
+    const data = await db.sequelize.query(query, {
       type: db.sequelize.QueryTypes.SELECT,
-    })
+    });
 
     return res.status(200).json(data);
   } catch (error) {
-    console.log(error)
     return res.sendStatus(500);
   }
 });
 
-router.get("/drivers", checkAuth, async (req, res) => {
+router.get('/drivers', checkAuth, async (req, res) => {
   try {
     const data = await db.user.findAll({
-      attributes: ["firstName", "lastName", "fullName", "id"],
-      order: db.sequelize.literal("id DESC"),
+      attributes: ['firstName', 'lastName', 'fullName', 'id'],
+      order: db.sequelize.literal('id DESC'),
       where: {
-        role: "driver",
+        role: 'driver',
       },
       raw: true,
     });

@@ -2,8 +2,9 @@ const express = require('express');
 
 const router = express.Router();
 const db = require('../../models');
+const checkAuth = require('../middleware/auth');
 
-router.post('/', async (req, res) => {
+router.post('/', checkAuth, async (req, res) => {
   try {
     const {
       customerId,
@@ -75,7 +76,7 @@ router.post('/', async (req, res) => {
   }
 });
 
-router.get('/itemList', async (req, res) => {
+router.get('/itemList', checkAuth, async (req, res) => {
   try {
     const data = await db.laundry_item.findAll({
       attributes: [

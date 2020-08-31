@@ -9,7 +9,7 @@ module.exports = async (req, res, next) => {
     // const { id } = req.user;
 
     db.user.update(
-      { lastSeen: new Date() },
+      { lastSignOff: new Date() },
       {
         where: {
           id: decoded.id,

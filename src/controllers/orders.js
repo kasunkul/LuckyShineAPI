@@ -4,8 +4,9 @@ const router = express.Router();
 const db = require('../../models');
 
 const { Op } = db.Sequelize;
+const checkAuth = require('../middleware/auth');
 
-router.get('/', async (req, res) => {
+router.get('/', checkAuth, async (req, res) => {
   try {
     // Total order
     const [itemsCount, pendingCount] = await Promise.all([
@@ -40,7 +41,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-router.get('/list', async (req, res) => {
+router.get('/list', checkAuth, async (req, res) => {
   try {
     const data = await db.laundry_order.findAll({
       order: db.sequelize.literal('laundry_order.id DESC'),
@@ -52,7 +53,7 @@ router.get('/list', async (req, res) => {
   }
 });
 
-router.get('/available-slots', async (req, res) => {
+router.get('/available-slots', checkAuth, async (req, res) => {
   try {
     const query = `SELECT 
 *
@@ -76,7 +77,7 @@ uniqueId NOT IN (SELECT
   }
 });
 
-router.get('/:id', async (req, res) => {
+router.get('/:id', checkAuth, async (req, res) => {
   try {
     const data = await db.laundry_order.findOne({
       where: {
@@ -91,14 +92,12 @@ router.get('/:id', async (req, res) => {
 
     return res.status(200).json(data);
   } catch (error) {
-    console.log(error);
     return res.sendStatus(500);
   }
 });
 
-router.put('/:id', async (req, res) => {
+router.put('/:id', checkAuth, async (req, res) => {
   try {
-   
     await db.laundry_order.update(req.body, {
       where: {
         id: req.params.id,

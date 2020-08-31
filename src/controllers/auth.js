@@ -119,8 +119,6 @@ router.post('/login', async (req, res) => {
       return res.sendStatus(401);
     }
 
-    console.log('JWT', process.env.JWT_KEY);
-
     // 3. issue a JWT
     const { id } = isUserExist;
     const userName = `${isUserExist.firstName} ${isUserExist.lastName}`;
@@ -139,6 +137,15 @@ router.post('/login', async (req, res) => {
       redirectUrl = '/pos';
     }
 
+    db.user.update(
+      { lastSignIn: new Date() },
+      {
+        where: {
+          id: isUserExist.id,
+        },
+      },
+    );
+
     return res.status(200).json({
       access_token: token,
       // role: [isUserExist.role],
@@ -154,7 +161,6 @@ router.post('/login', async (req, res) => {
       },
     });
   } catch (error) {
-    console.log(error);
     return res.sendStatus(500);
   }
 });
@@ -228,7 +234,6 @@ router.post('/access-token', async (req, res) => {
     }
     throw new Error();
   } catch (error) {
-    console.log(error);
     return res.sendStatus(500);
   }
 });

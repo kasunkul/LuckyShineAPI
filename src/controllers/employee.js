@@ -3,10 +3,11 @@ const bcrypt = require('bcrypt');
 
 const router = express.Router();
 const db = require('../../models');
+const checkAuth = require('../middleware/auth');
 
 const { Op } = db.Sequelize;
 
-router.post('/with-password', async (req, res) => {
+router.post('/with-password', checkAuth, async (req, res) => {
   try {
     // check fiscal code uniqueness
     const isExists = await db.user.findOne({
@@ -27,7 +28,7 @@ router.post('/with-password', async (req, res) => {
   }
 });
 
-router.post('/', async (req, res) => {
+router.post('/', checkAuth, async (req, res) => {
   try {
     // check fiscal code uniqueness
     const isExists = await db.user.findOne({
@@ -49,7 +50,7 @@ router.post('/', async (req, res) => {
   }
 });
 
-router.put('/status/:id', async (req, res) => {
+router.put('/status/:id', checkAuth, async (req, res) => {
   try {
     await db.user.update(req.body, {
       where: {
@@ -63,7 +64,7 @@ router.put('/status/:id', async (req, res) => {
   }
 });
 
-router.put('/:id', async (req, res) => {
+router.put('/:id', checkAuth, async (req, res) => {
   try {
     // check fiscal code uniqueness
     const isExists = await db.user.findOne({
@@ -91,7 +92,7 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-router.get('/', async (req, res) => {
+router.get('/', checkAuth, async (req, res) => {
   try {
     // Total employees and active employees
 
@@ -147,15 +148,16 @@ WHERE
   }
 });
 
-router.get('/list/:type', async (req, res) => {
+router.get('/list/:type', checkAuth, async (req, res) => {
   try {
     const { type } = req.params;
     // type can be all and active
 
-    const query = `SELECT 
+    let query = `SELECT 
     CONCAT(firstName, ' ', lastName) AS name,
     id,
     status,
+    role,
     DATE_FORMAT(CONVERT_TZ(lastSignOff, '+00:00', '+02:00'),
             '%Y-%m-%d %h:%i %p') AS signOff,
     DATE_FORMAT(CONVERT_TZ(lastSignIn, '+00:00', '+02:00'),
@@ -181,7 +183,7 @@ WHERE
   }
 });
 
-router.get('/:id', async (req, res) => {
+router.get('/:id', checkAuth, async (req, res) => {
   try {
     const data = await db.user.findOne({
       where: {

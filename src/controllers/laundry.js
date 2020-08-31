@@ -2,10 +2,11 @@ const express = require('express');
 
 const router = express.Router();
 const db = require('../../models');
+const checkAuth = require('../middleware/auth');
 
 const { Op } = db.Sequelize;
 
-router.post('/', async (req, res) => {
+router.post('/', checkAuth, async (req, res) => {
   try {
     // check category name uniqueness
     const isExists = await db.laundry_item.findOne({
@@ -24,7 +25,7 @@ router.post('/', async (req, res) => {
   }
 });
 
-router.put('/status/:id', async (req, res) => {
+router.put('/status/:id', checkAuth, async (req, res) => {
   try {
     await db.laundry_item.update(req.body, {
       where: {
@@ -38,7 +39,7 @@ router.put('/status/:id', async (req, res) => {
   }
 });
 
-router.put('/:id', async (req, res) => {
+router.put('/:id', checkAuth, async (req, res) => {
   try {
     // check fiscal code uniqueness
     const isExists = await db.laundry_item.findOne({
@@ -65,7 +66,7 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-router.get('/list', async (req, res) => {
+router.get('/list', checkAuth, async (req, res) => {
   try {
     const data = await db.laundry_item.findAll({
       include: [{ model: db.item_category }],
@@ -77,7 +78,7 @@ router.get('/list', async (req, res) => {
   }
 });
 
-router.get('/', async (req, res) => {
+router.get('/', checkAuth, async (req, res) => {
   try {
     // Total laundry items
     const [itemsCount] = await Promise.all([db.laundry_item.count()]);
@@ -119,7 +120,7 @@ GROUP BY itemId;`;
   }
 });
 
-router.get('/:id', async (req, res) => {
+router.get('/:id', checkAuth, async (req, res) => {
   try {
     const data = await db.laundry_item.findOne({
       where: {

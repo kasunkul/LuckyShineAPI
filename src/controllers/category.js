@@ -4,8 +4,9 @@ const router = express.Router();
 const db = require('../../models');
 
 const { Op } = db.Sequelize;
+const checkAuth = require('../middleware/auth');
 
-router.post('/', async (req, res) => {
+router.post('/', checkAuth, async (req, res) => {
   try {
     // check category name uniqueness
     const isExists = await db.item_category.findOne({
@@ -24,7 +25,7 @@ router.post('/', async (req, res) => {
   }
 });
 
-router.put('/:id', async (req, res) => {
+router.put('/:id', checkAuth, async (req, res) => {
   try {
     // check fiscal code uniqueness
     const isExists = await db.item_category.findOne({
@@ -51,7 +52,7 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-router.get('/:id', async (req, res) => {
+router.get('/:id', checkAuth, async (req, res) => {
   try {
     const data = await db.item_category.findOne({
       where: {
@@ -64,7 +65,7 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-router.get('/', async (req, res) => {
+router.get('/', checkAuth, async (req, res) => {
   try {
     const data = await db.item_category.findAll();
     res.status(200).json(data);

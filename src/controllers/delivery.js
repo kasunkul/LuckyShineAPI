@@ -4,8 +4,9 @@ const router = express.Router();
 const db = require('../../models');
 
 const { Op } = db.Sequelize;
+const checkAuth = require('../middleware/auth');
 
-router.get('/', async (req, res) => {
+router.get('/', checkAuth, async (req, res) => {
   try {
     // Total delivery orders and items
     const [deliveryCount, returnedDelivery, items] = await Promise.all([
@@ -52,7 +53,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-router.get('/list/:type', async (req, res) => {
+router.get('/list/:type', checkAuth, async (req, res) => {
   try {
     const { type } = req.params;
 
