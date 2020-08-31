@@ -58,15 +58,7 @@ router.get('/available-slots', checkAuth, async (req, res) => {
     const query = `SELECT 
     *
 FROM
-    slots
-WHERE
-    uniqueId NOT IN (SELECT 
-            slotId
-        FROM
-            laundry_order_items
-        WHERE
-            slotId IS NOT NULL
-        GROUP BY slotId)`;
+    slots`;
     const data = await db.sequelize.query(query, {
       type: db.sequelize.QueryTypes.SELECT,
     });
