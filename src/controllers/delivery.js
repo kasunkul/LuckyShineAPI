@@ -74,7 +74,15 @@ router.get('/list/:type', checkAuth, async (req, res) => {
           // required:true
         },
       ],
+      where:{
+        status:{
+          [Op.in]:['to be delivered','on going delivery','delivered']
+        }
+      }
+
     };
+
+   
 
     if (type !== 'all') {
       query.where = {
