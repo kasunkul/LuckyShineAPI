@@ -169,10 +169,10 @@ router.get('/getAllItemsFromCategories/:CatId',  async (req, res) => {
   }
 });
 
-router.get('/getAllItemsSearch/:searchQuery',  async (req, res) => {
+router.post('/getAllItemsSearch',  async (req, res) => {
   try {
 
-    const { searchQuery } = req.params;
+    const { searchQuery } = req.body.searchQuery;
 
     let query = `SELECT 
                   id,
