@@ -25,7 +25,8 @@ router.post('/signup', async (req, res) => {
     }
 
     const resetToken = Math.floor(1000 + Math.random() * 9000);
-
+    const salt = bcrypt.genSaltSync(10);
+    const password = bcrypt.hashSync(req.body.password, salt);
     await db.user.create({
       firstName: req.body.firstName,
       lastName: req.body.lastName,
@@ -34,7 +35,7 @@ router.post('/signup', async (req, res) => {
       email: req.body.email,
       role: "user",
       status: "active",
-      password: req.body.password,
+      password: password,
       occupation: req.body.occupation,
       isAppUser:  1
     });
