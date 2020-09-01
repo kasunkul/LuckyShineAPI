@@ -107,18 +107,57 @@ router.post('/login', async (req, res) => {
 
 router.get('/getAllCategories',  async (req, res) => {
   try {
-    
-    let query = `SELECT id,itemName FROM lavup_db.item_categories`;
+
+    let query = `(SELECT 
+      0 as id,
+      'All' as itemName 
+      )
+      UNION ALL
+      ( 
+      SELECT id, itemName 
+      FROM lavup_db.item_categories
+      )`;
 
     const data = await db.sequelize.query(query, {
       type: db.sequelize.QueryTypes.SELECT,
     });
 
     return res.status(200).json(data);
+
   } catch (error) {
     res.sendStatus(500);
   }
 });
 
+router.get('/getAllItemsFromCategories/:CatId',  async (req, res) => {
+  try {
+
+    const { CatId } = req.params;
+    
+    let CategoryCheck = "";
+
+    if (CatId > 0) {
+      CategoryCheck += `and itemCategoryId = ${CatId}`;
+    }
+
+    let query = `SELECT 
+                  id,
+                  itemName,
+                  itemCode,
+                  itemCategoryId,
+                  unitPrice 
+                FROM lavup_db.laundry_items 
+                where status = 1 ${CategoryCheck}`;
+
+    const data = await db.sequelize.query(query, {
+      type: db.sequelize.QueryTypes.SELECT,
+    });
+
+    return res.status(200).json(data);
+
+  } catch (error) {
+    res.sendStatus(500);
+  }
+});
 
 module.exports = router;
