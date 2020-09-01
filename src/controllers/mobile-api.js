@@ -107,8 +107,14 @@ router.post('/login', async (req, res) => {
 
 router.get('/getAllCategories',  async (req, res) => {
   try {
-    const data = await db.item_category.findAll();
-    res.status(200).json(data);
+    
+    let query = `SELECT id,itemName FROM lavup_db.item_categories`;
+
+    const data = await db.sequelize.query(query, {
+      type: db.sequelize.QueryTypes.SELECT,
+    });
+
+    return res.status(200).json(data);
   } catch (error) {
     res.sendStatus(500);
   }
