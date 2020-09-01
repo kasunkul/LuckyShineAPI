@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const db = require('../../models');
 
 const { Op } = db.Sequelize;
+const checkAuth = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -101,6 +102,15 @@ router.post('/login', async (req, res) => {
     });
   } catch (error) {
     return res.sendStatus(500);
+  }
+});
+
+router.get('/getAllCategories',  async (req, res) => {
+  try {
+    const data = await db.item_category.findAll();
+    res.status(200).json(data);
+  } catch (error) {
+    res.sendStatus(500);
   }
 });
 
