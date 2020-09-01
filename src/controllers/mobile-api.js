@@ -149,9 +149,43 @@ router.get('/getAllItemsFromCategories/:CatId',  async (req, res) => {
                   itemName,
                   itemCode,
                   itemCategoryId,
-                  unitPrice 
+                  unitPrice,
+                  description,
+                  0 as selected,
+                  0 as maxQty,
+                  0 as iron
                 FROM lavup_db.laundry_items 
                 where status = 1 ${CategoryCheck}`;
+
+    const data = await db.sequelize.query(query, {
+      type: db.sequelize.QueryTypes.SELECT,
+    });
+
+    return res.status(200).json(data);
+
+  } catch (error) {
+    console.error(error);
+    res.sendStatus(500);
+  }
+});
+
+router.get('/getAllItemsSearch/:searchQuery',  async (req, res) => {
+  try {
+
+    const { searchQuery } = req.params;
+
+    let query = `SELECT 
+                  id,
+                  itemName,
+                  itemCode,
+                  itemCategoryId,
+                  unitPrice,
+                  description,
+                  0 as selected,
+                  0 as maxQty,
+                  0 as iron
+                FROM lavup_db.laundry_items 
+                where status = 1 and itemName LIKE '%${searchQuery}%'`;
 
     const data = await db.sequelize.query(query, {
       type: db.sequelize.QueryTypes.SELECT,
