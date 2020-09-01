@@ -42,6 +42,7 @@ router.post('/signup', async (req, res) => {
     return res.sendStatus(200);
 
   } catch (error) {
+    console.error(error);
     return res.sendStatus(500);
   }
 });
@@ -101,6 +102,7 @@ router.post('/login', async (req, res) => {
       },
     });
   } catch (error) {
+    console.error(error);
     return res.sendStatus(500);
   }
 });
@@ -125,6 +127,7 @@ router.get('/getAllCategories',  async (req, res) => {
     return res.status(200).json(data);
 
   } catch (error) {
+    console.error(error);
     res.sendStatus(500);
   }
 });
@@ -156,6 +159,7 @@ router.get('/getAllItemsFromCategories/:CatId',  async (req, res) => {
     return res.status(200).json(data);
 
   } catch (error) {
+    console.error(error);
     res.sendStatus(500);
   }
 });
