@@ -19,6 +19,12 @@ module.exports = (sequelize, Sequelize) => {
     itemName: {
       type: Sequelize.STRING
     },
+    activeImage: {
+      type: Sequelize.STRING,
+    },
+    inactiveImage: {
+      type: Sequelize.STRING,
+    }
   }, {
     sequelize,
     modelName: 'item_category',
