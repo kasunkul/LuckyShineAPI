@@ -89,6 +89,12 @@ module.exports = (sequelize, Sequelize) => {
           return `${this.firstName} ${this.lastName}`;
         },
       },
+      address: {
+        type: Sequelize.VIRTUAL,
+        get() {
+          return `${this.street1} ${this.street2} ${this.city} ${this.stateRegion} ${this.postalCode}`;
+        },
+      },
     },
     {
       sequelize,

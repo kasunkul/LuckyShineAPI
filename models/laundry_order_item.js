@@ -1,7 +1,5 @@
-'use strict';
-const {
-  Model
-} = require('sequelize');
+"use strict";
+const { Model } = require("sequelize");
 module.exports = (sequelize, Sequelize) => {
   class laundry_order_item extends Model {
     /**
@@ -10,44 +8,48 @@ module.exports = (sequelize, Sequelize) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      // define association here
+      laundry_order_item.belongsTo(models.laundry_item, {
+        foreignKey: "itemId",
+      });
     }
-  };
-  laundry_order_item.init({
-    laundryOrderId: {
-      type: Sequelize.INTEGER,
-      references: {
-        model: "laundry_orders",
-        key: "id",
+  }
+  laundry_order_item.init(
+    {
+      laundryOrderId: {
+        type: Sequelize.INTEGER,
+        references: {
+          model: "laundry_orders",
+          key: "id",
+        },
+        onUpdate: "cascade",
+        onDelete: "cascade",
       },
-      onUpdate: "cascade",
-      onDelete: "cascade",
-    },
-    unitPrice: {
-      type: Sequelize.DOUBLE(11,2)
-    },
-    unitsPurchased: {
-      type: Sequelize.INTEGER
-    },
-    subTotal: {
-      type: Sequelize.DOUBLE(11,2)
-    },
-    itemId: {
-      type: Sequelize.INTEGER,
-      references:{
-        model:'laundry_items',
-        key:'id'
+      unitPrice: {
+        type: Sequelize.DOUBLE(11, 2),
       },
-      onDelete:'cascade',
-      onUpdate:'cascade'
-
+      unitsPurchased: {
+        type: Sequelize.INTEGER,
+      },
+      subTotal: {
+        type: Sequelize.DOUBLE(11, 2),
+      },
+      itemId: {
+        type: Sequelize.INTEGER,
+        references: {
+          model: "laundry_items",
+          key: "id",
+        },
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      },
+      slotId: {
+        type: Sequelize.STRING,
+      },
     },
-    slotId: {
-      type: Sequelize.STRING,
+    {
+      sequelize,
+      modelName: "laundry_order_item",
     }
-  }, {
-    sequelize,
-    modelName: 'laundry_order_item',
-  });
+  );
   return laundry_order_item;
 };

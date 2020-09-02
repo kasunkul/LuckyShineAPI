@@ -1,25 +1,25 @@
-const express = require('express');
+const express = require("express");
 
 const router = express.Router();
-const db = require('../../models');
+const db = require("../../models");
 
 const { Op } = db.Sequelize;
-const checkAuth = require('../middleware/auth');
+const checkAuth = require("../middleware/auth");
 
-router.get('/', checkAuth, async (req, res) => {
+router.get("/", checkAuth, async (req, res) => {
   try {
     // Total delivery orders and items
     const [deliveryCount, returnedDelivery, items] = await Promise.all([
       db.laundry_order.count({
         where: {
           status: {
-            [Op.in]: ['pending', 'inQueue'],
+            [Op.in]: ["pending", "inQueue"],
           },
         },
       }),
       db.laundry_order.count({
         where: {
-          status: 'returned',
+          status: "returned",
         },
       }),
       db.laundry_order.findAll({
@@ -33,11 +33,11 @@ router.get('/', checkAuth, async (req, res) => {
         include: [
           {
             model: db.user,
-            as: 'driver',
+            as: "driver",
             required: true,
           },
         ],
-        order: db.sequelize.literal('laundry_order.id DESC'),
+        order: db.sequelize.literal("laundry_order.id DESC"),
 
         // logging: true,
       }),
@@ -53,53 +53,79 @@ router.get('/', checkAuth, async (req, res) => {
   }
 });
 
-router.get('/list/:type', checkAuth, async (req, res) => {
+router.get("/list/:type", checkAuth, async (req, res) => {
   try {
     const { type } = req.params;
 
     const query = {
-      order: db.sequelize.literal('laundry_order.id DESC'),
-      raw: true,
+      order: db.sequelize.literal("laundry_order.id DESC"),
+      // raw: true,
       include: [
         {
           model: db.user,
-          as: 'driver',
-          attributes: ['firstName', 'lastName'],
-          // required:true
+          as: "driver",
+          attributes: ["firstName", "lastName","fullName"],
+          required:false
         },
         {
           model: db.user,
-          as: 'customer',
-          attributes: ['firstName', 'lastName'],
-          // required:true
+          as: "customer",
+          attributes: [
+            "firstName",
+            "lastName",
+            "address",
+            "street1",
+            "street2",
+            "city",
+            "stateRegion",
+            "postalCode",
+            "fullName"
+          ],
+          required:false
         },
       ],
-      where:{
-        status:{
-          [Op.in]:['to be delivered','on going delivery','delivered']
-        }
-      }
-
+      where: {
+        status: {
+          [Op.in]: ["to be delivered", "on going delivery", "delivered"],
+        },
+      },
     };
 
-   
-
-    if (type !== 'all') {
+    if (type !== "all") {
       query.where = {
-        status: 'returned',
+        status: "returned",
       };
     }
 
     const data = await db.laundry_order.findAll(query);
 
-    data.forEach((element) => {
-      element.driver = `${element['driver.firstName']} ${element['driver.lastName']}`;
-      element.customer = `${element['customer.firstName']} ${element['customer.lastName']}`;
-    });
+    // data.forEach((element) => {
+    //   element.driver = `${element["driver.firstName"]} ${element["driver.lastName"]}`;
+    //   element.customer = `${element["customer.firstName"]} ${element["customer.lastName"]}`;
+    // });
 
     return res.status(200).json(data);
   } catch (error) {
     return res.sendStatus(500);
+  }
+});
+
+router.post("/print", async (req, res) => {
+  try {
+    await db.laundry_order.update(
+      {
+        toPrint: true,
+      },
+      {
+        where: {
+          id: req.body.orderId,
+        },
+      }
+    );
+    res.sendStatus(200);
+  } catch (error) {
+    console.log(error);
+    res.sendStatus(500);
   }
 });
 
