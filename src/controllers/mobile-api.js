@@ -150,7 +150,7 @@ router.get('/getAllItemsFromCategories/:CatId',  async (req, res) => {
                   itemCode,
                   itemCategoryId,
                   unitPrice,
-                  description,
+                  '' as description,
                   0 as selected,
                   0 as maxQty,
                   0 as iron
@@ -180,7 +180,7 @@ router.post('/getAllItemsSearch',  async (req, res) => {
                   itemCode,
                   itemCategoryId,
                   unitPrice,
-                  description,
+                  '' as description,
                   0 as selected,
                   0 as maxQty,
                   0 as iron
