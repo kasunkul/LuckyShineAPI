@@ -42,7 +42,16 @@ module.exports = (sequelize, Sequelize) => {
       status: {
         type: Sequelize.BOOLEAN,
         defaultValue: true,
-      }
+      },
+      image: {
+        type: Sequelize.STRING,
+      },
+      description: {
+        type: Sequelize.STRING,
+      },
+      maximumQty: {
+        type: Sequelize.INTEGER,
+      },
     },
     {
       sequelize,

@@ -1,10 +1,10 @@
-const express = require('express');
+const express = require("express");
 
 const router = express.Router();
-const db = require('../../models');
-const checkAuth = require('../middleware/auth');
+const db = require("../../models");
+const checkAuth = require("../middleware/auth");
 
-router.post('/', checkAuth, async (req, res) => {
+router.post("/", checkAuth, async (req, res) => {
   try {
     const {
       customerId,
@@ -18,7 +18,7 @@ router.post('/', checkAuth, async (req, res) => {
       shopId,
     } = req.body;
     const orderValue = cart.map((e) => e.price).reduce((a, b) => a + b);
-    const status = 'pending';
+    const status = "pending";
 
     let deliveryDate = null;
     if (assignDate) {
@@ -29,7 +29,7 @@ router.post('/', checkAuth, async (req, res) => {
       customerId,
       orderValue,
       tax: orderValue * (22 / 100),
-      totalOrderAmount: orderValue + (orderValue * (22 / 100)),
+      totalOrderAmount: orderValue + orderValue * (22 / 100),
       totalItems,
       orderType,
       driverId,
@@ -76,24 +76,91 @@ router.post('/', checkAuth, async (req, res) => {
   }
 });
 
-router.get('/itemList', checkAuth, async (req, res) => {
+router.get("/itemList", checkAuth, async (req, res) => {
   try {
-    const data = await db.laundry_item.findAll({
+    const items = await db.laundry_item.findAll({
       attributes: [
-        ['itemName', 'name'],
-        'id',
-        ['unitPrice', 'price'],
-        'unitPrice',
+        ["itemName", "name"],
+        "id",
+        ["unitPrice", "price"],
+        "unitPrice",
+        "itemCategoryId"
       ],
+      where:{
+        status:true
+      },
       raw: true,
     });
-    data.forEach((element, i, a) => {
+    const categories = await db.item_category.findAll({
+      include:[{
+        model:db.laundry_item,
+        where:{
+          status:true
+        },
+        required:true
+      }]
+    })
+    items.forEach((element, i, a) => {
       a[i].qty = 1;
       element.needIron = false;
     });
-    res.status(200).json(data);
+    res.status(200).json({ items,categories });
   } catch (error) {
+    console.log(error)
     res.sendStatus(500);
+  }
+});
+
+router.get("/list/:type", checkAuth, async (req, res) => {
+  try {
+    const { type } = req.params;
+
+    const query = {
+      order: db.sequelize.literal("laundry_order.id DESC"),
+      // raw: true,
+      include: [
+        {
+          model: db.user,
+          as: "driver",
+          attributes: ["firstName", "lastName","fullName"],
+          required:false
+        },
+        {
+          model: db.user,
+          as: "customer",
+          attributes: [
+            "firstName",
+            "lastName",
+            "address",
+            "street1",
+            "street2",
+            "city",
+            "stateRegion",
+            "postalCode",
+            "fullName"
+          ],
+          required:false
+        },
+      ],
+     
+    };
+
+    if (type !== "all") {
+      query.where = {
+        status: "returned",
+      };
+    }
+
+    const data = await db.laundry_order.findAll(query);
+
+    // data.forEach((element) => {
+    //   element.driver = `${element["driver.firstName"]} ${element["driver.lastName"]}`;
+    //   element.customer = `${element["customer.firstName"]} ${element["customer.lastName"]}`;
+    // });
+
+    return res.status(200).json(data);
+  } catch (error) {
+    return res.sendStatus(500);
   }
 });
 

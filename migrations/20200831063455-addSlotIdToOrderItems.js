@@ -8,6 +8,7 @@ module.exports = {
         type: Sequelize.STRING,
       })
     ]);
+    // return await Promise.resolve()
   },
 
   down: async (queryInterface, Sequelize) => {

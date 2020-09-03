@@ -78,6 +78,9 @@ router.get('/:id', checkAuth, async (req, res) => {
       include: [
         {
           model: db.laundry_order_item,
+          include:[{
+            model:db.laundry_item
+          }]
         },
       ],
     });

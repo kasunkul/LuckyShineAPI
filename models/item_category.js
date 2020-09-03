@@ -10,13 +10,21 @@ module.exports = (sequelize, Sequelize) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      // define association here
+      item_category.hasMany(models.laundry_item,{
+        foreignKey:'itemCategoryId'
+      })
     }
   };
   item_category.init({
     itemName: {
       type: Sequelize.STRING
     },
+    activeImage: {
+      type: Sequelize.STRING,
+    },
+    inactiveImage: {
+      type: Sequelize.STRING,
+    }
   }, {
     sequelize,
     modelName: 'item_category',
