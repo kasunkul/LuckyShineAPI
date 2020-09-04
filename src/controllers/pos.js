@@ -16,6 +16,7 @@ router.post("/", checkAuth, async (req, res) => {
       cart,
       orderPayed,
       shopId,
+      isDeliveryOrder
     } = req.body;
     const orderValue = cart.map((e) => e.price).reduce((a, b) => a + b);
     const status = "inQueue";
@@ -40,6 +41,7 @@ router.post("/", checkAuth, async (req, res) => {
       orderPayed,
       shopId,
       deliveryDate,
+      isDeliveryOrder
     };
 
     if (!customerId) {

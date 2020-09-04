@@ -126,6 +126,7 @@ router.get("/v2/:id", checkAuth, async (req, res) => {
         "totalOrderAmount",
         "status",
         "shopId",
+        "isDeliveryOrder"
       ],
       where: {
         id: req.params.id,
