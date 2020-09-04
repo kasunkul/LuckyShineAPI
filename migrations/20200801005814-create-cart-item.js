@@ -11,6 +11,9 @@ module.exports = {
       itemId: {
         type: Sequelize.INTEGER
       },
+      userId: {
+        type: Sequelize.INTEGER
+      },
       unitPrice: {
         type: Sequelize.DOUBLE(11,2)
       },
