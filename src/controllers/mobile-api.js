@@ -201,7 +201,7 @@ router.post('/getAllItemsSearch',  async (req, res) => {
   }
 });
 
-router.post('/addToCart',  async (req, res) => {
+router.post('/addToCart', checkAuth, async (req, res) => {
   try {
 
     const itemId = req.body.itemId;
