@@ -45,6 +45,10 @@ module.exports = (sequelize, Sequelize) => {
       slotId: {
         type: Sequelize.STRING,
       },
+      needIron: {
+        type: Sequelize.BOOLEAN,
+        defaultValue:false
+      }
     },
     {
       sequelize,

@@ -24,7 +24,13 @@ module.exports = (sequelize, Sequelize) => {
     },
     inactiveImage: {
       type: Sequelize.STRING,
-    }
+    },
+    description: {
+      type: Sequelize.STRING,
+    },
+    maximumQty: {
+      type: Sequelize.INTEGER,
+    },
   }, {
     sequelize,
     modelName: 'item_category',

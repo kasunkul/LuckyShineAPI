@@ -1,7 +1,5 @@
-'use strict';
-const {
-  Model
-} = require('sequelize');
+"use strict";
+const { Model } = require("sequelize");
 module.exports = (sequelize, Sequelize) => {
   class slot extends Model {
     /**
@@ -12,17 +10,29 @@ module.exports = (sequelize, Sequelize) => {
     static associate(models) {
       // define association here
     }
-  };
-  slot.init({
-    uniqueId: {
-      type: Sequelize.STRING
+  }
+  slot.init(
+    {
+      uniqueId: {
+        type: Sequelize.STRING,
+      },
+      type: {
+        type: Sequelize.STRING,
+      },
+      shopId: {
+        type: Sequelize.INTEGER,
+        references: {
+          model: "shops",
+          key: "id",
+        },
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      },
     },
-    type: {
-      type: Sequelize.STRING
-    },
-  }, {
-    sequelize,
-    modelName: 'slot',
-  });
+    {
+      sequelize,
+      modelName: "slot",
+    }
+  );
   return slot;
 };
