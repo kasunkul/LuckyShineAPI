@@ -199,4 +199,61 @@ router.post('/getAllItemsSearch',  async (req, res) => {
   }
 });
 
+router.post('/addToCart',  async (req, res) => {
+  try {
+
+    const itemId = req.body.itemId;
+    const userId = req.user.id;
+
+    const isExists = await db.cart_item.findOne({
+      where: {
+        itemId,
+        userId
+      },
+    });
+
+    if(isExists){
+
+
+      await db.cart_item.update(
+        {
+          units: (isExists.units + 1 ),
+        },
+        {
+          where: {
+            id: isExists.id,
+          },
+        }
+      );
+
+    }else{
+
+      const laundry_item = await db.laundry_item.findOne({
+        where: {
+          id: itemId
+        },
+      });
+
+      await db.cart_item.create({
+        itemId: itemId,
+        userId: userId,
+        unitPrice: laundry_item.unitPrice,
+        units: 1,
+        needIron: 0
+      });
+    }
+
+
+    
+    return res.status(200).json("Successfully added to Cart.");
+
+  } catch (error) {
+    console.error(error);
+    res.sendStatus(500);
+  }
+});
+
+
+
+
 module.exports = router;
