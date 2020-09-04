@@ -1,19 +1,60 @@
-const express = require('express');
+const express = require("express");
 
 const router = express.Router();
-const db = require('../../models');
+const db = require("../../models");
 
 const { Op } = db.Sequelize;
-const checkAuth = require('../middleware/auth');
+const checkAuth = require("../middleware/auth");
+const e = require("express");
 
-router.get('/', checkAuth, async (req, res) => {
+async function getIds(id) {
+  try {
+    const q = `SELECT 
+    uniqueId
+FROM
+    lavup_db.slots
+WHERE
+    shopId = ${id}
+        AND uniqueId NOT IN (SELECT 
+            laundry_order_items.slotId
+        FROM
+            lavup_db.laundry_order_items
+                INNER JOIN
+            laundry_orders ON laundry_order_items.laundryOrderId = laundry_orders.id
+        WHERE
+            laundry_orders.shopId = ${id}
+                AND laundry_order_items.slotId IS NOT NULL)
+ORDER BY CONVERT( uniqueId , UNSIGNED)`;
+    let data = await db.sequelize.query(q, {
+      type: db.sequelize.QueryTypes.SELECT,
+    });
+    data = data
+      .map((e) => Number(e.uniqueId))
+      .reduce((r, n) => {
+        const lastSubArray = r[r.length - 1];
+
+        if (!lastSubArray || lastSubArray[lastSubArray.length - 1] !== n - 1) {
+          r.push([]);
+        }
+
+        r[r.length - 1].push(n);
+
+        return r;
+      }, []);
+    return data;
+  } catch (error) {
+    throw new Error();
+  }
+}
+
+router.get("/", checkAuth, async (req, res) => {
   try {
     // Total order
     const [itemsCount, pendingCount] = await Promise.all([
       db.laundry_order.count(),
       db.laundry_order.count({
         where: {
-          status: 'pending',
+          status: "pending",
         },
       }),
     ]);
@@ -41,10 +82,10 @@ router.get('/', checkAuth, async (req, res) => {
   }
 });
 
-router.get('/list', checkAuth, async (req, res) => {
+router.get("/list", checkAuth, async (req, res) => {
   try {
     const data = await db.laundry_order.findAll({
-      order: db.sequelize.literal('laundry_order.id DESC'),
+      order: db.sequelize.literal("laundry_order.id DESC"),
     });
 
     return res.status(200).json(data);
@@ -53,7 +94,7 @@ router.get('/list', checkAuth, async (req, res) => {
   }
 });
 
-router.get('/available-slots', checkAuth, async (req, res) => {
+router.get("/available-slots", checkAuth, async (req, res) => {
   try {
     const query = `SELECT 
     *
@@ -69,29 +110,115 @@ FROM
   }
 });
 
-router.get('/:id', checkAuth, async (req, res) => {
+router.get("/v2/:id", checkAuth, async (req, res) => {
   try {
-    const data = await db.laundry_order.findOne({
+    // 		laundry_order_items
+    let meta = await db.laundry_order.findOne({
+      attributes: [
+        "id",
+        "customerId",
+        "notes",
+        "orderType",
+        "orderPayed",
+        "createdAt",
+        "assignDate",
+        "totalItems",
+        "totalOrderAmount",
+        "status",
+        "shopId",
+      ],
       where: {
         id: req.params.id,
       },
+      raw: true,
+    });
+
+    const items = await db.laundry_order_item.findAll({
+      raw: true,
+      attributes: ["id", "itemId", "slotId"],
+      where: {
+        laundryOrderId: req.params.id,
+      },
       include: [
         {
-          model: db.laundry_order_item,
-          include:[{
-            model:db.laundry_item
-          }]
+          model: db.laundry_item,
+          attributes: ["itemName"],
         },
       ],
     });
 
-    return res.status(200).json(data);
+    if (meta.status === "processing" && meta.shopId) {
+      // first get all the available slots
+      const ids = await getIds(meta.shopId);
+
+      console.log('ids',ids)
+
+      // if items length = (slot length + 2)
+      const equalIdx = ids.findIndex((e) => (e.length === items.length + 2));
+
+      if (equalIdx >= 0) {
+        console.log('this if')
+        ids[equalIdx].forEach((e, i) => {
+          if (i !== 0 && i !== ids[equalIdx].length - 1) {
+            items[i - 1].slotId = e;
+          }
+        });
+      }
+
+      // if items length < slot length
+      const idx = ids.findIndex((e) => e.length > items.length+2 );
+      if (idx >= 0) {
+        ids[idx].forEach((e, i) => {
+          if (i !== 0 && i <= items.length) {
+            console.log('if')
+            items[i - 1].slotId = e;
+          }
+        });
+      }
+
+      //
+    }
+
+    return res.status(200).json({ meta, items });
   } catch (error) {
+    console.log(error);
     return res.sendStatus(500);
   }
 });
 
-router.put('/update-status', checkAuth, async (req, res) => {
+router.get("/:id", checkAuth, async (req, res) => {
+  try {
+    let data = await db.laundry_order.findOne({
+      where: {
+        id: req.params.id,
+      },
+
+      include: [
+        {
+          model: db.laundry_order_item,
+          include: [
+            {
+              model: db.laundry_item,
+            },
+          ],
+        },
+      ],
+    });
+
+    // if (data.dataValues.status === "processing" && data.dataValues.shopId) {
+    //   // first get all the available slots
+    //   const ids = await getIds(data.dataValues.shopId);
+    //   console.log('ids',data.dataValues.laundry_order_items)
+    // }
+
+    return res.status(200).json(data);
+  } catch (error) {
+    console.log(error);
+    return res.sendStatus(500);
+  }
+});
+
+router.put("/update-status", checkAuth, async (req, res) => {
   try {
     const { id, status, items } = req.body;
 
@@ -104,11 +231,11 @@ router.put('/update-status', checkAuth, async (req, res) => {
         where: {
           id,
         },
-      },
+      }
     );
 
-    if (status === 'inQueue') {
-      console.log('if statement');
+    if (status === "ready") {
+      console.log("if statement");
       for (const iterator of items) {
         const { id, slotId } = iterator;
         db.laundry_order_item.update(
@@ -119,12 +246,12 @@ router.put('/update-status', checkAuth, async (req, res) => {
             where: {
               id,
             },
-          },
+          }
         );
       }
     }
 
-    if (status === 'completed') {
+    if (status === "completed") {
       for (const iterator of items) {
         const { id, slotId } = iterator;
         db.laundry_order_item.update(
@@ -135,7 +262,7 @@ router.put('/update-status', checkAuth, async (req, res) => {
             where: {
               id,
             },
-          },
+          }
         );
       }
     }
@@ -147,7 +274,7 @@ router.put('/update-status', checkAuth, async (req, res) => {
   }
 });
 
-router.put('/:id', checkAuth, async (req, res) => {
+router.put("/:id", checkAuth, async (req, res) => {
   try {
     await db.laundry_order.update(req.body, {
       where: {

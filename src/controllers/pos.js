@@ -18,7 +18,7 @@ router.post("/", checkAuth, async (req, res) => {
       shopId,
     } = req.body;
     const orderValue = cart.map((e) => e.price).reduce((a, b) => a + b);
-    const status = "pending";
+    const status = "inQueue";
 
     let deliveryDate = null;
     if (assignDate) {
@@ -50,6 +50,8 @@ router.post("/", checkAuth, async (req, res) => {
       delete orderData.assignDate;
       delete orderData.notes;
     }
+
+    console.log('cart',cart)
     const data = await db.laundry_order.create(orderData);
     const cartBulk = [];
     cart.forEach((e) => {
@@ -58,6 +60,7 @@ router.post("/", checkAuth, async (req, res) => {
           laundryOrderId: data.dataValues.id,
           unitPrice: e.unitPrice,
           itemId: e.id,
+          needIron:e.needIron
         });
       }
     });

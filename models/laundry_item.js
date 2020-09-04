@@ -46,12 +46,11 @@ module.exports = (sequelize, Sequelize) => {
       image: {
         type: Sequelize.STRING,
       },
-      description: {
-        type: Sequelize.STRING,
-      },
-      maximumQty: {
-        type: Sequelize.INTEGER,
-      },
+      isHangable: {
+        type: Sequelize.BOOLEAN,
+        defaultValue:false
+      }
+     
     },
     {
       sequelize,
