@@ -59,7 +59,7 @@ router.get("/list/:type", checkAuth, async (req, res) => {
 
     const query = {
       order: db.sequelize.literal("laundry_order.id DESC"),
-      // raw: true,
+      raw: true,
       include: [
         {
           model: db.user,
@@ -86,23 +86,23 @@ router.get("/list/:type", checkAuth, async (req, res) => {
       ],
       where: {
         status: {
-          [Op.in]: ["to be delivered", "on going delivery", "delivered"],
+          [Op.in]: ["onDelivery"],
         },
       },
     };
 
-    if (type !== "all") {
-      query.where = {
-        status: "returned",
-      };
-    }
+    // if (type !== "all") {
+    //   query.where = {
+    //     status: "returned",
+    //   };
+    // }
 
     const data = await db.laundry_order.findAll(query);
 
-    // data.forEach((element) => {
-    //   element.driver = `${element["driver.firstName"]} ${element["driver.lastName"]}`;
-    //   element.customer = `${element["customer.firstName"]} ${element["customer.lastName"]}`;
-    // });
+    data.forEach((element) => {
+      element.driver = `${element["driver.firstName"]} ${element["driver.lastName"]}`;
+      element.customer = `${element["customer.firstName"]} ${element["customer.lastName"]}`;
+    });
 
     return res.status(200).json(data);
   } catch (error) {
