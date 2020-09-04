@@ -153,7 +153,8 @@ router.get('/getAllItemsFromCategories/:CatId',  async (req, res) => {
                   '' as description,
                   0 as selected,
                   0 as maxQty,
-                  0 as iron
+                  0 as iron,
+                  '' as image
                 FROM lavup_db.laundry_items 
                 where status = 1 ${CategoryCheck}`;
 
@@ -183,7 +184,8 @@ router.post('/getAllItemsSearch',  async (req, res) => {
                   '' as description,
                   0 as selected,
                   0 as maxQty,
-                  0 as iron
+                  0 as iron,
+                  '' as image
                 FROM lavup_db.laundry_items 
                 where status = 1 and itemName LIKE '%${searchQuery}%'`;
 
