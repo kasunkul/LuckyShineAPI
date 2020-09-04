@@ -16,10 +16,9 @@ module.exports = (sequelize, Sequelize) => {
           foreignKey: "customerId",
           as: "driver",
         });
-        laundry_order.hasMany(models.laundry_order_item, {
-          foreignKey: "laundryOrderId",
-         
-        });
+      laundry_order.hasMany(models.laundry_order_item, {
+        foreignKey: "laundryOrderId",
+      });
     }
   }
   laundry_order.init(
@@ -77,7 +76,10 @@ module.exports = (sequelize, Sequelize) => {
       shopId: {
         type: Sequelize.INTEGER,
       },
-    
+      isDeliveryOrder: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false,
+      },
     },
     {
       sequelize,
