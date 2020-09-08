@@ -20,5 +20,5 @@ routes.forEach(([name, handler]) => app.use(`/${name}`, handler));
 const port = process.env.PORT || 5000;
 
 app.listen(port, () => {
-  console.log(`Server started on port, ${port}`);
+  console.log(`Server started on port, ${port} ${process.env.NODE_ENV}`);
 });

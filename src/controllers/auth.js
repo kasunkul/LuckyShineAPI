@@ -134,7 +134,7 @@ router.post('/login', async (req, res) => {
     } else if (isUserExist.role === 'labManager') {
       redirectUrl = '/laundry';
     } else {
-      redirectUrl = '/pos';
+      redirectUrl = '/dashboard';
     }
 
     db.user.update(
@@ -161,7 +161,7 @@ router.post('/login', async (req, res) => {
       },
     });
   } catch (error) {
-    console.log(error)
+    console.log(error);
     return res.sendStatus(500);
   }
 });

@@ -1,10 +1,10 @@
-const express = require("express");
+const express = require('express');
 
 const router = express.Router();
-const db = require("../../models");
-const checkAuth = require("../middleware/auth");
+const db = require('../../models');
+const checkAuth = require('../middleware/auth');
 
-router.post("/", checkAuth, async (req, res) => {
+router.post('/', checkAuth, async (req, res) => {
   try {
     const {
       customerId,
@@ -16,10 +16,10 @@ router.post("/", checkAuth, async (req, res) => {
       cart,
       orderPayed,
       shopId,
-      isDeliveryOrder
+      isDeliveryOrder,
     } = req.body;
     const orderValue = cart.map((e) => e.price).reduce((a, b) => a + b);
-    const status = "inQueue";
+    const status = 'inQueue';
 
     let deliveryDate = null;
     if (assignDate) {
@@ -41,7 +41,7 @@ router.post("/", checkAuth, async (req, res) => {
       orderPayed,
       shopId,
       deliveryDate,
-      isDeliveryOrder
+      isDeliveryOrder,
     };
 
     if (!customerId) {
@@ -53,7 +53,7 @@ router.post("/", checkAuth, async (req, res) => {
       delete orderData.notes;
     }
 
-    console.log('cart',cart)
+    console.log('cart', cart);
     const data = await db.laundry_order.create(orderData);
     const cartBulk = [];
     cart.forEach((e) => {
@@ -62,7 +62,7 @@ router.post("/", checkAuth, async (req, res) => {
           laundryOrderId: data.dataValues.id,
           unitPrice: e.unitPrice,
           itemId: e.id,
-          needIron:e.needIron
+          needIron: e.needIron,
         });
       }
     });
@@ -81,78 +81,78 @@ router.post("/", checkAuth, async (req, res) => {
   }
 });
 
-router.get("/itemList", checkAuth, async (req, res) => {
+router.get('/itemList', checkAuth, async (req, res) => {
   try {
     const items = await db.laundry_item.findAll({
       attributes: [
-        ["itemName", "name"],
-        "id",
-        ["unitPrice", "price"],
-        "unitPrice",
-        "itemCategoryId"
+        ['itemName', 'name'],
+        'id',
+        ['unitPrice', 'price'],
+        'unitPrice',
+        'itemCategoryId',
       ],
-      where:{
-        status:true
+      where: {
+        status: true,
       },
       raw: true,
     });
     const categories = await db.item_category.findAll({
-      include:[{
-        model:db.laundry_item,
-        where:{
-          status:true
+      include: [{
+        model: db.laundry_item,
+        where: {
+          status: true,
         },
-        required:true
-      }]
-    })
+        required: true,
+      }],
+    });
     items.forEach((element, i, a) => {
       a[i].qty = 1;
       element.needIron = false;
     });
-    res.status(200).json({ items,categories });
+    res.status(200).json({ items, categories });
   } catch (error) {
-    console.log(error)
+    console.log(error);
     res.sendStatus(500);
   }
 });
 
-router.get("/list/:type", checkAuth, async (req, res) => {
+router.get('/list/:type', checkAuth, async (req, res) => {
   try {
     const { type } = req.params;
 
     const query = {
-      order: db.sequelize.literal("laundry_order.id DESC"),
+      order: db.sequelize.literal('laundry_order.id DESC'),
       // raw: true,
       include: [
         {
           model: db.user,
-          as: "driver",
-          attributes: ["firstName", "lastName","fullName"],
-          required:false
+          as: 'driver',
+          attributes: ['firstName', 'lastName', 'fullName'],
+          required: false,
         },
         {
           model: db.user,
-          as: "customer",
+          as: 'customer',
           attributes: [
-            "firstName",
-            "lastName",
-            "address",
-            "street1",
-            "street2",
-            "city",
-            "stateRegion",
-            "postalCode",
-            "fullName"
+            'firstName',
+            'lastName',
+            'address',
+            'street1',
+            'street2',
+            'city',
+            'stateRegion',
+            'postalCode',
+            'fullName',
           ],
-          required:false
+          required: false,
         },
       ],
-     
+
     };
 
-    if (type !== "all") {
+    if (type !== 'all') {
       query.where = {
-        status: "returned",
+        status: 'returned',
       };
     }
 

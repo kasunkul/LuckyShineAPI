@@ -10,7 +10,6 @@ const router = express.Router();
 
 router.post('/signup', async (req, res) => {
   try {
-
     const { email } = req.body;
 
     // check number uniqueness
@@ -33,15 +32,14 @@ router.post('/signup', async (req, res) => {
       dob: req.body.dob,
       socialSecurityNumber: req.body.socialSecurityNumber,
       email: req.body.email,
-      role: "user",
-      status: "active",
-      password: password,
+      role: 'user',
+      status: 'active',
+      password,
       occupation: req.body.occupation,
-      isAppUser:  1
+      isAppUser: 1,
     });
 
     return res.sendStatus(200);
-
   } catch (error) {
     console.error(error);
     return res.sendStatus(500);
@@ -108,10 +106,9 @@ router.post('/login', async (req, res) => {
   }
 });
 
-router.get('/getAllCategories',  async (req, res) => {
+router.get('/getAllCategories', async (req, res) => {
   try {
-
-    let query = `(SELECT 
+    const query = `(SELECT 
       0 as id,
       'All' as itemName 
       )
@@ -126,25 +123,23 @@ router.get('/getAllCategories',  async (req, res) => {
     });
 
     return res.status(200).json(data);
-
   } catch (error) {
     console.error(error);
     res.sendStatus(500);
   }
 });
 
-router.get('/getAllItemsFromCategories/:CatId',  async (req, res) => {
+router.get('/getAllItemsFromCategories/:CatId', async (req, res) => {
   try {
-
     const { CatId } = req.params;
-    
-    let CategoryCheck = "";
+
+    let CategoryCheck = '';
 
     if (CatId > 0) {
       CategoryCheck += `and itemCategoryId = ${CatId}`;
     }
 
-    let query = `SELECT 
+    const query = `SELECT 
                   id,
                   itemName,
                   itemCode,
@@ -163,19 +158,17 @@ router.get('/getAllItemsFromCategories/:CatId',  async (req, res) => {
     });
 
     return res.status(200).json(data);
-
   } catch (error) {
     console.error(error);
     res.sendStatus(500);
   }
 });
 
-router.post('/getAllItemsSearch',  async (req, res) => {
+router.post('/getAllItemsSearch', async (req, res) => {
   try {
-
     const { searchQuery } = req.body.searchQuery;
 
-    let query = `SELECT 
+    const query = `SELECT 
                   id,
                   itemName,
                   itemCode,
@@ -194,7 +187,6 @@ router.post('/getAllItemsSearch',  async (req, res) => {
     });
 
     return res.status(200).json(data);
-
   } catch (error) {
     console.error(error);
     res.sendStatus(500);
@@ -203,59 +195,48 @@ router.post('/getAllItemsSearch',  async (req, res) => {
 
 router.post('/addToCart', checkAuth, async (req, res) => {
   try {
-
-    const itemId = req.body.itemId;
+    const { itemId } = req.body;
     const userId = req.user.id;
 
     const isExists = await db.cart_item.findOne({
       where: {
         itemId,
-        userId
+        userId,
       },
     });
 
-    if(isExists){
-
-
+    if (isExists) {
       await db.cart_item.update(
         {
-          units: (isExists.units + 1 ),
+          units: (isExists.units + 1),
         },
         {
           where: {
             id: isExists.id,
           },
-        }
+        },
       );
-
-    }else{
-
+    } else {
       const laundry_item = await db.laundry_item.findOne({
         where: {
-          id: itemId
+          id: itemId,
         },
       });
 
       await db.cart_item.create({
-        itemId: itemId,
-        userId: userId,
+        itemId,
+        userId,
         unitPrice: laundry_item.unitPrice,
         units: 1,
-        needIron: 0
+        needIron: 0,
       });
     }
 
-
-    
-    return res.status(200).json("Successfully added to Cart.");
-
+    return res.status(200).json('Successfully added to Cart.');
   } catch (error) {
     console.error(error);
     res.sendStatus(500);
   }
 });
-
-
-
 
 module.exports = router;
