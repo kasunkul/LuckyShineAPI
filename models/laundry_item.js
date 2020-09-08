@@ -48,9 +48,11 @@ module.exports = (sequelize, Sequelize) => {
       },
       isHangable: {
         type: Sequelize.BOOLEAN,
-        defaultValue:false
-      }
-     
+        defaultValue: false,
+      },
+      description: {
+        type: Sequelize.STRING,
+      },
     },
     {
       sequelize,
