@@ -239,4 +239,57 @@ router.post('/addToCart', checkAuth, async (req, res) => {
   }
 });
 
+router.post('/removeFromCart', checkAuth, async (req, res) => {
+  try {
+
+    const itemId = req.body.itemId;
+    const userId = req.user.id;
+
+    const isExists = await db.cart_item.findOne({
+      where: {
+        itemId,
+        userId
+      },
+    });
+
+    if(isExists){
+
+
+      if((isExists.units - 1) > 0){
+        await db.cart_item.update(
+          {
+            units: (isExists.units - 1),
+          },
+          {
+            where: {
+              id: isExists.id,
+            },
+          }
+        );
+      }else{
+
+        await db.cart_item.delete(
+          {
+            where: {
+              id: isExists.id,
+            },
+          }
+        );
+
+      }
+
+      
+
+    }
+
+    
+    return res.status(200).json("Successfully removed from Cart.");
+
+  } catch (error) {
+    console.error(error);
+    res.sendStatus(500);
+  }
+});
+
+
 module.exports = router;
