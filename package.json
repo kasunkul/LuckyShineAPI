@@ -6,7 +6,8 @@
   "scripts": {
     "lint": "eslint \"./src/**/*.js\" app.js  --fix",
     "start": "nodemon",
-    "stop": "Taskkill /IM node.exe /F"
+    "stop": "Taskkill /IM node.exe /F",
+    "migrate": "npx sequelize db:migrate"
   },
   "engines": {
     "node": "12.3.1"
