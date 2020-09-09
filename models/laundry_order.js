@@ -1,4 +1,5 @@
 "use strict";
+const moment = require('moment')
 const { Model } = require("sequelize");
 module.exports = (sequelize, Sequelize) => {
   class laundry_order extends Model {
@@ -80,6 +81,12 @@ module.exports = (sequelize, Sequelize) => {
         type: Sequelize.BOOLEAN,
         defaultValue: false,
       },
+      d:{
+        type:Sequelize.VIRTUAL,
+        get(){
+          return moment(this.assignDate).format('YYYY-MM-DD')
+        }
+      }
     },
     {
       sequelize,
