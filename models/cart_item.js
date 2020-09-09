@@ -20,6 +20,9 @@ module.exports = (sequelize, Sequelize) => {
       },
       needIron: {
         type: Sequelize.BOOLEAN,
+      },
+      notes: {
+        type: Sequelize.STRING,
       }
     },
     {

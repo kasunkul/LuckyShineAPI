@@ -106,7 +106,38 @@ router.post('/login', async (req, res) => {
   }
 });
 
+router.get('/getProfile', checkAuth, async (req, res) => {
+  try {
+
+    const userId = req.user.id;
+
+
+    let query = `SELECT 
+
+    concat(firstName,' ',lastName) as name,
+      email,
+      contactNumber,
+      dob,
+      concat(users.street1,' ',users.street2) as address,
+      occupation,
+      socialSecurityNumber
+  
+   FROM users where user.id = ${userId}`;
+
+    const data = await db.sequelize.query(query, {
+      type: db.sequelize.QueryTypes.SELECT,
+    });
+
+    return res.status(200).json(data);
+
+  } catch (error) {
+    console.error(error);
+    res.sendStatus(500);
+  }
+});
+
 router.get('/getAllCategories', async (req, res) => {
+
   try {
     const query = `(SELECT 
       0 as id,
@@ -291,5 +322,229 @@ router.post('/removeFromCart', checkAuth, async (req, res) => {
   }
 });
 
+router.get('/getOrderHistory', checkAuth, async (req, res) => {
+  try {
+
+  
+    const userId = req.user.id;
+
+    let query = `SELECT 
+
+    concat('LAVUP','',laundry_orders.id) as orderId,
+    totalOrderAmount,
+    status,
+    createdAt
+    
+    FROM lavup_db.laundry_orders where customerId = ${userId}`;
+
+    const data = await db.sequelize.query(query, {
+      type: db.sequelize.QueryTypes.SELECT,
+    });
+
+    return res.status(200).json(data);
+
+  } catch (error) {
+    console.error(error);
+    res.sendStatus(500);
+  }
+});
+
+router.post('/updateCartItemIronStatus', checkAuth, async (req, res) => {
+  try {
+    const itemId = req.body.itemId;
+    const needIron = req.body.needIron;
+    const userId = req.user.id;
+
+    const isExists = await db.cart_item.findOne({
+      where: {
+        itemId,
+        userId,
+      },
+    });
+
+    if (isExists) {
+      await db.cart_item.update(
+        {
+          needIron: needIron,
+        },
+        {
+          where: {
+            id: isExists.id,
+          },
+        },
+      );
+    } 
+
+    return res.status(200).json('Successfully added to Cart.');
+  } catch (error) {
+    console.error(error);
+    res.sendStatus(500);
+  }
+});
+
+
+router.post('/updateCartItemNotes', checkAuth, async (req, res) => {
+  try {
+    const itemId = req.body.itemId;
+    const notes = req.body.notes;
+    const userId = req.user.id;
+
+    const isExists = await db.cart_item.findOne({
+      where: {
+        itemId,
+        userId,
+      },
+    });
+
+    if (isExists) {
+      await db.cart_item.update(
+        {
+          notes: notes,
+        },
+        {
+          where: {
+            id: isExists.id,
+          },
+        },
+      );
+    } 
+
+    return res.status(200).json('Successfully added to Cart.');
+  } catch (error) {
+    console.error(error);
+    res.sendStatus(500);
+  }
+});
+
+router.get('/getCartPrices', checkAuth, async (req, res) => {
+  try {
+  
+    const userId = req.user.id;
+    let query = `SELECT
+    sysVars.value as tax_percentage,
+    subtotal.sum as subtotal,
+    (subtotal.sum * ((sysVars.value + 100)/100)) as grandTotal,
+    (subtotal.sum * ((sysVars.value)/100)) as vat
+    FROM (
+
+    SELECT name,label,value, 1 as join_id FROM lavup_db.sysVars 
+    ) sysVars 
+    LEFT JOIN (
+    SELECT SUM(unitPrice * units) sum , 1 as join_id from cart_items where userId = ${userId}
+    ) subtotal on sysVars.join_id = subtotal.join_id
+
+    where sysVars.name = 'tax'`;
+
+    const data = await db.sequelize.query(query, {
+      type: db.sequelize.QueryTypes.SELECT,
+    });
+
+    return res.status(200).json(data);
+  } catch (error) {
+    console.error(error);
+    res.sendStatus(500);
+  }
+});
+
+router.post('/confirmOrder',  async (req, res) => {
+  try {
+    const pickUpDate = req.body.pickUpDate;
+    const pickUpTime = req.body.pickUpTime;
+    const deliveryDate = req.body.deliveryDate;
+    const deliveryTime = req.body.deliveryTime;
+    const notes = req.body.notes;
+    const addressline1 = req.body.addressline1;
+    const addressline2 = req.body.addressline2;
+    const city = req.body.city;
+    const specialLandmarks = req.body.specialLandmarks;
+    const userId = 46;
+
+    //get order calculation
+    let query = `SELECT
+    sysVars.value as tax_percentage,
+    subtotal.sum as subtotal,
+    (subtotal.sum * ((sysVars.value + 100)/100)) as grandTotal,
+    (subtotal.sum * ((sysVars.value)/100)) as vat,
+    count.count
+    FROM (
+
+    SELECT name,label,value, 1 as join_id FROM lavup_db.sysVars 
+    ) sysVars 
+    LEFT JOIN (
+    SELECT SUM(unitPrice * units) sum , 1 as join_id from cart_items where userId = ${userId}
+    ) subtotal on sysVars.join_id = subtotal.join_id
+    LEFT JOIN (
+    SELECT SUM(units) count , 1 as join_id from cart_items where userId = ${userId}
+    ) count on sysVars.join_id = count.join_id
+
+    where sysVars.name = 'tax'`;
+
+    const data = await db.sequelize.query(query, {
+      type: db.sequelize.QueryTypes.SELECT,
+    });
+
+    const orderValue = data[0].subtotal
+    const tax = data[0].vat
+    const totalOrderAmount = data[0].grandTotal;
+    const totalItems = data[0].count;
+
+    let laundry_order = await db.laundry_order.create({
+      pickUpDate: pickUpDate,
+      pickUpTime: pickUpTime,
+      deliveryDate: deliveryDate,
+      deliveryTime: deliveryTime,
+      notes: notes,
+      addressline1: addressline1,
+      addressline2: addressline2,
+      city: city,
+      specialLandmarks: specialLandmarks,
+      userId: userId,
+      orderValue: orderValue,
+      tax: tax,
+      totalOrderAmount: totalOrderAmount,
+      totalItems: totalItems,
+      orderType: "app",
+      status: "pending",
+      orderPayed: 0,
+      toPrint: 0,
+      isDeliveryOrder: 1,
+    });
+
+    if (laundry_order) {
+      const cart_data = await db.cart_item.findAll({
+        where: {
+          userId,
+        },
+      });
+
+      for (let elements of cart_data) {
+        await db.laundry_order_item.create({
+          laundryOrderId: laundry_order.id,
+          unitPrice: elements.unitPrice,
+          unitsPurchased: elements.units,
+          subTotal: (elements.units * elements.unitPrice),
+          itemId: elements.itemId,
+          slotId: "",
+          needIron: elements.needIron,
+          notes: elements.notes
+        });
+      }
+    } 
+
+    await db.cart_item.delete(
+      {
+        where: {
+          userId,
+        },
+      }
+    );
+
+    return res.status(200).json('Successfully confirmed the Order.');
+
+  } catch (error) {
+    console.error(error);
+    res.sendStatus(500);
+  }
+});
 
 module.exports = router;
