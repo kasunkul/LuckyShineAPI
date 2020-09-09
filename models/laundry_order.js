@@ -86,7 +86,28 @@ module.exports = (sequelize, Sequelize) => {
         get(){
           return moment(this.assignDate).format('YYYY-MM-DD')
         }
-      }
+      },
+      pickUpDate: {
+        type: Sequelize.DATE,
+      },
+      pickUpTime: {
+        type: Sequelize.STRING,
+      },
+      deliveryTime: {
+        type: Sequelize.STRING,
+      },
+      addressline1: {
+        type: Sequelize.STRING,
+      },
+      addressline2: {
+        type: Sequelize.STRING,
+      },
+      city: {
+        type: Sequelize.STRING,
+      },
+      specialLandmarks: {
+        type: Sequelize.STRING,
+      },
     },
     {
       sequelize,
