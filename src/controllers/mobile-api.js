@@ -337,7 +337,7 @@ router.post('/removeFromCart', checkAuth, async (req, res) => {
   }
 });
 
-router.post('/getOrderHistory', checkAuth, async (req, res) => {
+router.get('/getOrderHistory', checkAuth, async (req, res) => {
   try {
 
   
