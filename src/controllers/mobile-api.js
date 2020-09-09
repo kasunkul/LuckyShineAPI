@@ -106,7 +106,6 @@ router.post('/login', async (req, res) => {
   }
 });
 
-<<<<<<< HEAD
 router.get('/getProfile', checkAuth, async (req, res) => {
   try {
 
@@ -136,7 +135,6 @@ router.get('/getProfile', checkAuth, async (req, res) => {
     res.sendStatus(500);
   }
 });
-
 
 router.get('/getAllCategories', async (req, res) => {
 
