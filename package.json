@@ -6,7 +6,8 @@
   "scripts": {
     "lint": "eslint \"./src/**/*.js\" app.js  --fix",
     "start": "nodemon",
-    "stop": "Taskkill /IM node.exe /F"
+    "stop": "Taskkill /IM node.exe /F",
+    "build": "NODE_ENV=production pm2 start app.js --name 'Lavup-API'"
   },
   "engines": {
     "node": "12.3.1"
