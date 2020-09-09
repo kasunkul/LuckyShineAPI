@@ -108,6 +108,36 @@ router.post('/login', async (req, res) => {
   }
 });
 
+router.get('/getProfile', checkAuth, async (req, res) => {
+  try {
+
+    const userId = req.user.id;
+
+
+    let query = `SELECT 
+
+    concat(firstName,' ',lastName) as name,
+      email,
+      contactNumber,
+      dob,
+      concat(users.street1,' ',users.street2) as address,
+      occupation,
+      socialSecurityNumber
+  
+   FROM users where user.id = ${userId}`;
+
+    const data = await db.sequelize.query(query, {
+      type: db.sequelize.QueryTypes.SELECT,
+    });
+
+    return res.status(200).json(data);
+
+  } catch (error) {
+    console.error(error);
+    res.sendStatus(500);
+  }
+});
+
 router.get('/getAllCategories',  async (req, res) => {
   try {
 
@@ -307,5 +337,31 @@ router.post('/removeFromCart', checkAuth, async (req, res) => {
   }
 });
 
+router.post('/getOrderHistory', checkAuth, async (req, res) => {
+  try {
+
+  
+    const userId = req.user.id;
+
+    let query = `SELECT 
+
+    concat('LAVUP','',laundry_orders.id) as orderId,
+    totalOrderAmount,
+    status,
+    createdAt
+    
+    FROM lavup_db.laundry_orders where customerId = ${userId}`;
+
+    const data = await db.sequelize.query(query, {
+      type: db.sequelize.QueryTypes.SELECT,
+    });
+
+    return res.status(200).json(data);
+
+  } catch (error) {
+    console.error(error);
+    res.sendStatus(500);
+  }
+});
 
 module.exports = router;
