@@ -108,11 +108,9 @@ router.post('/login', async (req, res) => {
 
 router.get('/getProfile', checkAuth, async (req, res) => {
   try {
-
     const userId = req.user.id;
 
-
-    let query = `SELECT 
+    const query = `SELECT 
 
     concat(firstName,' ',lastName) as name,
       email,
@@ -129,7 +127,6 @@ router.get('/getProfile', checkAuth, async (req, res) => {
     });
 
     return res.status(200).json(data);
-
   } catch (error) {
     console.error(error);
     res.sendStatus(500);
@@ -137,7 +134,6 @@ router.get('/getProfile', checkAuth, async (req, res) => {
 });
 
 router.get('/getAllCategories', async (req, res) => {
-
   try {
     const query = `(SELECT 
       0 as id,
@@ -307,21 +303,18 @@ router.post('/addToCart', checkAuth, async (req, res) => {
 
 router.post('/removeFromCart', checkAuth, async (req, res) => {
   try {
-
-    const itemId = req.body.itemId;
+    const { itemId } = req.body;
     const userId = req.user.id;
 
     const isExists = await db.cart_item.findOne({
       where: {
         itemId,
-        userId
+        userId,
       },
     });
 
-    if(isExists){
-
-
-      if((isExists.units - 1) > 0){
+    if (isExists) {
+      if ((isExists.units - 1) > 0) {
         await db.cart_item.update(
           {
             units: (isExists.units - 1),
@@ -330,27 +323,20 @@ router.post('/removeFromCart', checkAuth, async (req, res) => {
             where: {
               id: isExists.id,
             },
-          }
+          },
         );
-      }else{
-
+      } else {
         await db.cart_item.delete(
           {
             where: {
               id: isExists.id,
             },
-          }
+          },
         );
-
       }
-
-      
-
     }
 
-    
-    return res.status(200).json("Successfully removed from Cart.");
-
+    return res.status(200).json('Successfully removed from Cart.');
   } catch (error) {
     console.error(error);
     res.sendStatus(500);
@@ -359,11 +345,9 @@ router.post('/removeFromCart', checkAuth, async (req, res) => {
 
 router.get('/getOrderHistory', checkAuth, async (req, res) => {
   try {
-
-  
     const userId = req.user.id;
 
-    let query = `SELECT 
+    const query = `SELECT 
 
     concat('LAVUP','',laundry_orders.id) as orderId,
     totalOrderAmount,
@@ -377,7 +361,6 @@ router.get('/getOrderHistory', checkAuth, async (req, res) => {
     });
 
     return res.status(200).json(data);
-
   } catch (error) {
     console.error(error);
     res.sendStatus(500);
@@ -386,8 +369,8 @@ router.get('/getOrderHistory', checkAuth, async (req, res) => {
 
 router.post('/updateCartItemIronStatus', checkAuth, async (req, res) => {
   try {
-    const itemId = req.body.itemId;
-    const needIron = req.body.needIron;
+    const { itemId } = req.body;
+    const { needIron } = req.body;
     const userId = req.user.id;
 
     const isExists = await db.cart_item.findOne({
@@ -400,7 +383,7 @@ router.post('/updateCartItemIronStatus', checkAuth, async (req, res) => {
     if (isExists) {
       await db.cart_item.update(
         {
-          needIron: needIron,
+          needIron,
         },
         {
           where: {
@@ -408,7 +391,7 @@ router.post('/updateCartItemIronStatus', checkAuth, async (req, res) => {
           },
         },
       );
-    } 
+    }
 
     return res.status(200).json('Successfully added to Cart.');
   } catch (error) {
@@ -419,8 +402,8 @@ router.post('/updateCartItemIronStatus', checkAuth, async (req, res) => {
 
 router.post('/updateCartItemNotes', checkAuth, async (req, res) => {
   try {
-    const itemId = req.body.itemId;
-    const notes = req.body.notes;
+    const { itemId } = req.body;
+    const { notes } = req.body;
     const userId = req.user.id;
 
     const isExists = await db.cart_item.findOne({
@@ -433,7 +416,7 @@ router.post('/updateCartItemNotes', checkAuth, async (req, res) => {
     if (isExists) {
       await db.cart_item.update(
         {
-          notes: notes,
+          notes,
         },
         {
           where: {
@@ -441,7 +424,7 @@ router.post('/updateCartItemNotes', checkAuth, async (req, res) => {
           },
         },
       );
-    } 
+    }
 
     return res.status(200).json('Successfully added to Cart.');
   } catch (error) {
@@ -452,9 +435,8 @@ router.post('/updateCartItemNotes', checkAuth, async (req, res) => {
 
 router.get('/getCartPrices', checkAuth, async (req, res) => {
   try {
-  
     const userId = req.user.id;
-    let query = `SELECT
+    const query = `SELECT
     sysVars.value as tax_percentage,
     subtotal.sum as subtotal,
     (subtotal.sum * ((sysVars.value + 100)/100)) as grandTotal,
@@ -480,21 +462,21 @@ router.get('/getCartPrices', checkAuth, async (req, res) => {
   }
 });
 
-router.post('/confirmOrder',  async (req, res) => {
+router.post('/confirmOrder', async (req, res) => {
   try {
-    const pickUpDate = req.body.pickUpDate;
-    const pickUpTime = req.body.pickUpTime;
-    const deliveryDate = req.body.deliveryDate;
-    const deliveryTime = req.body.deliveryTime;
-    const notes = req.body.notes;
-    const addressline1 = req.body.addressline1;
-    const addressline2 = req.body.addressline2;
-    const city = req.body.city;
-    const specialLandmarks = req.body.specialLandmarks;
+    const { pickUpDate } = req.body;
+    const { pickUpTime } = req.body;
+    const { deliveryDate } = req.body;
+    const { deliveryTime } = req.body;
+    const { notes } = req.body;
+    const { addressline1 } = req.body;
+    const { addressline2 } = req.body;
+    const { city } = req.body;
+    const { specialLandmarks } = req.body;
     const userId = 46;
 
-    //get order calculation
-    let query = `SELECT
+    // get order calculation
+    const query = `SELECT
     sysVars.value as tax_percentage,
     subtotal.sum as subtotal,
     (subtotal.sum * ((sysVars.value + 100)/100)) as grandTotal,
@@ -517,8 +499,8 @@ router.post('/confirmOrder',  async (req, res) => {
       type: db.sequelize.QueryTypes.SELECT,
     });
 
-    const orderValue = data[0].subtotal
-    const tax = data[0].vat
+    const orderValue = data[0].subtotal;
+    const tax = data[0].vat;
     const totalOrderAmount = data[0].grandTotal;
     const totalItems = data[0].count;
 
@@ -551,30 +533,29 @@ router.post('/confirmOrder',  async (req, res) => {
         },
       });
 
-      for (let elements of cart_data) {
+      for (const elements of cart_data) {
         await db.laundry_order_item.create({
           laundryOrderId: laundry_order.id,
           unitPrice: elements.unitPrice,
           unitsPurchased: elements.units,
           subTotal: (elements.units * elements.unitPrice),
           itemId: elements.itemId,
-          slotId: "",
+          slotId: '',
           needIron: elements.needIron,
-          notes: elements.notes
+          notes: elements.notes,
         });
       }
-    } 
+    }
 
     await db.cart_item.delete(
       {
         where: {
           userId,
         },
-      }
+      },
     );
 
     return res.status(200).json('Successfully confirmed the Order.');
-
   } catch (error) {
     console.error(error);
     res.sendStatus(500);
