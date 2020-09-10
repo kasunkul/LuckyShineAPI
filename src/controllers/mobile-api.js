@@ -501,7 +501,7 @@ router.post('/confirmOrder',  async (req, res) => {
       addressline2: addressline2,
       city: city,
       specialLandmarks: specialLandmarks,
-      userId: userId,
+      customerId: userId,
       orderValue: orderValue,
       tax: tax,
       totalOrderAmount: totalOrderAmount,
