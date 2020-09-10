@@ -228,6 +228,37 @@ router.post('/getAllItemsSearch', async (req, res) => {
   }
 });
 
+router.get('/getCartItems', checkAuth, async (req, res) => {
+  try {
+  
+    const userId = req.user.id; 
+    const query = `SELECT 
+    laundry_items.id,
+    itemName,
+    itemCode,
+    itemCategoryId,
+    laundry_items.unitPrice,
+    ifnull(description,'') as description,
+    ifnull(cart_items.units,0) as selected,
+    0 as maxQty,
+    ifnull(cart_items.needIron,0) as iron,
+    ifnull(image,'') as image
+    
+  FROM lavup_db.laundry_items 
+  RIGHT JOIN (SELECT * FROM cart_items WHERE userId = ${userId}) cart_items ON laundry_items.id = cart_items.itemId
+  where laundry_items.status = 1 `;
+
+    const data = await db.sequelize.query(query, {
+      type: db.sequelize.QueryTypes.SELECT,
+    });
+
+    return res.status(200).json(data);
+  } catch (error) {
+    console.error(error);
+    res.sendStatus(500);
+  }
+});
+
 router.post('/addToCart', checkAuth, async (req, res) => {
   try {
     const { itemId } = req.body;
