@@ -97,8 +97,17 @@ async function assignLabSlots(itm, type, userName, shopId) {
   }
 }
 
-router.get("/:id", async (req, res) => {
+router.get("/:id", checkAuth,async (req, res) => {
+
   try {
+    // const user = 
+    const user = await db.user.findOne({
+      where:{
+        id:req.user.id
+      },
+      raw:true
+    })
+    
     //laundry_order_items
     const meta = await db.laundry_order.findOne({
       attributes: [
@@ -140,7 +149,7 @@ router.get("/:id", async (req, res) => {
     if (meta.status === "processing" || meta.status === "accepted by shop") {
        
       // ASSIGN SLOTS IN LAB
-      items = await assignLabSlots(items, meta.status, "P", meta.shopId);
+      items = await assignLabSlots(items, meta.status, user.firstName.charAt(0).toUpperCase(), meta.shopId);
     }
 
     // console.log('items',items)
