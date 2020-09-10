@@ -23,7 +23,7 @@ router.get('/', checkAuth, async (req, res) => {
         },
       }),
       db.laundry_order.findAll({
-        attributes:['id','assignDate','d','startLocation','status'],
+        attributes: ['id', 'assignDate', 'd', 'startLocation', 'status'],
         where: {
           [Op.and]: [
             db.Sequelize
@@ -59,7 +59,7 @@ router.get('/list/:type', checkAuth, async (req, res) => {
     const { type } = req.params;
 
     const query = {
-      attributes:['id','assignDate','d','startLocation','status'],
+      attributes: ['id', 'assignDate', 'd', 'startLocation', 'status'],
       order: db.sequelize.literal('laundry_order.id DESC'),
       raw: true,
       include: [
@@ -126,7 +126,6 @@ router.post('/print', async (req, res) => {
     );
     res.sendStatus(200);
   } catch (error) {
-    
     res.sendStatus(500);
   }
 });

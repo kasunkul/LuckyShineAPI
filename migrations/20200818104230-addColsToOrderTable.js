@@ -1,33 +1,31 @@
 "use strict";
 
 module.exports = {
-  up: async (queryInterface, Sequelize) => {
-    Promise.all([
-      await queryInterface.addColumn("laundry_orders", "pickUpDate", {
+  up: (queryInterface, Sequelize) => {
+    return Promise.all([
+      queryInterface.addColumn("laundry_orders", "pickUpDate", {
         type: Sequelize.DATE,
-        defaultValue:false
       }),
-      await queryInterface.addColumn("laundry_orders", "pickUpTime", {
-        type: Sequelize.STRING,
-        defaultValue:false
-      }),
-      await queryInterface.addColumn("laundry_orders", "deliveryTime", {
+      queryInterface.addColumn("laundry_orders", "pickUpTime", {
         type: Sequelize.STRING,
       }),
-      await queryInterface.addColumn("laundry_orders", "addressline1", {
+      queryInterface.addColumn("laundry_orders", "deliveryTime", {
         type: Sequelize.STRING,
       }),
-      await queryInterface.addColumn("laundry_orders", "addressline2", {
+      queryInterface.addColumn("laundry_orders", "addressline1", {
         type: Sequelize.STRING,
       }),
-      await queryInterface.addColumn("laundry_orders", "city", {
+      queryInterface.addColumn("laundry_orders", "addressline2", {
         type: Sequelize.STRING,
       }),
-      await queryInterface.addColumn("laundry_orders", "specialLandmarks", {
+      queryInterface.addColumn("laundry_orders", "city", {
         type: Sequelize.STRING,
-      })
-    ])
-  
+      }),
+      queryInterface.addColumn("laundry_orders", "specialLandmarks", {
+        type: Sequelize.STRING,
+      }),
+    ]);
+    // return Promise.resolve()
   },
 
   down: async (queryInterface, Sequelize) => {
