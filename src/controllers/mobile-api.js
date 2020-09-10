@@ -171,18 +171,20 @@ router.get('/getAllItemsFromCategories/:CatId', async (req, res) => {
     }
 
     const query = `SELECT 
-                  id,
-                  itemName,
-                  itemCode,
-                  itemCategoryId,
-                  unitPrice,
-                  '' as description,
-                  0 as selected,
-                  0 as maxQty,
-                  0 as iron,
-                  '' as image
-                FROM lavup_db.laundry_items 
-                where status = 1 ${CategoryCheck}`;
+    laundry_items.id,
+    itemName,
+    itemCode,
+    itemCategoryId,
+    laundry_items.unitPrice,
+    ifnull(description,'') as description,
+    ifnull(cart_items.units,0) as selected,
+    0 as maxQty,
+    ifnull(cart_items.needIron,0) as iron,
+    ifnull(image,'') as image
+    
+  FROM lavup_db.laundry_items 
+  LEFT JOIN (SELECT * FROM cart_items WHERE userId = 46) cart_items ON laundry_items.id = cart_items.itemId
+  where laundry_items.status = 1 ${CategoryCheck}`;
 
     const data = await db.sequelize.query(query, {
       type: db.sequelize.QueryTypes.SELECT,
@@ -200,18 +202,20 @@ router.post('/getAllItemsSearch', async (req, res) => {
     const { searchQuery } = req.body.searchQuery;
 
     const query = `SELECT 
-                  id,
-                  itemName,
-                  itemCode,
-                  itemCategoryId,
-                  unitPrice,
-                  '' as description,
-                  0 as selected,
-                  0 as maxQty,
-                  0 as iron,
-                  '' as image
-                FROM lavup_db.laundry_items 
-                where status = 1 and itemName LIKE '%${searchQuery}%'`;
+    laundry_items.id,
+    itemName,
+    itemCode,
+    itemCategoryId,
+    laundry_items.unitPrice,
+    ifnull(description,'') as description,
+    ifnull(cart_items.units,0) as selected,
+    0 as maxQty,
+    ifnull(cart_items.needIron,0) as iron,
+    ifnull(image,'') as image
+    
+  FROM lavup_db.laundry_items 
+  LEFT JOIN (SELECT * FROM cart_items WHERE userId = 46) cart_items ON laundry_items.id = cart_items.itemId
+  where laundry_items.status = 1 and itemName LIKE '%${searchQuery}%'`;
 
     const data = await db.sequelize.query(query, {
       type: db.sequelize.QueryTypes.SELECT,
@@ -381,7 +385,6 @@ router.post('/updateCartItemIronStatus', checkAuth, async (req, res) => {
     res.sendStatus(500);
   }
 });
-
 
 router.post('/updateCartItemNotes', checkAuth, async (req, res) => {
   try {
