@@ -1,8 +1,10 @@
 const express = require("express");
-
+const moment = require("moment");
 const router = express.Router();
 const db = require("../../models");
 const checkAuth = require("../middleware/auth");
+
+const { sendEmail } = require("../utils/sendEmail");
 
 router.post("/", checkAuth, async (req, res) => {
   const transaction = await db.sequelize.transaction();
@@ -58,7 +60,7 @@ router.post("/", checkAuth, async (req, res) => {
     const data = await db.laundry_order.create(orderData, { transaction });
 
     const cartBulk = [];
-    cart.forEach((e) => {
+    cart.forEach((e, i) => {
       for (let index = 0; index < e.qty; index++) {
         cartBulk.push({
           laundryOrderId: data.dataValues.id,
@@ -67,14 +69,42 @@ router.post("/", checkAuth, async (req, res) => {
           needIron: e.needIron,
         });
       }
+      e.idx = i + 1;
     });
 
-    
+    const user = await db.user.findOne({
+      where: {
+        id: customerId,
+      },
+      raw: true,
+    });
+
     await db.laundry_order_item.bulkCreate(cartBulk, { transaction });
+
+    const templateData = {
+      name: user.firstName,
+      orderNo: data.dataValues.id,
+      orderDate:moment().format('YYYY-MM-DD'),
+      totalItems,
+      orderValue,
+      items: cart,
+    };
+
+    if (isDeliveryOrder) {
+      templateData.shipping = `${user.street1} ${user.street2} ${user.city} ${user.stateRegion} ${user.postalCode}`;
+      templateData.assignDate = moment(assignDate).format("YYYY-MM-DD");
+      templateData.assignDateTo = moment(assignDate)
+        .add(7, "days")
+        .format("YYYY-MM-DD");
+    }
+
+    sendEmail(templateData,user.email);
+
     await transaction.commit();
+
     res.sendStatus(200);
   } catch (error) {
-    console.log(error)
+    console.log(error);
     await transaction.rollback();
 
     res.sendStatus(500);
