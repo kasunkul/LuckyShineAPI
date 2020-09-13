@@ -133,7 +133,7 @@ router.get('/getProfile', checkAuth, async (req, res) => {
   }
 });
 
-router.get('/getAllCategories', async (req, res) => {
+router.get('/getAllCategories', checkAuth, async (req, res) => {
   try {
     const query = `(SELECT 
       0 as id,
@@ -178,6 +178,7 @@ router.get('/getAllItemsFromCategories/:CatId', checkAuth, async (req, res) => {
     ifnull(cart_items.units,0) as selected,
     0 as maxQty,
     ifnull(cart_items.needIron,0) as iron,
+    ifnull(cart_items.notes,'') as notes,
     ifnull(image,'') as image
     
   FROM lavup_db.laundry_items 
@@ -195,7 +196,7 @@ router.get('/getAllItemsFromCategories/:CatId', checkAuth, async (req, res) => {
   }
 });
 
-router.post('/getAllItemsSearch', async (req, res) => {
+router.post('/getAllItemsSearch', checkAuth,async (req, res) => {
   try {
     const { searchQuery } = req.body.searchQuery;
     const userId = req.user.id;
@@ -210,6 +211,7 @@ router.post('/getAllItemsSearch', async (req, res) => {
     ifnull(cart_items.units,0) as selected,
     0 as maxQty,
     ifnull(cart_items.needIron,0) as iron,
+    ifnull(cart_items.notes,'') as notes,
     ifnull(image,'') as image
     
   FROM lavup_db.laundry_items 
