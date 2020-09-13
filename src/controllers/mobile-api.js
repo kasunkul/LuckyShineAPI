@@ -428,6 +428,7 @@ router.post('/getOrderDetails', checkAuth, async (req, res) => {
                     tax,
                     orderValue,
                     status,
+                    notes,
                     createdAt
     FROM lavup_db.laundry_orders where customerId = ${userId} and laundry_orders.id = '${orderId}'`;
 
@@ -448,7 +449,7 @@ router.post('/getOrderDetails', checkAuth, async (req, res) => {
       type: db.sequelize.QueryTypes.SELECT,
     });
 
-    data.laundry_order_items = data2;
+    data[0].laundry_order_items = data2;
 
     console.log(data);
 
