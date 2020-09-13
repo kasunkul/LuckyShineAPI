@@ -170,7 +170,7 @@ router.get('/getAllItemsFromCategories/:CatId', checkAuth, async (req, res) => {
 
     const query = `SELECT 
     laundry_items.id,
-    itemName,
+    laundry_items.itemName,
     itemCode,
     itemCategoryId,
     item_categories.itemName as itemCategoryName,
@@ -208,7 +208,7 @@ router.post('/getAllItemsSearch', checkAuth,async (req, res) => {
 
     const query = `SELECT 
     laundry_items.id,
-    itemName,
+    laundry_items.itemName,
     itemCode,
     itemCategoryId,
     item_categories.itemName as itemCategoryName,
