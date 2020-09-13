@@ -417,6 +417,7 @@ router.post('/getOrderDetails', checkAuth, async (req, res) => {
 
     const userId = req.user.id;
     const { orderId } = req.body;
+    orderId = orderId.replace("LAVUP", "");
 
     const query = `SELECT 
                     laundry_orders.id,
@@ -424,7 +425,7 @@ router.post('/getOrderDetails', checkAuth, async (req, res) => {
                     totalOrderAmount,
                     status,
                     createdAt
-    FROM lavup_db.laundry_orders where customerId = ${userId} and laundry_orders.id = ${orderId}`;
+    FROM lavup_db.laundry_orders where customerId = ${userId} and laundry_orders.id = '${orderId}'`;
 
     let data = await db.sequelize.query(query, {
       type: db.sequelize.QueryTypes.SELECT,
@@ -437,7 +438,7 @@ router.post('/getOrderDetails', checkAuth, async (req, res) => {
     laundry_items.itemName
     FROM lavup_db.laundry_order_items
     LEFT JOIN laundry_items ON laundry_items.id = laundry_order_items.itemId
-    WHERE lavup_db.laundry_order_items.laundryOrderId = ${orderId}`;
+    WHERE lavup_db.laundry_order_items.laundryOrderId = '${orderId}'`;
 
     let data2 = await db.sequelize.query(query2, {
       type: db.sequelize.QueryTypes.SELECT,
