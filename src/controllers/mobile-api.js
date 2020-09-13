@@ -120,7 +120,7 @@ router.get('/getProfile', checkAuth, async (req, res) => {
       occupation,
       socialSecurityNumber
   
-   FROM users where user.id = ${userId}`;
+   FROM users where users.id = ${userId}`;
 
     const data = await db.sequelize.query(query, {
       type: db.sequelize.QueryTypes.SELECT,
@@ -420,9 +420,13 @@ router.post('/getOrderDetails', checkAuth, async (req, res) => {
     orderId = orderId.replace("LAVUP", "");
 
     const query = `SELECT 
+                    CONCAT(addressline1,' ',city) as address,
+                    specialLandmarks as specialLandmarks,
                     laundry_orders.id,
                     concat('LAVUP','',laundry_orders.id) as orderId,
                     totalOrderAmount,
+                    tax,
+                    orderValue,
                     status,
                     createdAt
     FROM lavup_db.laundry_orders where customerId = ${userId} and laundry_orders.id = '${orderId}'`;
