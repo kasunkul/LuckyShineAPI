@@ -446,6 +446,8 @@ router.post('/getOrderDetails', checkAuth, async (req, res) => {
 
     data.laundry_order_items = data2;
 
+    console.log(data);
+
     return res.status(200).json(data);
   } catch (error) {
     console.error(error);
