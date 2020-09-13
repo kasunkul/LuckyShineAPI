@@ -359,6 +359,36 @@ router.post('/removeFromCart', checkAuth, async (req, res) => {
   }
 });
 
+router.post('/deleteFromCart', checkAuth, async (req, res) => {
+  try {
+    const { itemId } = req.body;
+    const userId = req.user.id;
+
+    const isExists = await db.cart_item.findOne({
+      where: {
+        itemId,
+        userId,
+      },
+    });
+
+    if (isExists) {
+      await db.cart_item.delete(
+        {
+          where: {
+            id: isExists.id,
+          },
+        },
+      );
+    }
+
+    return res.status(200).json('Successfully Deleted from Cart.');
+  } catch (error) {
+    console.error(error);
+    res.sendStatus(500);
+  }
+});
+
+
 router.get('/getOrderHistory', checkAuth, async (req, res) => {
   try {
     const userId = req.user.id;
