@@ -342,7 +342,7 @@ router.post('/removeFromCart', checkAuth, async (req, res) => {
           },
         );
       } else {
-        await db.cart_item.delete(
+        await db.cart_item.destroy(
           {
             where: {
               id: isExists.id,
@@ -372,7 +372,7 @@ router.post('/deleteFromCart', checkAuth, async (req, res) => {
     });
 
     if (isExists) {
-      await db.cart_item.delete(
+      await db.cart_item.destroy(
         {
           where: {
             id: isExists.id,
@@ -594,7 +594,7 @@ router.post('/confirmOrder', checkAuth, async (req, res) => {
       }
     }
 
-    await db.cart_item.delete(
+    await db.cart_item.destroy(
       {
         where: {
           userId,
