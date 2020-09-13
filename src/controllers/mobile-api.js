@@ -54,7 +54,7 @@ router.post('/login', async (req, res) => {
         email: req.body.email,
         status: 'active',
         role: {
-          [Op.in]: ['user'],
+          [Op.in]: ['user','admin','customer'],
         },
       },
     });
@@ -96,7 +96,7 @@ router.post('/login', async (req, res) => {
         data: {
           displayName: userName,
           photoURL: 'assets/images/avatars/Velazquez.jpg',
-          email: 'johndoe@withinpixels.com',
+          email: isUserExist.email,
         },
       },
     });
