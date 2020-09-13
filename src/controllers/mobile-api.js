@@ -219,9 +219,13 @@ router.post('/getAllItemsSearch', checkAuth,async (req, res) => {
   LEFT JOIN (SELECT * FROM cart_items WHERE userId = ${userId}) cart_items ON laundry_items.id = cart_items.itemId
   where laundry_items.status = 1 and itemName LIKE '%${searchQuery}%'`;
 
+  console.log("query....",query);
+
     const data = await db.sequelize.query(query, {
       type: db.sequelize.QueryTypes.SELECT,
     });
+
+    console.log("data....",data);
 
     return res.status(200).json(data);
   } catch (error) {
