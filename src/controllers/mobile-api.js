@@ -161,7 +161,6 @@ router.get('/getAllItemsFromCategories/:CatId', checkAuth, async (req, res) => {
     const { CatId } = req.params;
     const userId = req.user.id;
 
-
     let CategoryCheck = '';
 
     if (CatId > 0) {
@@ -273,6 +272,7 @@ router.get('/getCartItems', checkAuth, async (req, res) => {
 
 router.post('/addToCart', checkAuth, async (req, res) => {
   try {
+
     const { itemId } = req.body;
     const userId = req.user.id;
 
@@ -388,7 +388,6 @@ router.post('/deleteFromCart', checkAuth, async (req, res) => {
   }
 });
 
-
 router.get('/getOrderHistory', checkAuth, async (req, res) => {
   try {
     const userId = req.user.id;
@@ -405,6 +404,46 @@ router.get('/getOrderHistory', checkAuth, async (req, res) => {
     const data = await db.sequelize.query(query, {
       type: db.sequelize.QueryTypes.SELECT,
     });
+
+    return res.status(200).json(data);
+  } catch (error) {
+    console.error(error);
+    res.sendStatus(500);
+  }
+});
+
+router.post('/getOrderDetails', checkAuth, async (req, res) => {
+  try {
+
+    const userId = req.user.id;
+    const { orderId } = req.body;
+
+    const query = `SELECT 
+                    laundry_orders.id,
+                    concat('LAVUP','',laundry_orders.id) as orderId,
+                    totalOrderAmount,
+                    status,
+                    createdAt
+    FROM lavup_db.laundry_orders where customerId = ${userId} and laundry_orders.id = ${orderId}`;
+
+    let data = await db.sequelize.query(query, {
+      type: db.sequelize.QueryTypes.SELECT,
+    });
+
+    const query = `SELECT 
+    laundry_order_items.unitPrice,
+    laundry_order_items.subTotal,
+    laundry_order_items.unitsPurchased,
+    laundry_items.itemName
+    FROM lavup_db.laundry_order_items
+    LEFT JOIN laundry_items ON laundry_items.id = laundry_order_items.itemId
+    WHERE lavup_db.laundry_order_items.laundryOrderId = ${orderId}`;
+
+    let data2 = await db.sequelize.query(query, {
+      type: db.sequelize.QueryTypes.SELECT,
+    });
+
+    data.laundry_order_items = data2;
 
     return res.status(200).json(data);
   } catch (error) {
