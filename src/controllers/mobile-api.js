@@ -173,6 +173,7 @@ router.get('/getAllItemsFromCategories/:CatId', checkAuth, async (req, res) => {
     itemName,
     itemCode,
     itemCategoryId,
+    item_categories.itemName as itemCategoryName,
     laundry_items.unitPrice,
     ifnull(description,'') as description,
     ifnull(cart_items.units,0) as selected,
@@ -182,6 +183,7 @@ router.get('/getAllItemsFromCategories/:CatId', checkAuth, async (req, res) => {
     ifnull(image,'') as image
     
   FROM lavup_db.laundry_items 
+  LEFT JOIN lavup_db.item_categories ON laundry_items.itemCategoryId = item_categories.id
   LEFT JOIN (SELECT * FROM cart_items WHERE userId = ${userId}) cart_items ON laundry_items.id = cart_items.itemId
   where laundry_items.status = 1 ${CategoryCheck}`;
 
@@ -202,13 +204,14 @@ router.post('/getAllItemsSearch', checkAuth,async (req, res) => {
     const searchQuery = req.body.searchQuery;
     const userId = req.user.id;
 
-    console.log("searchQuery....",req.searchQuery);
+    console.log("searchQuery....",req.body.searchQuery);
 
     const query = `SELECT 
     laundry_items.id,
     itemName,
     itemCode,
     itemCategoryId,
+    item_categories.itemName as itemCategoryName,
     laundry_items.unitPrice,
     ifnull(description,'') as description,
     ifnull(cart_items.units,0) as selected,
@@ -218,6 +221,7 @@ router.post('/getAllItemsSearch', checkAuth,async (req, res) => {
     ifnull(image,'') as image
     
   FROM lavup_db.laundry_items 
+  LEFT JOIN lavup_db.item_categories ON laundry_items.itemCategoryId = item_categories.id
   LEFT JOIN (SELECT * FROM cart_items WHERE userId = ${userId}) cart_items ON laundry_items.id = cart_items.itemId
   where laundry_items.status = 1 and itemName LIKE '%${searchQuery}%'`;
 
