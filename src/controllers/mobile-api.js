@@ -175,7 +175,7 @@ router.get('/getAllItemsFromCategories/:CatId', checkAuth, async (req, res) => {
     itemCategoryId,
     item_categories.itemName as itemCategoryName,
     laundry_items.unitPrice,
-    ifnull(laundry_items.description,'') as laundry_items.description,
+    ifnull(laundry_items.description,'') as description,
     ifnull(cart_items.units,0) as selected,
     0 as maxQty,
     ifnull(cart_items.needIron,0) as iron,
@@ -213,7 +213,7 @@ router.post('/getAllItemsSearch', checkAuth,async (req, res) => {
     itemCategoryId,
     item_categories.itemName as itemCategoryName,
     laundry_items.unitPrice,
-    ifnull(laundry_items.description,'') as laundry_items.description,
+    ifnull(laundry_items.description,'') as description,
     ifnull(cart_items.units,0) as selected,
     0 as maxQty,
     ifnull(cart_items.needIron,0) as iron,
@@ -223,7 +223,7 @@ router.post('/getAllItemsSearch', checkAuth,async (req, res) => {
   FROM lavup_db.laundry_items 
   LEFT JOIN lavup_db.item_categories ON laundry_items.itemCategoryId = item_categories.id
   LEFT JOIN (SELECT * FROM cart_items WHERE userId = ${userId}) cart_items ON laundry_items.id = cart_items.itemId
-  where laundry_items.status = 1 and itemName LIKE '%${searchQuery}%'`;
+  where laundry_items.status = 1 and laundry_items.itemName LIKE '%${searchQuery}%'`;
 
   console.log("query....",query);
 
