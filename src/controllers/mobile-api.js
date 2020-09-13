@@ -416,7 +416,7 @@ router.post('/getOrderDetails', checkAuth, async (req, res) => {
   try {
 
     const userId = req.user.id;
-    const { orderId } = req.body;
+    let orderId = req.body.orderId;
     orderId = orderId.replace("LAVUP", "");
 
     const query = `SELECT 
