@@ -156,9 +156,11 @@ router.get('/getAllCategories', async (req, res) => {
   }
 });
 
-router.get('/getAllItemsFromCategories/:CatId', async (req, res) => {
+router.get('/getAllItemsFromCategories/:CatId', checkAuth, async (req, res) => {
   try {
     const { CatId } = req.params;
+    const userId = req.user.id;
+
 
     let CategoryCheck = '';
 
@@ -179,7 +181,7 @@ router.get('/getAllItemsFromCategories/:CatId', async (req, res) => {
     ifnull(image,'') as image
     
   FROM lavup_db.laundry_items 
-  LEFT JOIN (SELECT * FROM cart_items WHERE userId = 46) cart_items ON laundry_items.id = cart_items.itemId
+  LEFT JOIN (SELECT * FROM cart_items WHERE userId = ${userId}) cart_items ON laundry_items.id = cart_items.itemId
   where laundry_items.status = 1 ${CategoryCheck}`;
 
     const data = await db.sequelize.query(query, {
@@ -196,6 +198,7 @@ router.get('/getAllItemsFromCategories/:CatId', async (req, res) => {
 router.post('/getAllItemsSearch', async (req, res) => {
   try {
     const { searchQuery } = req.body.searchQuery;
+    const userId = req.user.id;
 
     const query = `SELECT 
     laundry_items.id,
@@ -210,7 +213,7 @@ router.post('/getAllItemsSearch', async (req, res) => {
     ifnull(image,'') as image
     
   FROM lavup_db.laundry_items 
-  LEFT JOIN (SELECT * FROM cart_items WHERE userId = 46) cart_items ON laundry_items.id = cart_items.itemId
+  LEFT JOIN (SELECT * FROM cart_items WHERE userId = ${userId}) cart_items ON laundry_items.id = cart_items.itemId
   where laundry_items.status = 1 and itemName LIKE '%${searchQuery}%'`;
 
     const data = await db.sequelize.query(query, {
@@ -462,8 +465,9 @@ router.get('/getCartPrices', checkAuth, async (req, res) => {
   }
 });
 
-router.post('/confirmOrder', async (req, res) => {
+router.post('/confirmOrder', checkAuth, async (req, res) => {
   try {
+    const userId = req.user.id;
     const { pickUpDate } = req.body;
     const { pickUpTime } = req.body;
     const { deliveryDate } = req.body;
@@ -473,7 +477,7 @@ router.post('/confirmOrder', async (req, res) => {
     const { addressline2 } = req.body;
     const { city } = req.body;
     const { specialLandmarks } = req.body;
-    const userId = 46;
+    // const userId = 46;
 
     // get order calculation
     const query = `SELECT
