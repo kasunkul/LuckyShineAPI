@@ -199,8 +199,10 @@ router.get('/getAllItemsFromCategories/:CatId', checkAuth, async (req, res) => {
 router.post('/getAllItemsSearch', checkAuth,async (req, res) => {
   try {
     console.log("req.body....",req.body);
-    const { searchQuery } = req.body.searchQuery;
+    const searchQuery = req.body.searchQuery;
     const userId = req.user.id;
+
+    console.log("searchQuery....",req.searchQuery);
 
     const query = `SELECT 
     laundry_items.id,
