@@ -74,7 +74,10 @@ router.get('/list/:type', checkAuth, async (req, res) => {
     contactNumber,
     users.status,
     CONCAT(firstName, ' ', lastName) AS fullName,
-    k.d
+    k.d,
+    IF(isAppUser,
+      'Mobile app customer',
+      'Walking customer') AS customerType
 FROM
     users
         LEFT JOIN
