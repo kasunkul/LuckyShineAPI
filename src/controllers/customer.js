@@ -1,11 +1,11 @@
-const express = require('express');
+const express = require("express");
 
 const router = express.Router();
-const db = require('../../models');
-const checkAuth = require('../middleware/auth');
+const db = require("../../models");
+const checkAuth = require("../middleware/auth");
 
 const { Op } = db.Sequelize;
-router.get('/', checkAuth, async (req, res) => {
+router.get("/", checkAuth, async (req, res) => {
   try {
     // query
     const query = `select * from (SELECT 
@@ -22,50 +22,73 @@ router.get('/', checkAuth, async (req, res) => {
       MONTH(laundry_orders.createdAt) = MONTH(CURDATE())
           AND YEAR(laundry_orders.createdAt) = YEAR(CURDATE())
   GROUP BY customerId) k order by k.value desc;`;
+
+    //
+    const standardCustomersQ = `SELECT COUNT(*) AS standard FROM lavup_db.laundry_orders INNER JOIN
+  users ON laundry_orders.customerId = users.id WHERE
+  MONTH(laundry_orders.createdAt) = MONTH(CURDATE())
+  AND YEAR(laundry_orders.createdAt) = YEAR(CURDATE())
+  AND users.email = 'standard@gmail.com'`;
+
+  const customers = `SELECT COUNT(*) AS registeredCustomers FROM (SELECT 
+  customerId FROM lavup_db.laundry_orders
+  INNER JOIN users ON laundry_orders.customerId = users.id
+  WHERE
+      MONTH(laundry_orders.createdAt) = MONTH(CURDATE())
+          AND YEAR(laundry_orders.createdAt) = YEAR(CURDATE())
+          AND users.email != 'standard@gmail.com'
+  GROUP BY customerId) AS x`
     // Total delivery orders and items
     const [
       inactiveCount,
       activeCount,
       items,
-      totalCustomerVisits,
+      standard,
+      customersCount
+
     ] = await Promise.all([
       db.user.count({
         where: {
-          status: 'inactive',
-          role: 'customer',
+          status: "inactive",
+          role: "customer",
         },
       }),
       db.user.count({
         where: {
-          status: 'active',
-          role: 'customer',
+          status: "active",
+          role: "customer",
         },
       }),
       db.sequelize.query(query, {
         type: db.sequelize.QueryTypes.SELECT,
       }),
-      db.laundry_order.count({
-        where: {
-          shopId: {
-            [Op.ne]: null,
-          },
-        },
-        logging: true,
+      db.sequelize.query(standardCustomersQ, {
+        type: db.sequelize.QueryTypes.SELECT,
+      }),
+      db.sequelize.query(customers, {
+        type: db.sequelize.QueryTypes.SELECT,
       }),
     ]);
 
+
+
+    
+    customersCount)
+    const totalCustomerVisits = standard[0].standard + customersCount[0].registeredCustomers
     return res.status(200).json({
       inactiveCount,
       activeCount,
       items,
-      totalCustomerVisits,
+      totalCustomerVisits
+
+      
     });
   } catch (error) {
     return res.sendStatus(500);
   }
 });
 
-router.get('/list/:type', checkAuth, async (req, res) => {
+router.get("/list/:type", checkAuth, async (req, res) => {
   try {
     const { type } = req.params;
 
@@ -89,10 +112,10 @@ FROM
 WHERE
     role = 'customer'`;
 
-    if (type === 'active') {
+    if (type === "active") {
       query += " and user.status = 'active'";
     }
-    if (type === 'inactive') {
+    if (type === "inactive") {
       query += " and user.status = 'inactive'";
     }
 
@@ -106,14 +129,14 @@ WHERE
   }
 });
 
-router.get('/drivers', checkAuth, async (req, res) => {
+router.get("/drivers", checkAuth, async (req, res) => {
   try {
     const data = await db.user.findAll({
-      attributes: ['firstName', 'lastName', 'fullName', 'id'],
-      order: db.sequelize.literal('id DESC'),
+      attributes: ["firstName", "lastName", "fullName", "id"],
+      order: db.sequelize.literal("id DESC"),
       logging: console.log,
       where: {
-        role: 'driver',
+        role: "driver",
       },
       raw: true,
     });
