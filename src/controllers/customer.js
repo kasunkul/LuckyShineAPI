@@ -73,7 +73,7 @@ router.get("/", checkAuth, async (req, res) => {
 
 
     
-    customersCount)
+    
     const totalCustomerVisits = standard[0].standard + customersCount[0].registeredCustomers
     return res.status(200).json({
       inactiveCount,
