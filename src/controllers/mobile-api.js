@@ -54,7 +54,7 @@ router.post('/login', async (req, res) => {
         email: req.body.email,
         status: 'active',
         role: {
-          [Op.in]: ['user'],
+          [Op.in]: ['user','admin','customer'],
         },
       },
     });
@@ -96,7 +96,7 @@ router.post('/login', async (req, res) => {
         data: {
           displayName: userName,
           photoURL: 'assets/images/avatars/Velazquez.jpg',
-          email: 'johndoe@withinpixels.com',
+          email: isUserExist.email,
         },
       },
     });
@@ -120,7 +120,7 @@ router.get('/getProfile', checkAuth, async (req, res) => {
       occupation,
       socialSecurityNumber
   
-   FROM users where user.id = ${userId}`;
+   FROM users where users.id = ${userId}`;
 
     const data = await db.sequelize.query(query, {
       type: db.sequelize.QueryTypes.SELECT,
@@ -133,7 +133,7 @@ router.get('/getProfile', checkAuth, async (req, res) => {
   }
 });
 
-router.get('/getAllCategories', async (req, res) => {
+router.get('/getAllCategories', checkAuth, async (req, res) => {
   try {
     const query = `(SELECT 
       0 as id,
@@ -156,9 +156,10 @@ router.get('/getAllCategories', async (req, res) => {
   }
 });
 
-router.get('/getAllItemsFromCategories/:CatId', async (req, res) => {
+router.get('/getAllItemsFromCategories/:CatId', checkAuth, async (req, res) => {
   try {
     const { CatId } = req.params;
+    const userId = req.user.id;
 
     let CategoryCheck = '';
 
@@ -168,18 +169,21 @@ router.get('/getAllItemsFromCategories/:CatId', async (req, res) => {
 
     const query = `SELECT 
     laundry_items.id,
-    itemName,
+    laundry_items.itemName,
     itemCode,
     itemCategoryId,
+    item_categories.itemName as itemCategoryName,
     laundry_items.unitPrice,
-    ifnull(description,'') as description,
+    ifnull(laundry_items.description,'') as description,
     ifnull(cart_items.units,0) as selected,
     0 as maxQty,
     ifnull(cart_items.needIron,0) as iron,
+    ifnull(cart_items.notes,'') as notes,
     ifnull(image,'') as image
     
   FROM lavup_db.laundry_items 
-  LEFT JOIN (SELECT * FROM cart_items WHERE userId = 46) cart_items ON laundry_items.id = cart_items.itemId
+  LEFT JOIN lavup_db.item_categories ON laundry_items.itemCategoryId = item_categories.id
+  LEFT JOIN (SELECT * FROM cart_items WHERE userId = ${userId}) cart_items ON laundry_items.id = cart_items.itemId
   where laundry_items.status = 1 ${CategoryCheck}`;
 
     const data = await db.sequelize.query(query, {
@@ -193,29 +197,40 @@ router.get('/getAllItemsFromCategories/:CatId', async (req, res) => {
   }
 });
 
-router.post('/getAllItemsSearch', async (req, res) => {
+router.post('/getAllItemsSearch', checkAuth,async (req, res) => {
   try {
-    const { searchQuery } = req.body.searchQuery;
+    console.log("req.body....",req.body);
+    const searchQuery = req.body.searchQuery;
+    const userId = req.user.id;
+
+    console.log("searchQuery....",req.body.searchQuery);
 
     const query = `SELECT 
     laundry_items.id,
-    itemName,
+    laundry_items.itemName,
     itemCode,
     itemCategoryId,
+    item_categories.itemName as itemCategoryName,
     laundry_items.unitPrice,
-    ifnull(description,'') as description,
+    ifnull(laundry_items.description,'') as description,
     ifnull(cart_items.units,0) as selected,
     0 as maxQty,
     ifnull(cart_items.needIron,0) as iron,
+    ifnull(cart_items.notes,'') as notes,
     ifnull(image,'') as image
     
   FROM lavup_db.laundry_items 
-  LEFT JOIN (SELECT * FROM cart_items WHERE userId = 46) cart_items ON laundry_items.id = cart_items.itemId
-  where laundry_items.status = 1 and itemName LIKE '%${searchQuery}%'`;
+  LEFT JOIN lavup_db.item_categories ON laundry_items.itemCategoryId = item_categories.id
+  LEFT JOIN (SELECT * FROM cart_items WHERE userId = ${userId}) cart_items ON laundry_items.id = cart_items.itemId
+  where laundry_items.status = 1 and laundry_items.itemName LIKE '%${searchQuery}%'`;
+
+  console.log("query....",query);
 
     const data = await db.sequelize.query(query, {
       type: db.sequelize.QueryTypes.SELECT,
     });
+
+    console.log("data....",data);
 
     return res.status(200).json(data);
   } catch (error) {
@@ -257,6 +272,7 @@ router.get('/getCartItems', checkAuth, async (req, res) => {
 
 router.post('/addToCart', checkAuth, async (req, res) => {
   try {
+
     const { itemId } = req.body;
     const userId = req.user.id;
 
@@ -326,7 +342,7 @@ router.post('/removeFromCart', checkAuth, async (req, res) => {
           },
         );
       } else {
-        await db.cart_item.delete(
+        await db.cart_item.destroy(
           {
             where: {
               id: isExists.id,
@@ -337,6 +353,35 @@ router.post('/removeFromCart', checkAuth, async (req, res) => {
     }
 
     return res.status(200).json('Successfully removed from Cart.');
+  } catch (error) {
+    console.error(error);
+    res.sendStatus(500);
+  }
+});
+
+router.post('/deleteFromCart', checkAuth, async (req, res) => {
+  try {
+    const { itemId } = req.body;
+    const userId = req.user.id;
+
+    const isExists = await db.cart_item.findOne({
+      where: {
+        itemId,
+        userId,
+      },
+    });
+
+    if (isExists) {
+      await db.cart_item.destroy(
+        {
+          where: {
+            id: isExists.id,
+          },
+        },
+      );
+    }
+
+    return res.status(200).json('Successfully Deleted from Cart.');
   } catch (error) {
     console.error(error);
     res.sendStatus(500);
@@ -359,6 +404,54 @@ router.get('/getOrderHistory', checkAuth, async (req, res) => {
     const data = await db.sequelize.query(query, {
       type: db.sequelize.QueryTypes.SELECT,
     });
+
+    return res.status(200).json(data);
+  } catch (error) {
+    console.error(error);
+    res.sendStatus(500);
+  }
+});
+
+router.post('/getOrderDetails', checkAuth, async (req, res) => {
+  try {
+
+    const userId = req.user.id;
+    let orderId = req.body.orderId;
+    orderId = orderId.replace("LAVUP", "");
+
+    const query = `SELECT 
+                    CONCAT(addressline1,' ',city) as address,
+                    specialLandmarks as specialLandmarks,
+                    laundry_orders.id,
+                    concat('LAVUP','',laundry_orders.id) as orderId,
+                    totalOrderAmount,
+                    tax,
+                    orderValue,
+                    status,
+                    notes,
+                    createdAt
+    FROM lavup_db.laundry_orders where customerId = ${userId} and laundry_orders.id = '${orderId}'`;
+
+    let data = await db.sequelize.query(query, {
+      type: db.sequelize.QueryTypes.SELECT,
+    });
+
+    const query2 = `SELECT 
+    laundry_order_items.unitPrice,
+    laundry_order_items.subTotal,
+    laundry_order_items.unitsPurchased,
+    laundry_items.itemName
+    FROM lavup_db.laundry_order_items
+    LEFT JOIN laundry_items ON laundry_items.id = laundry_order_items.itemId
+    WHERE lavup_db.laundry_order_items.laundryOrderId = '${orderId}'`;
+
+    let data2 = await db.sequelize.query(query2, {
+      type: db.sequelize.QueryTypes.SELECT,
+    });
+
+    data[0].laundry_order_items = data2;
+
+    console.log(data);
 
     return res.status(200).json(data);
   } catch (error) {
@@ -462,8 +555,9 @@ router.get('/getCartPrices', checkAuth, async (req, res) => {
   }
 });
 
-router.post('/confirmOrder', async (req, res) => {
+router.post('/confirmOrder', checkAuth, async (req, res) => {
   try {
+    const userId = req.user.id;
     const { pickUpDate } = req.body;
     const { pickUpTime } = req.body;
     const { deliveryDate } = req.body;
@@ -473,7 +567,7 @@ router.post('/confirmOrder', async (req, res) => {
     const { addressline2 } = req.body;
     const { city } = req.body;
     const { specialLandmarks } = req.body;
-    const userId = 46;
+    // const userId = 46;
 
     // get order calculation
     const query = `SELECT
@@ -547,7 +641,7 @@ router.post('/confirmOrder', async (req, res) => {
       }
     }
 
-    await db.cart_item.delete(
+    await db.cart_item.destroy(
       {
         where: {
           userId,
