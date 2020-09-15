@@ -113,18 +113,24 @@ WHERE
     role = 'customer'`;
 
     if (type === "active") {
-      query += " and user.status = 'active'";
+      query += " and users.status = 'active'";
     }
     if (type === "inactive") {
-      query += " and user.status = 'inactive'";
+      query += " and users.status = 'inactive'";
+    }
+    if (type ==='month') {
+      query += ` and MONTH(k.d) = MONTH(CURDATE())
+      AND YEAR(k.d) = YEAR(CURDATE())`
     }
 
     const data = await db.sequelize.query(query, {
       type: db.sequelize.QueryTypes.SELECT,
+      logging:console.log
     });
 
     return res.status(200).json(data);
   } catch (error) {
+    console.log('error',error)
     return res.sendStatus(500);
   }
 });
