@@ -143,7 +143,7 @@ router.get('/getProfile', checkAuth, async (req, res) => {
 
     const query = `SELECT 
 
-      concat(firstName,' ',lastName) as name,
+    firstName as name,
       email,
       contactNumber,
       dob,
