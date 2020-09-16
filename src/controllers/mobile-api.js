@@ -112,7 +112,7 @@ router.get('/getProfile', checkAuth, async (req, res) => {
 
     const query = `SELECT 
 
-    concat(firstName,' ',lastName) as name,
+      concat(firstName,' ',lastName) as name,
       email,
       contactNumber,
       dob,
@@ -399,7 +399,10 @@ router.get('/getOrderHistory', checkAuth, async (req, res) => {
     status,
     createdAt
     
-    FROM lavup_db.laundry_orders where customerId = ${userId}`;
+    FROM lavup_db.laundry_orders where customerId = ${userId}
+    ORDER BY laundry_orders.id DESC
+    
+    `;
 
     const data = await db.sequelize.query(query, {
       type: db.sequelize.QueryTypes.SELECT,
@@ -614,7 +617,7 @@ router.post('/confirmOrder', checkAuth, async (req, res) => {
       totalOrderAmount: totalOrderAmount,
       totalItems: totalItems,
       orderType: "app",
-      status: "pending",
+      status: "accepted to pick",
       orderPayed: 0,
       toPrint: 0,
       isDeliveryOrder: 1,
