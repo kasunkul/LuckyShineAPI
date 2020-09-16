@@ -174,10 +174,10 @@ router.get('/getAllCategories', checkAuth, async (req, res) => {
       )
       UNION ALL
       ( 
-      SELECT id, itemName 
-      FROM lavup_db.item_categories,
+      SELECT id, itemName  ,
       activeImage,
       inactiveImage
+      FROM lavup_db.item_categories
       )`;
 
     const data = await db.sequelize.query(query, {
