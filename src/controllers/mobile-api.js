@@ -8,6 +8,37 @@ const checkAuth = require('../middleware/auth');
 
 const router = express.Router();
 
+router.post('/updateUserField', checkAuth, async (req, res) => {
+  try {
+    const fieldName = req.body.fieldName;
+    const value = req.body.value;
+    const userId = req.user.id;
+
+    const user = await db.user.findOne({
+      where: {
+        id:userId
+      },
+    });
+
+    if (user) {
+
+
+      const query = `UPDATE users SET ${fieldName} = ${value} WHERE id = ${userId}`;
+
+      await db.sequelize.query(query, {
+        type: db.sequelize.QueryTypes.UPDATE,
+      });
+
+    
+    }
+
+    return res.status(200).json('Successfully updated User.');
+  } catch (error) {
+    console.error(error);
+    res.sendStatus(500);
+  }
+});
+
 router.post('/signup', async (req, res) => {
   try {
     const { email } = req.body;
@@ -28,14 +59,14 @@ router.post('/signup', async (req, res) => {
     const password = bcrypt.hashSync(req.body.password, salt);
     await db.user.create({
       firstName: req.body.firstName,
-      lastName: req.body.lastName,
       dob: req.body.dob,
-      socialSecurityNumber: req.body.socialSecurityNumber,
+      socialSecurityNumber: "",
       email: req.body.email,
+      contactNumber: req.body.contactNumber,
       role: 'user',
       status: 'active',
       password,
-      occupation: req.body.occupation,
+      occupation: "",
       isAppUser: 1,
     });
 
