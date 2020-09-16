@@ -23,7 +23,7 @@ router.post('/updateUserField', checkAuth, async (req, res) => {
     if (user) {
 
 
-      const query = `UPDATE users SET ${fieldName} = ${value} WHERE id = ${userId}`;
+      const query = `UPDATE users SET ${fieldName} = '${value}' WHERE id = ${userId}`;
 
       await db.sequelize.query(query, {
         type: db.sequelize.QueryTypes.UPDATE,
