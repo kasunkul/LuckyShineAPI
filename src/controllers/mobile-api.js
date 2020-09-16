@@ -168,12 +168,16 @@ router.get('/getAllCategories', checkAuth, async (req, res) => {
   try {
     const query = `(SELECT 
       0 as id,
-      'All' as itemName 
+      'All' as itemName,
+      '' as activeImage,
+      '' as inactiveImage
       )
       UNION ALL
       ( 
       SELECT id, itemName 
-      FROM lavup_db.item_categories
+      FROM lavup_db.item_categories,
+      activeImage,
+      inactiveImage
       )`;
 
     const data = await db.sequelize.query(query, {
