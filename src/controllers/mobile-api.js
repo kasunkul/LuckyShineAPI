@@ -63,7 +63,7 @@ router.post('/signup', async (req, res) => {
       socialSecurityNumber: "",
       email: req.body.email,
       contactNumber: req.body.contactNumber,
-      role: 'user',
+      role: 'customer',
       status: 'active',
       password,
       occupation: "",
