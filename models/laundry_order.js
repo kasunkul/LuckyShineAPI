@@ -1,5 +1,5 @@
 "use strict";
-const moment = require('moment')
+const moment = require("moment");
 const { Model } = require("sequelize");
 module.exports = (sequelize, Sequelize) => {
   class laundry_order extends Model {
@@ -19,6 +19,10 @@ module.exports = (sequelize, Sequelize) => {
         });
       laundry_order.hasMany(models.laundry_order_item, {
         foreignKey: "laundryOrderId",
+      });
+      laundry_order.belongsTo(models.shop, {
+        foreignKey: "shopId",
+       
       });
     }
   }
@@ -81,11 +85,11 @@ module.exports = (sequelize, Sequelize) => {
         type: Sequelize.BOOLEAN,
         defaultValue: false,
       },
-      d:{
-        type:Sequelize.VIRTUAL,
-        get(){
-          return moment(this.assignDate).format('YYYY-MM-DD')
-        }
+      d: {
+        type: Sequelize.VIRTUAL,
+        get() {
+          return moment(this.assignDate).format("YYYY-MM-DD");
+        },
       },
       pickUpDate: {
         type: Sequelize.DATE,

@@ -84,7 +84,7 @@ router.post("/", checkAuth, async (req, res) => {
     const templateData = {
       name: user.firstName,
       orderNo: data.dataValues.id,
-      orderDate:moment().format('YYYY-MM-DD'),
+      orderDate: moment().format("YYYY-MM-DD"),
       totalItems,
       orderValue,
       items: cart,
@@ -98,7 +98,7 @@ router.post("/", checkAuth, async (req, res) => {
         .format("YYYY-MM-DD");
     }
 
-    sendEmail(templateData,user.email);
+    sendEmail(templateData, user.email);
 
     await transaction.commit();
 
@@ -176,6 +176,10 @@ router.get("/list/:type", checkAuth, async (req, res) => {
             "postalCode",
             "fullName",
           ],
+          required: false,
+        },
+        {
+          model: db.shop,
           required: false,
         },
       ],

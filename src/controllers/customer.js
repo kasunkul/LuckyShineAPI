@@ -92,25 +92,12 @@ router.get("/list/:type", checkAuth, async (req, res) => {
   try {
     const { type } = req.params;
 
-    let query = `SELECT 
-    users.id,
-    contactNumber,
-    users.status,
-    CONCAT(firstName, ' ', lastName) AS fullName,
-    k.d,
-    IF(isAppUser,
-      'Mobile app customer',
-      'Walking customer') AS customerType
-FROM
-    users
-        LEFT JOIN
-    (SELECT 
-        COALESCE(MAX(createdAt)) AS d, customerId
-    FROM
-        laundry_orders
-    GROUP BY customerId) AS k ON k.customerId = users.id
-WHERE
-    role = 'customer'`;
+    let query = `SELECT users.id,contactNumber,users.status,
+    CONCAT(IFNULL(firstName, ''),' ',IFNULL(lastName, '')) AS fullName,
+    k.d,IF(isAppUser,'Mobile app customer','Walking customer') AS customerType
+    FROM users LEFT JOIN (SELECT COALESCE(MAX(createdAt)) AS d, customerId
+    FROM laundry_orders GROUP BY customerId) AS k ON k.customerId = users.id
+    WHERE role = 'customer'`;
 
     if (type === "active") {
       query += " and users.status = 'active'";
