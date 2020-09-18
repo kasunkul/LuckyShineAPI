@@ -59,6 +59,7 @@ router.post('/signup', async (req, res) => {
     const password = bcrypt.hashSync(req.body.password, salt);
     await db.user.create({
       firstName: req.body.firstName,
+      lastName: "",
       dob: req.body.dob,
       socialSecurityNumber: "",
       email: req.body.email,
@@ -195,6 +196,7 @@ router.get('/getAllItemsFromCategories/:CatId', checkAuth, async (req, res) => {
   try {
     const { CatId } = req.params;
     const userId = req.user.id;
+    let tax = 0;
 
     let CategoryCheck = '';
 
@@ -202,13 +204,21 @@ router.get('/getAllItemsFromCategories/:CatId', checkAuth, async (req, res) => {
       CategoryCheck += `and itemCategoryId = ${CatId}`;
     }
 
+    const tax_query = `SELECT * FROM lavup_db.sysVars where label = 'Tax value'`;
+
+    const tax_data = await db.sequelize.query(tax_query, {
+      type: db.sequelize.QueryTypes.SELECT,
+    });
+
+    tax = parseFloat(tax_data[0].value);
+
     const query = `SELECT 
     laundry_items.id,
     laundry_items.itemName,
     itemCode,
     itemCategoryId,
     item_categories.itemName as itemCategoryName,
-    laundry_items.unitPrice,
+    (laundry_items.unitPrice * ${tax} ) as unitPrice,
     ifnull(laundry_items.description,'') as description,
     ifnull(cart_items.units,0) as selected,
     0 as maxQty,
@@ -237,6 +247,15 @@ router.post('/getAllItemsSearch', checkAuth,async (req, res) => {
     console.log("req.body....",req.body);
     const searchQuery = req.body.searchQuery;
     const userId = req.user.id;
+    let tax = 0;
+    const tax_query = `SELECT * FROM lavup_db.sysVars where label = 'Tax value'`;
+
+    const tax_data = await db.sequelize.query(tax_query, {
+      type: db.sequelize.QueryTypes.SELECT,
+    });
+
+    tax = parseFloat(tax_data[0].value);
+
 
     console.log("searchQuery....",req.body.searchQuery);
 
@@ -246,7 +265,7 @@ router.post('/getAllItemsSearch', checkAuth,async (req, res) => {
     itemCode,
     itemCategoryId,
     item_categories.itemName as itemCategoryName,
-    laundry_items.unitPrice,
+    (laundry_items.unitPrice * ${tax} ) as unitPrice,
     ifnull(laundry_items.description,'') as description,
     ifnull(cart_items.units,0) as selected,
     0 as maxQty,
@@ -278,12 +297,23 @@ router.get('/getCartItems', checkAuth, async (req, res) => {
   try {
   
     const userId = req.user.id; 
+
+    let tax = 0;
+    const tax_query = `SELECT * FROM lavup_db.sysVars where label = 'Tax value'`;
+
+    const tax_data = await db.sequelize.query(tax_query, {
+      type: db.sequelize.QueryTypes.SELECT,
+    });
+
+    tax = parseFloat(tax_data[0].value);
+
+
     const query = `SELECT 
     laundry_items.id,
     itemName,
     itemCode,
     itemCategoryId,
-    laundry_items.unitPrice,
+     (laundry_items.unitPrice * ${tax} ) as unitPrice,
     ifnull(description,'') as description,
     ifnull(cart_items.units,0) as selected,
     0 as maxQty,
