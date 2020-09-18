@@ -20,6 +20,9 @@ const headers = {
 };
 
 async function sendEmail(templateData, email) {
+
+  console.log("email--",email);
+
   const data = {
     personalizations: [
       {
