@@ -79,6 +79,8 @@ router.post("/", checkAuth, async (req, res) => {
       raw: true,
     });
 
+    console.log("user----",user);
+
     await db.laundry_order_item.bulkCreate(cartBulk, { transaction });
 
     const templateData = {

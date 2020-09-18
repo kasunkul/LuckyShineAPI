@@ -1,11 +1,11 @@
 const sgMail = require("@sendgrid/mail");
 const axios = require("axios");
 sgMail.setApiKey(
-  "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"
+  "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"
 );
 const msg = {
-  to: "pathumsimpson@gmail.com",
-  from: "pathum@earltech.biz", // Use the email address or domain you verified above
+  to: "staff@lavup.it",
+  from: "staff@lavup.it", // Use the email address or domain you verified above
   subject: "Sending with Twilio SendGrid is Fun",
   text: "and easy to do anywhere, even with Node.js",
   html: "<strong>and easy to do anywhere, even with Node.js</strong>",
@@ -15,11 +15,14 @@ const headers = {
   headers: {
     "content-type": "application/json",
     authorization:
-      "Bearer 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",
+      "Bearer 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",
   },
 };
 
 async function sendEmail(templateData, email) {
+
+  console.log("email--",email);
+
   const data = {
     personalizations: [
       {
@@ -34,12 +37,12 @@ async function sendEmail(templateData, email) {
       },
     ],
     from: {
-      email: "pathum@earltech.biz",
-      name: "Pathum lab manager",
+      email: "staff@lavup.it",
+      name: "Lavup Team",
     },
     reply_to: {
-      email: "pathum@earltech.biz",
-      name: "Pathum lab manager",
+      email: "staff@lavup.it",
+      name: "Lavup Team",
     },
     template_id: "d-02e6d35c684f425fb8f19f627e752769",
   };

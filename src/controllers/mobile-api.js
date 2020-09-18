@@ -8,6 +8,37 @@ const checkAuth = require('../middleware/auth');
 
 const router = express.Router();
 
+router.post('/updateUserField', checkAuth, async (req, res) => {
+  try {
+    const fieldName = req.body.fieldName;
+    const value = req.body.value;
+    const userId = req.user.id;
+
+    const user = await db.user.findOne({
+      where: {
+        id:userId
+      },
+    });
+
+    if (user) {
+
+
+      const query = `UPDATE users SET ${fieldName} = '${value}' WHERE id = ${userId}`;
+
+      await db.sequelize.query(query, {
+        type: db.sequelize.QueryTypes.UPDATE,
+      });
+
+    
+    }
+
+    return res.status(200).json('Successfully updated User.');
+  } catch (error) {
+    console.error(error);
+    res.sendStatus(500);
+  }
+});
+
 router.post('/signup', async (req, res) => {
   try {
     const { email } = req.body;
@@ -28,14 +59,15 @@ router.post('/signup', async (req, res) => {
     const password = bcrypt.hashSync(req.body.password, salt);
     await db.user.create({
       firstName: req.body.firstName,
-      lastName: req.body.lastName,
+      lastName: "",
       dob: req.body.dob,
-      socialSecurityNumber: req.body.socialSecurityNumber,
+      socialSecurityNumber: "",
       email: req.body.email,
-      role: 'user',
+      contactNumber: req.body.contactNumber,
+      role: 'customer',
       status: 'active',
       password,
-      occupation: req.body.occupation,
+      occupation: "",
       isAppUser: 1,
     });
 
@@ -112,7 +144,7 @@ router.get('/getProfile', checkAuth, async (req, res) => {
 
     const query = `SELECT 
 
-    concat(firstName,' ',lastName) as name,
+    firstName as name,
       email,
       contactNumber,
       dob,
@@ -137,11 +169,15 @@ router.get('/getAllCategories', checkAuth, async (req, res) => {
   try {
     const query = `(SELECT 
       0 as id,
-      'All' as itemName 
+      'All' as itemName,
+      '' as activeImage,
+      '' as inactiveImage
       )
       UNION ALL
       ( 
-      SELECT id, itemName 
+      SELECT id, itemName  ,
+      activeImage,
+      inactiveImage
       FROM lavup_db.item_categories
       )`;
 
@@ -160,6 +196,7 @@ router.get('/getAllItemsFromCategories/:CatId', checkAuth, async (req, res) => {
   try {
     const { CatId } = req.params;
     const userId = req.user.id;
+    let tax = 0;
 
     let CategoryCheck = '';
 
@@ -167,13 +204,21 @@ router.get('/getAllItemsFromCategories/:CatId', checkAuth, async (req, res) => {
       CategoryCheck += `and itemCategoryId = ${CatId}`;
     }
 
+    const tax_query = `SELECT * FROM lavup_db.sysVars where label = 'Tax value'`;
+
+    const tax_data = await db.sequelize.query(tax_query, {
+      type: db.sequelize.QueryTypes.SELECT,
+    });
+
+    tax = (parseFloat(tax_data[0].value) + 100 ) / 100;
+
     const query = `SELECT 
     laundry_items.id,
     laundry_items.itemName,
     itemCode,
     itemCategoryId,
     item_categories.itemName as itemCategoryName,
-    laundry_items.unitPrice,
+    (laundry_items.unitPrice * ${tax} ) as unitPrice,
     ifnull(laundry_items.description,'') as description,
     ifnull(cart_items.units,0) as selected,
     0 as maxQty,
@@ -202,6 +247,15 @@ router.post('/getAllItemsSearch', checkAuth,async (req, res) => {
     console.log("req.body....",req.body);
     const searchQuery = req.body.searchQuery;
     const userId = req.user.id;
+    let tax = 0;
+    const tax_query = `SELECT * FROM lavup_db.sysVars where label = 'Tax value'`;
+
+    const tax_data = await db.sequelize.query(tax_query, {
+      type: db.sequelize.QueryTypes.SELECT,
+    });
+
+    tax = (parseFloat(tax_data[0].value) + 100 ) / 100;
+
 
     console.log("searchQuery....",req.body.searchQuery);
 
@@ -211,7 +265,7 @@ router.post('/getAllItemsSearch', checkAuth,async (req, res) => {
     itemCode,
     itemCategoryId,
     item_categories.itemName as itemCategoryName,
-    laundry_items.unitPrice,
+    (laundry_items.unitPrice * ${tax} ) as unitPrice,
     ifnull(laundry_items.description,'') as description,
     ifnull(cart_items.units,0) as selected,
     0 as maxQty,
@@ -243,12 +297,23 @@ router.get('/getCartItems', checkAuth, async (req, res) => {
   try {
   
     const userId = req.user.id; 
+
+    let tax = 0;
+    const tax_query = `SELECT * FROM lavup_db.sysVars where label = 'Tax value'`;
+
+    const tax_data = await db.sequelize.query(tax_query, {
+      type: db.sequelize.QueryTypes.SELECT,
+    });
+
+    tax = (parseFloat(tax_data[0].value) + 100 ) / 100;
+
+
     const query = `SELECT 
     laundry_items.id,
     itemName,
     itemCode,
     itemCategoryId,
-    laundry_items.unitPrice,
+     (laundry_items.unitPrice * ${tax} ) as unitPrice,
     ifnull(description,'') as description,
     ifnull(cart_items.units,0) as selected,
     0 as maxQty,
@@ -399,7 +464,10 @@ router.get('/getOrderHistory', checkAuth, async (req, res) => {
     status,
     createdAt
     
-    FROM lavup_db.laundry_orders where customerId = ${userId}`;
+    FROM lavup_db.laundry_orders where customerId = ${userId}
+    ORDER BY laundry_orders.id DESC
+    
+    `;
 
     const data = await db.sequelize.query(query, {
       type: db.sequelize.QueryTypes.SELECT,
@@ -614,7 +682,7 @@ router.post('/confirmOrder', checkAuth, async (req, res) => {
       totalOrderAmount: totalOrderAmount,
       totalItems: totalItems,
       orderType: "app",
-      status: "pending",
+      status: "accepted to pick",
       orderPayed: 0,
       toPrint: 0,
       isDeliveryOrder: 1,
