@@ -210,7 +210,7 @@ router.get('/getAllItemsFromCategories/:CatId', checkAuth, async (req, res) => {
       type: db.sequelize.QueryTypes.SELECT,
     });
 
-    tax = parseFloat(tax_data[0].value);
+    tax = (parseFloat(tax_data[0].value) + 100 ) / 100;
 
     const query = `SELECT 
     laundry_items.id,
@@ -254,7 +254,7 @@ router.post('/getAllItemsSearch', checkAuth,async (req, res) => {
       type: db.sequelize.QueryTypes.SELECT,
     });
 
-    tax = parseFloat(tax_data[0].value);
+    tax = (parseFloat(tax_data[0].value) + 100 ) / 100;
 
 
     console.log("searchQuery....",req.body.searchQuery);
@@ -305,7 +305,7 @@ router.get('/getCartItems', checkAuth, async (req, res) => {
       type: db.sequelize.QueryTypes.SELECT,
     });
 
-    tax = parseFloat(tax_data[0].value);
+    tax = (parseFloat(tax_data[0].value) + 100 ) / 100;
 
 
     const query = `SELECT 
