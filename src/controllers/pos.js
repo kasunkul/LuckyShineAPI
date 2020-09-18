@@ -21,6 +21,7 @@ router.post("/", checkAuth, async (req, res) => {
       orderPayed,
       shopId,
       isDeliveryOrder,
+      email
     } = req.body;
     const orderValue = cart.map((e) => e.price).reduce((a, b) => a + b);
     const status = "inQueue";
@@ -79,7 +80,7 @@ router.post("/", checkAuth, async (req, res) => {
       raw: true,
     });
 
-    console.log("user----",user);
+    
 
     await db.laundry_order_item.bulkCreate(cartBulk, { transaction });
 
@@ -100,7 +101,14 @@ router.post("/", checkAuth, async (req, res) => {
         .format("YYYY-MM-DD");
     }
 
-    sendEmail(templateData, user.email);
+    let emailAddress = user.email;
+    if (user.id === 4) {
+      emailAddress = email
+    }
+
+
+
+    sendEmail(templateData, emailAddress);
 
     await transaction.commit();
 
