@@ -90,29 +90,35 @@ router.get("/list", checkAuth, async (req, res) => {
     // });
     const data = await db.sequelize.query(
       `SELECT 
-    id,
-    customerId,
-    orderValue,
-    tax,
-    totalOrderAmount,
-    totalItems,
-    orderType,
-    status,
-    driverId,
-    assignDate,
-    startLocation,
-    notes,
-    orderPayed,
-    toPrint,
-    deliveryDate,
-    shopId,
-    isDeliveryOrder,
-    DATE_FORMAT(CONVERT_TZ(createdAt, '+00:00', '+02:00'),
-            '%Y-%m-%d %h:%i %p') AS createdAt,
-    updatedAt
-FROM
-    laundry_orders
-ORDER BY laundry_orders.id DESC`,
+      id,
+      customerId,
+      orderValue,
+      tax,
+      totalOrderAmount,
+      totalItems,
+      orderType,
+      status,
+      driverId,
+      assignDate,
+      startLocation,
+      notes,
+      orderPayed,
+      toPrint,
+      deliveryDate,
+      shopId,
+      isDeliveryOrder,
+      CONCAT(IFNULL(addressline1, ''),
+              ' ',
+              IFNULL(addressline2, ''),
+              ' ',
+              IFNULL(city, '')) AS address,
+      specialLandmarks AS landmark,
+      DATE_FORMAT(CONVERT_TZ(createdAt, '+00:00', '+02:00'),
+              '%Y-%m-%d %h:%i %p') AS createdAt,
+      updatedAt
+  FROM
+      laundry_orders
+  ORDER BY laundry_orders.id DESC`,
       {
         type: db.sequelize.QueryTypes.SELECT,
       }
@@ -120,6 +126,7 @@ ORDER BY laundry_orders.id DESC`,
 
     return res.status(200).json(data);
   } catch (error) {
+    console.log(error)
     return res.sendStatus(500);
   }
 });
