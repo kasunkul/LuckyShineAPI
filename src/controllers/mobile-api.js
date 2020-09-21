@@ -682,7 +682,7 @@ router.post('/confirmOrder', checkAuth, async (req, res) => {
       totalOrderAmount: totalOrderAmount,
       totalItems: totalItems,
       orderType: "app",
-      status: "accepted to pick",
+      status: "pending to pick",
       orderPayed: 0,
       toPrint: 0,
       isDeliveryOrder: 1,
