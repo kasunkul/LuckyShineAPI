@@ -9,17 +9,17 @@ const checkAuth = require('../middleware/auth');
 router.get('/', checkAuth, async (req, res) => {
   try {
     // Total delivery orders and items
-    const [deliveryCount, returnedDelivery, items] = await Promise.all([
+    const [orderToPick, orderToDeliver, items] = await Promise.all([
       db.laundry_order.count({
         where: {
           status: {
-            [Op.in]: ['pending', 'inQueue'],
+            [Op.in]: ['accepted to pick'],
           },
         },
       }),
       db.laundry_order.count({
         where: {
-          status: 'returned',
+          status: 'ready',
         },
       }),
       db.laundry_order.findAll({
@@ -40,13 +40,16 @@ router.get('/', checkAuth, async (req, res) => {
         ],
         order: db.sequelize.literal('laundry_order.id DESC'),
 
-        logging: true,
+        
       }),
     ]);
 
+    console.log('order to pick',orderToPick,'order to deliver',orderToDeliver)
+
+
     return res.status(200).json({
-      deliveryCount,
-      returnedDelivery,
+      orderToPick,
+      orderToDeliver,
       items,
     });
   } catch (error) {
