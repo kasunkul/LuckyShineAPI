@@ -10,26 +10,22 @@ const router = express.Router();
 
 router.post('/updateUserField', checkAuth, async (req, res) => {
   try {
-    const fieldName = req.body.fieldName;
-    const value = req.body.value;
+    const { fieldName } = req.body;
+    const { value } = req.body;
     const userId = req.user.id;
 
     const user = await db.user.findOne({
       where: {
-        id:userId
+        id: userId,
       },
     });
 
     if (user) {
-
-
       const query = `UPDATE users SET ${fieldName} = '${value}' WHERE id = ${userId}`;
 
       await db.sequelize.query(query, {
         type: db.sequelize.QueryTypes.UPDATE,
       });
-
-    
     }
 
     return res.status(200).json('Successfully updated User.');
@@ -59,15 +55,15 @@ router.post('/signup', async (req, res) => {
     const password = bcrypt.hashSync(req.body.password, salt);
     await db.user.create({
       firstName: req.body.firstName,
-      lastName: "",
+      lastName: '',
       dob: req.body.dob,
-      socialSecurityNumber: "",
+      socialSecurityNumber: '',
       email: req.body.email,
       contactNumber: req.body.contactNumber,
       role: 'customer',
       status: 'active',
       password,
-      occupation: "",
+      occupation: '',
       isAppUser: 1,
     });
 
@@ -86,7 +82,7 @@ router.post('/login', async (req, res) => {
         email: req.body.email,
         status: 'active',
         role: {
-          [Op.in]: ['user','admin','customer'],
+          [Op.in]: ['user', 'admin', 'customer'],
         },
       },
     });
@@ -204,13 +200,13 @@ router.get('/getAllItemsFromCategories/:CatId', checkAuth, async (req, res) => {
       CategoryCheck += `and itemCategoryId = ${CatId}`;
     }
 
-    const tax_query = `SELECT * FROM lavup_db.sysVars where label = 'Tax value'`;
+    const tax_query = 'SELECT * FROM lavup_db.sysVars where label = \'Tax value\'';
 
     const tax_data = await db.sequelize.query(tax_query, {
       type: db.sequelize.QueryTypes.SELECT,
     });
 
-    tax = (parseFloat(tax_data[0].value) + 100 ) / 100;
+    tax = (parseFloat(tax_data[0].value) + 100) / 100;
 
     const query = `SELECT 
     laundry_items.id,
@@ -242,22 +238,21 @@ router.get('/getAllItemsFromCategories/:CatId', checkAuth, async (req, res) => {
   }
 });
 
-router.post('/getAllItemsSearch', checkAuth,async (req, res) => {
+router.post('/getAllItemsSearch', checkAuth, async (req, res) => {
   try {
-    console.log("req.body....",req.body);
-    const searchQuery = req.body.searchQuery;
+    console.log('req.body....', req.body);
+    const { searchQuery } = req.body;
     const userId = req.user.id;
     let tax = 0;
-    const tax_query = `SELECT * FROM lavup_db.sysVars where label = 'Tax value'`;
+    const tax_query = 'SELECT * FROM lavup_db.sysVars where label = \'Tax value\'';
 
     const tax_data = await db.sequelize.query(tax_query, {
       type: db.sequelize.QueryTypes.SELECT,
     });
 
-    tax = (parseFloat(tax_data[0].value) + 100 ) / 100;
+    tax = (parseFloat(tax_data[0].value) + 100) / 100;
 
-
-    console.log("searchQuery....",req.body.searchQuery);
+    console.log('searchQuery....', req.body.searchQuery);
 
     const query = `SELECT 
     laundry_items.id,
@@ -278,13 +273,13 @@ router.post('/getAllItemsSearch', checkAuth,async (req, res) => {
   LEFT JOIN (SELECT * FROM cart_items WHERE userId = ${userId}) cart_items ON laundry_items.id = cart_items.itemId
   where laundry_items.status = 1 and laundry_items.itemName LIKE '%${searchQuery}%'`;
 
-  console.log("query....",query);
+    console.log('query....', query);
 
     const data = await db.sequelize.query(query, {
       type: db.sequelize.QueryTypes.SELECT,
     });
 
-    console.log("data....",data);
+    console.log('data....', data);
 
     return res.status(200).json(data);
   } catch (error) {
@@ -295,18 +290,16 @@ router.post('/getAllItemsSearch', checkAuth,async (req, res) => {
 
 router.get('/getCartItems', checkAuth, async (req, res) => {
   try {
-  
-    const userId = req.user.id; 
+    const userId = req.user.id;
 
     let tax = 0;
-    const tax_query = `SELECT * FROM lavup_db.sysVars where label = 'Tax value'`;
+    const tax_query = 'SELECT * FROM lavup_db.sysVars where label = \'Tax value\'';
 
     const tax_data = await db.sequelize.query(tax_query, {
       type: db.sequelize.QueryTypes.SELECT,
     });
 
-    tax = (parseFloat(tax_data[0].value) + 100 ) / 100;
-
+    tax = (parseFloat(tax_data[0].value) + 100) / 100;
 
     const query = `SELECT 
     laundry_items.id,
@@ -337,7 +330,6 @@ router.get('/getCartItems', checkAuth, async (req, res) => {
 
 router.post('/addToCart', checkAuth, async (req, res) => {
   try {
-
     const { itemId } = req.body;
     const userId = req.user.id;
 
@@ -482,10 +474,9 @@ router.get('/getOrderHistory', checkAuth, async (req, res) => {
 
 router.post('/getOrderDetails', checkAuth, async (req, res) => {
   try {
-
     const userId = req.user.id;
-    let orderId = req.body.orderId;
-    orderId = orderId.replace("LAVUP", "");
+    let { orderId } = req.body;
+    orderId = orderId.replace('LAVUP', '');
 
     const query = `SELECT 
                     CONCAT(addressline1,' ',city) as address,
@@ -500,7 +491,7 @@ router.post('/getOrderDetails', checkAuth, async (req, res) => {
                     createdAt
     FROM lavup_db.laundry_orders where customerId = ${userId} and laundry_orders.id = '${orderId}'`;
 
-    let data = await db.sequelize.query(query, {
+    const data = await db.sequelize.query(query, {
       type: db.sequelize.QueryTypes.SELECT,
     });
 
@@ -513,7 +504,7 @@ router.post('/getOrderDetails', checkAuth, async (req, res) => {
     LEFT JOIN laundry_items ON laundry_items.id = laundry_order_items.itemId
     WHERE lavup_db.laundry_order_items.laundryOrderId = '${orderId}'`;
 
-    let data2 = await db.sequelize.query(query2, {
+    const data2 = await db.sequelize.query(query2, {
       type: db.sequelize.QueryTypes.SELECT,
     });
 
@@ -666,23 +657,23 @@ router.post('/confirmOrder', checkAuth, async (req, res) => {
     const totalOrderAmount = data[0].grandTotal;
     const totalItems = data[0].count;
 
-    let laundry_order = await db.laundry_order.create({
-      pickUpDate: pickUpDate,
-      pickUpTime: pickUpTime,
-      deliveryDate: deliveryDate,
-      deliveryTime: deliveryTime,
-      notes: notes,
-      addressline1: addressline1,
-      addressline2: addressline2,
-      city: city,
-      specialLandmarks: specialLandmarks,
+    const laundry_order = await db.laundry_order.create({
+      pickUpDate,
+      pickUpTime,
+      deliveryDate,
+      deliveryTime,
+      notes,
+      addressline1,
+      addressline2,
+      city,
+      specialLandmarks,
       customerId: userId,
-      orderValue: orderValue,
-      tax: tax,
-      totalOrderAmount: totalOrderAmount,
-      totalItems: totalItems,
-      orderType: "app",
-      status: "accepted to pick",
+      orderValue,
+      tax,
+      totalOrderAmount,
+      totalItems,
+      orderType: 'app',
+      status: 'accepted to pick',
       orderPayed: 0,
       toPrint: 0,
       isDeliveryOrder: 1,

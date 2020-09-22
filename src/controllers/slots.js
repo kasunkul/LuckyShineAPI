@@ -1,15 +1,15 @@
-const express = require("express");
+const express = require('express');
 
 const router = express.Router();
-const checkAuth = require("../middleware/auth");
-const db = require("../../models");
+const checkAuth = require('../middleware/auth');
+const db = require('../../models');
 
 // const { Op } = db.Sequelize;
 
 async function getFreeSlotIds(type, shopId) {
   try {
     let q;
-    if (type === "processing") {
+    if (type === 'processing') {
       q = `SELECT uniqueId FROM lavup_db.slots WHERE uniqueId NOT IN (SELECT 
            laundry_order_items.slotId FROM lavup_db.laundry_order_items INNER JOIN
            slots ON laundry_order_items.slotId = slots.uniqueId) and slots.type = 'lab'`;
@@ -40,13 +40,12 @@ async function getFreeSlotIds(type, shopId) {
 }
 
 async function assignLabSlots(itm, type, userName, shopId) {
-    
   const items = itm;
   let letter;
-  if (type === "processing") {
-    letter = "L";
+  if (type === 'processing') {
+    letter = 'L';
   } else {
-    letter = "S";
+    letter = 'S';
   }
 
   try {
@@ -55,10 +54,9 @@ async function assignLabSlots(itm, type, userName, shopId) {
 
     // GET HANGABLE ITEMS COUNT
     const hangableItemsCount = items
-      .filter((e) => e["laundry_item.isHangable"])
-      .length
+      .filter((e) => e['laundry_item.isHangable'])
+      .length;
 
-     
     let equalIdx = ids.findIndex((e) => e.length === hangableItemsCount + 2);
 
     if (equalIdx < 0) {
@@ -67,11 +65,10 @@ async function assignLabSlots(itm, type, userName, shopId) {
     }
 
     if (hangableItemsCount && equalIdx >= 0) {
-
       let slotId = ids[equalIdx][1];
 
       for (let index = 0; index < items.length; index++) {
-        if (items[index]["laundry_item.isHangable"]) {
+        if (items[index]['laundry_item.isHangable']) {
           items[index].slotId = `${letter}${slotId}`;
           slotId += 1;
         } else {
@@ -87,7 +84,7 @@ async function assignLabSlots(itm, type, userName, shopId) {
     }
 
     if (hangableItemsCount && equalIdx < 0) {
-    console.log('this place ***************************')
+      console.log('this place ***************************');
 
       // SYSTEM CAN'T HANDLE
     }
@@ -97,32 +94,31 @@ async function assignLabSlots(itm, type, userName, shopId) {
   }
 }
 
-router.get("/:id", checkAuth,async (req, res) => {
-
+router.get('/:id', checkAuth, async (req, res) => {
   try {
-    // const user = 
+    // const user =
     const user = await db.user.findOne({
-      where:{
-        id:req.user.id
+      where: {
+        id: req.user.id,
       },
-      raw:true
-    })
-    
-    //laundry_order_items
+      raw: true,
+    });
+
+    // laundry_order_items
     const meta = await db.laundry_order.findOne({
       attributes: [
-        "id",
-        "customerId",
-        "notes",
-        "orderType",
-        "orderPayed",
-        "createdAt",
-        "assignDate",
-        "totalItems",
-        "totalOrderAmount",
-        "status",
-        "shopId",
-        "isDeliveryOrder",
+        'id',
+        'customerId',
+        'notes',
+        'orderType',
+        'orderPayed',
+        'createdAt',
+        'assignDate',
+        'totalItems',
+        'totalOrderAmount',
+        'status',
+        'shopId',
+        'isDeliveryOrder',
       ],
       where: {
         id: req.params.id,
@@ -132,22 +128,19 @@ router.get("/:id", checkAuth,async (req, res) => {
 
     let items = await db.laundry_order_item.findAll({
       raw: true,
-      attributes: ["id", "itemId", "slotId", "needIron"],
+      attributes: ['id', 'itemId', 'slotId', 'needIron'],
       where: {
         laundryOrderId: req.params.id,
       },
       include: [
         {
           model: db.laundry_item,
-          attributes: ["itemName", "isHangable"],
+          attributes: ['itemName', 'isHangable'],
         },
       ],
     });
 
-    
-
-    if (meta.status === "processing" || meta.status === "accepted by shop") {
-       
+    if (meta.status === 'processing' || meta.status === 'accepted by shop') {
       // ASSIGN SLOTS IN LAB
       items = await assignLabSlots(items, meta.status, user.firstName.charAt(0).toUpperCase(), meta.shopId);
     }
