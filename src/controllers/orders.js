@@ -420,9 +420,9 @@ router.put('/update-status', checkAuth, async (req, res) => {
       });
     }
 
-    const query = `set @idx= 0;
+    const query = `
     SELECT 
-        @idx:=@idx + 1 AS idx,
+      
         laundry_items.itemName AS name,
         COUNT(*) AS qty,
         laundry_order_items.itemId
@@ -436,8 +436,14 @@ router.put('/update-status', checkAuth, async (req, res) => {
 
     const cart = await db.sequelize.query(query, {
       type: db.sequelize.QueryTypes.SELECT,
+      raw:true
 
     });
+
+    for (let index = 0; index < cart.length; index++) {
+     cart[index].idx = index + 1
+      
+    }
 
     // emailing part
     let title = 'Il tuo ordine è stato inviato al team lavup';
@@ -463,16 +469,14 @@ router.put('/update-status', checkAuth, async (req, res) => {
 
       if (order.isDeliveryOrder) {
         templateData.shipping = `${user.street1} ${user.street2} ${user.city} ${user.stateRegion} ${user.postalCode}`;
-        templateData.assignDate = moment(order.assignDate).format('YYYY-MM-DD');
-        templateData.assignDateTo = moment(order.assignDate)
+        templateData.assignDate = moment(order.deliveryDate).format('YYYY-MM-DD');
+        templateData.assignDateTo = moment(order.deliveryDate)
           .add(7, 'days')
           .format('YYYY-MM-DD');
 
-          console.log('cart',cart);
-          console.log('assign date',order.assignDate);
-          console.log('assign date 2',order.assignDate)
-
-      }
+          
+        }
+        
 
       const emailAddress = user.email;
       // if (user.id === 4) {
