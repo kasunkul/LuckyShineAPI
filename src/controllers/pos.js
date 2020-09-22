@@ -51,7 +51,7 @@ router.post('/', checkAuth, async (req, res) => {
     };
 
     if (!customerId) {
-      orderData.customerId = 4;
+      orderData.customerId = 2;
     }
     if (!driverId) {
       delete orderData.driverId;
@@ -83,6 +83,8 @@ router.post('/', checkAuth, async (req, res) => {
 
     await db.laundry_order_item.bulkCreate(cartBulk, { transaction });
 
+    const title = 'Il tuo ordine è confermato';
+
     const templateData = {
       name: user.firstName,
       orderNo: data.dataValues.id,
@@ -90,6 +92,7 @@ router.post('/', checkAuth, async (req, res) => {
       totalItems,
       orderValue,
       items: cart,
+      title,
     };
 
     if (isDeliveryOrder) {
@@ -101,7 +104,7 @@ router.post('/', checkAuth, async (req, res) => {
     }
 
     let emailAddress = user.email;
-    if (user.id === 4) {
+    if (user.id === 2) {
       emailAddress = email;
     }
 

@@ -1,11 +1,13 @@
 const express = require('express');
 
 const router = express.Router();
+const moment = require('moment');
 const db = require('../../models');
+const { sendEmail } = require('../utils/sendEmail');
 
 const { Op } = db.Sequelize;
 const checkAuth = require('../middleware/auth');
-const e = require('express');
+// const e = require('express');
 
 async function getIds(id) {
   try {
@@ -134,7 +136,7 @@ router.get('/list', checkAuth, async (req, res) => {
 router.post('/list/v2/:type', checkAuth, async (req, res) => {
   try {
     const { type } = req.params;
-    console.log('type',type)
+    console.log('type', type);
     let query = `SELECT id,customerId, orderValue, tax, totalOrderAmount, totalItems, orderType,
    status, driverId, assignDate, startLocation, notes, orderPayed, toPrint, deliveryDate,
    shopId, isDeliveryOrder, CONCAT(IFNULL(addressline1, ''),
@@ -165,11 +167,11 @@ FROM
       query,
       {
         type: db.sequelize.QueryTypes.SELECT,
-        logging:true
+        logging: true,
       },
     );
 
-    console.log("type",type, data.length)
+    console.log('type', type, data.length);
 
     return res.status(200).json(data);
   } catch (error) {
@@ -353,6 +355,22 @@ router.put('/update-status', checkAuth, async (req, res) => {
   try {
     const { id, status, items } = req.body;
 
+    // order
+    const order = await db.laundry_order.findOne({
+      where: {
+        id,
+      },
+      raw: true,
+    });
+
+    // user
+    const user = await db.user.findOne({
+      where: {
+        id: order.customerId,
+      },
+      raw: true,
+    });
+
     // update status in the order
     await db.laundry_order.update(
       {
@@ -400,6 +418,68 @@ router.put('/update-status', checkAuth, async (req, res) => {
         type: db.Sequelize.QueryTypes.UPDATE,
         transaction,
       });
+    }
+
+    const query = `set @idx= 0;
+    SELECT 
+        @idx:=@idx + 1 AS idx,
+        laundry_items.itemName AS name,
+        COUNT(*) AS qty,
+        laundry_order_items.itemId
+    FROM
+        lavup_db.laundry_order_items
+            INNER JOIN
+        laundry_items ON laundry_order_items.itemId = laundry_items.id
+    WHERE
+        laundry_order_items.laundryOrderId = ${id}
+    GROUP BY laundry_order_items.itemId;`;
+
+    const cart = await db.sequelize.query(query, {
+      type: db.sequelize.QueryTypes.SELECT,
+
+    });
+
+    // emailing part
+    let title = 'Il tuo ordine è stato inviato al team lavup';
+
+    if (status === 'in delivery') {
+      title = 'Il tuo ordine è stato completato e pronto per la consegna. Per qualsiasi richiesta contatta il team di assistenza LavUp';
+    }
+
+    if (status === 'order canceled') {
+      title = 'Il tuo ordine è stato annullato';
+    }
+
+    if (status === 'order canceled' || status === 'in delivery' || status === 'accepted to pick') {
+      const templateData = {
+        name: user.firstName,
+        orderNo: id,
+        orderDate: moment(order.createdAt).format('YYYY-MM-DD'),
+        totalItems: order.totalItems,
+        orderValue: order.orderValue,
+        items: cart,
+        title,
+      };
+
+      if (order.isDeliveryOrder) {
+        templateData.shipping = `${user.street1} ${user.street2} ${user.city} ${user.stateRegion} ${user.postalCode}`;
+        templateData.assignDate = moment(order.assignDate).format('YYYY-MM-DD');
+        templateData.assignDateTo = moment(order.assignDate)
+          .add(7, 'days')
+          .format('YYYY-MM-DD');
+
+          console.log('cart',cart);
+          console.log('assign date',order.assignDate);
+          console.log('assign date 2',order.assignDate)
+
+      }
+
+      const emailAddress = user.email;
+      // if (user.id === 4) {
+      //   emailAddress = email;
+      // }
+
+      sendEmail(templateData, emailAddress);
     }
 
     await transaction.commit();

@@ -40,12 +40,8 @@ router.get('/', checkAuth, async (req, res) => {
         ],
         order: db.sequelize.literal('laundry_order.id DESC'),
 
-        
       }),
     ]);
-
-    console.log('order to pick',orderToPick,'order to deliver',orderToDeliver)
-
 
     return res.status(200).json({
       orderToPick,
