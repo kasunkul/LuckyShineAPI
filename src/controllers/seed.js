@@ -1,16 +1,18 @@
-const express = require("express");
-const db = require("../../models");
-const axios = require("axios");
+const express = require('express');
+const axios = require('axios');
+const db = require('../../models');
+
 const router = express.Router();
-const { sendEmail } = require("../utils/sendEmail");
-router.post("/", async (req, res) => {
+const { sendEmail } = require('../utils/sendEmail');
+
+router.post('/', async (req, res) => {
   try {
     const data = [];
     for (let i = 1; i <= 3; i++) {
       for (let index = 1; index <= 700; index++) {
         data.push({
           uniqueId: `S${index}`,
-          type: "shop",
+          type: 'shop',
           shopId: i,
         });
       }
@@ -19,7 +21,7 @@ router.post("/", async (req, res) => {
     for (let index = 1; index <= 3000; index++) {
       data.push({
         uniqueId: `L${index}`,
-        type: "lab",
+        type: 'lab',
         shopId: null,
       });
     }
@@ -32,7 +34,7 @@ router.post("/", async (req, res) => {
   }
 });
 
-router.get("/", async (req, res) => {
+router.get('/', async (req, res) => {
   try {
     await sendEmail();
     res.sendStatus(200);
@@ -41,10 +43,10 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.get("/v2", async (req, res) => {
+router.get('/v2', async (req, res) => {
   try {
     // await sendEmail();
-    
+
     res.sendStatus(200);
   } catch (error) {
     res.sendStatus(500);
@@ -56,7 +58,5 @@ router.get("/v2", async (req, res) => {
 // req.headers({
 
 // });
-
-
 
 module.exports = router;
