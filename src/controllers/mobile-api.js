@@ -212,6 +212,8 @@ router.get('/getAllItemsFromCategories/:CatId', checkAuth, async (req, res) => {
 
     tax = (parseFloat(tax_data[0].value) + 100 ) / 100;
 
+    console.error("tax -- ",tax);
+
     const query = `SELECT 
     laundry_items.id,
     laundry_items.itemName,
