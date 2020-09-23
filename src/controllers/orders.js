@@ -436,13 +436,12 @@ router.put('/update-status', checkAuth, async (req, res) => {
 
     const cart = await db.sequelize.query(query, {
       type: db.sequelize.QueryTypes.SELECT,
-      raw:true
+      raw: true,
 
     });
 
     for (let index = 0; index < cart.length; index++) {
-     cart[index].idx = index + 1
-      
+      cart[index].idx = index + 1;
     }
 
     // emailing part
@@ -473,10 +472,7 @@ router.put('/update-status', checkAuth, async (req, res) => {
         templateData.assignDateTo = moment(order.deliveryDate)
           .add(7, 'days')
           .format('YYYY-MM-DD');
-
-          
-        }
-        
+      }
 
       const emailAddress = user.email;
       // if (user.id === 4) {

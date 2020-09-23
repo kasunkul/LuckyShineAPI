@@ -112,6 +112,12 @@ module.exports = (sequelize, Sequelize) => {
       specialLandmarks: {
         type: Sequelize.STRING,
       },
+      address: {
+        type: Sequelize.VIRTUAL,
+        get() {
+          return`${this.addressline1} ${this.addressline2} ${this.city} ${this.specialLandmarks}`
+        },
+      },
     },
     {
       sequelize,
