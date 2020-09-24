@@ -114,13 +114,13 @@ router.get('/', checkAuth, async (req, res) => {
       }),
     ]);
 
-    const itemsPerEmp = 0;
 
     // Monthly top performers
     const query = `SELECT 
     CONCAT(firstName, ' ', lastName) AS name,
     id,
     status,
+    role,
     DATE_FORMAT(CONVERT_TZ(lastSignOff, '+00:00', '+02:00'),
             '%Y-%m-%d %h:%i %p') AS signOff,
     DATE_FORMAT(CONVERT_TZ(lastSignIn, '+00:00', '+02:00'),
@@ -137,10 +137,13 @@ WHERE
       type: db.sequelize.QueryTypes.SELECT,
     });
 
+    const inactive = totalEmp - activeEmp;
+
+
     return res.status(200).json({
       totalEmp,
       activeEmp,
-      itemsPerEmp,
+      inactive,
       performers,
     });
   } catch (error) {

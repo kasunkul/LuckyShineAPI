@@ -13,7 +13,9 @@ router.get('/', checkAuth, async (req, res) => {
       customerId AS id,
       users.contactNumber,
       users.status,
-      SUM(totalOrderAmount) AS value
+      SUM(totalOrderAmount) AS value,
+      IF(users.isAppUser, 'Mobile', 'Normal') as role
+      
   FROM
       lavup_db.laundry_orders
           INNER JOIN
@@ -79,6 +81,7 @@ router.get('/', checkAuth, async (req, res) => {
 
     });
   } catch (error) {
+    console.log(error)
     return res.sendStatus(500);
   }
 });
