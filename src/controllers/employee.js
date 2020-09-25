@@ -122,9 +122,9 @@ router.get('/', checkAuth, async (req, res) => {
     status,
     role,
     DATE_FORMAT(CONVERT_TZ(lastSignOff, '+00:00', '+02:00'),
-            '%Y-%m-%d %h:%i %p') AS signOff,
+            '%d/%m/%y') AS signOff,
     DATE_FORMAT(CONVERT_TZ(lastSignIn, '+00:00', '+02:00'),
-            '%Y-%m-%d %h:%i %p') AS signIn,
+    '%d/%m/%y') AS signIn,
     TIMESTAMPDIFF(HOUR,
         lastSignIn,
         lastSignOff) AS hours
@@ -162,9 +162,9 @@ router.get('/list/:type', checkAuth, async (req, res) => {
     status,
     role,
     DATE_FORMAT(CONVERT_TZ(lastSignOff, '+00:00', '+02:00'),
-            '%Y-%m-%d %h:%i %p') AS signOff,
+    '%d/%m/%y') AS signOff,
     DATE_FORMAT(CONVERT_TZ(lastSignIn, '+00:00', '+02:00'),
-            '%Y-%m-%d %h:%i %p') AS signIn,
+    '%d/%m/%y') AS signIn,
     TIMESTAMPDIFF(HOUR,
         lastSignIn,
         lastSignOff) AS hours

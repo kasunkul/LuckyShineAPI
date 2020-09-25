@@ -116,7 +116,7 @@ router.get('/list', checkAuth, async (req, res) => {
               IFNULL(city, '')) AS address,
       specialLandmarks AS landmark,
       DATE_FORMAT(CONVERT_TZ(createdAt, '+00:00', '+02:00'),
-              '%Y-%m-%d %h:%i %p') AS createdAt,
+      '%d/%m/%y') AS createdAt,
       updatedAt
   FROM
       laundry_orders
@@ -146,7 +146,7 @@ router.post('/list/v2/:type', checkAuth, async (req, res) => {
            IFNULL(city, '')) AS address,
    specialLandmarks AS landmark,
    DATE_FORMAT(CONVERT_TZ(createdAt, '+00:00', '+02:00'),
-           '%Y-%m-%d %h:%i %p') AS createdAt,
+   '%d/%m/%y') AS createdAt,
    updatedAt
 FROM
    laundry_orders`;
@@ -206,7 +206,7 @@ router.get('/list-this-month', checkAuth, async (req, res) => {
       shopId,
       isDeliveryOrder,
       DATE_FORMAT(CONVERT_TZ(createdAt, '+00:00', '+02:00'),
-              '%Y-%m-%d %h:%i %p') AS createdAt,
+      '%d/%m/%y') AS createdAt,
       updatedAt
   FROM
       laundry_orders
