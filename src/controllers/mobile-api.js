@@ -47,7 +47,11 @@ router.post('/signup', async (req, res) => {
     });
 
     if (isExists) {
-      return res.sendStatus(422);
+      return res.status(200).json({
+        status : 0,
+        title: "Email già esistente.",
+        message: "Account disponibile con il seguente email. Contatta il team di lavup per ulteriori difficoltà",
+      });
     }
 
     const resetToken = Math.floor(1000 + Math.random() * 9000);
