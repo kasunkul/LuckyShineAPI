@@ -116,7 +116,7 @@ router.get('/list', checkAuth, async (req, res) => {
               IFNULL(city, '')) AS address,
       specialLandmarks AS landmark,
       DATE_FORMAT(CONVERT_TZ(createdAt, '+00:00', '+02:00'),
-              '%Y-%m-%d %h:%i %p') AS createdAt,
+      '%d/%m/%y') AS createdAt,
       updatedAt
   FROM
       laundry_orders
@@ -146,7 +146,7 @@ router.post('/list/v2/:type', checkAuth, async (req, res) => {
            IFNULL(city, '')) AS address,
    specialLandmarks AS landmark,
    DATE_FORMAT(CONVERT_TZ(createdAt, '+00:00', '+02:00'),
-           '%Y-%m-%d %h:%i %p') AS createdAt,
+   '%d/%m/%y') AS createdAt,
    updatedAt
 FROM
    laundry_orders`;
@@ -206,7 +206,7 @@ router.get('/list-this-month', checkAuth, async (req, res) => {
       shopId,
       isDeliveryOrder,
       DATE_FORMAT(CONVERT_TZ(createdAt, '+00:00', '+02:00'),
-              '%Y-%m-%d %h:%i %p') AS createdAt,
+      '%d/%m/%y') AS createdAt,
       updatedAt
   FROM
       laundry_orders
@@ -436,13 +436,12 @@ router.put('/update-status', checkAuth, async (req, res) => {
 
     const cart = await db.sequelize.query(query, {
       type: db.sequelize.QueryTypes.SELECT,
-      raw:true
+      raw: true,
 
     });
 
     for (let index = 0; index < cart.length; index++) {
-     cart[index].idx = index + 1
-      
+      cart[index].idx = index + 1;
     }
 
     // emailing part
@@ -473,10 +472,7 @@ router.put('/update-status', checkAuth, async (req, res) => {
         templateData.assignDateTo = moment(order.deliveryDate)
           .add(7, 'days')
           .format('YYYY-MM-DD');
-
-          
-        }
-        
+      }
 
       const emailAddress = user.email;
       // if (user.id === 4) {

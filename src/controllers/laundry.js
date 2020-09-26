@@ -115,7 +115,7 @@ FROM
     const query = `SELECT 
     t1.*, 
     DATE_FORMAT(CONVERT_TZ(t2.d, '+00:00', '+02:00'),
-            '%Y-%m-%d %h:%i %p') AS d
+    '%d/%m/%y') AS d
 FROM
     (SELECT 
         laundry_order_items.itemId,
