@@ -493,9 +493,9 @@ router.post('/getOrderDetails', checkAuth, async (req, res) => {
                     specialLandmarks as specialLandmarks,
                     laundry_orders.id,
                     concat('LAVUP','',laundry_orders.id) as orderId,
-                    totalOrderAmount,
-                    tax,
-                    orderValue,
+                    CONVERT( (ROUND(ROUND((totalOrderAmount), 1), 2)) , CHAR) as totalOrderAmount,
+                    CONVERT( (ROUND(ROUND((orderValue), 1), 2)) , CHAR) as orderValue,
+                    CONVERT( (ROUND(ROUND((tax), 1), 2)) , CHAR) as tax,
                     status,
                     notes,
                     createdAt
@@ -506,9 +506,9 @@ router.post('/getOrderDetails', checkAuth, async (req, res) => {
     });
 
     const query2 = `SELECT 
-    CONVERT( (ROUND(ROUND((laundry_order_items.unitPrice), 1), 2)) , CHAR) as unitPrice,
-    CONVERT( (ROUND(ROUND((laundry_order_items.subTotal), 1), 2)) , CHAR) as subTotal,
-    CONVERT( (ROUND(ROUND((laundry_order_items.unitsPurchased), 1), 2)) , CHAR) as unitsPurchased,
+    laundry_order_items.unitPrice,
+    laundry_order_items.subTotal,
+    laundry_order_items.unitsPurchased,
     laundry_items.itemName
     FROM lavup_db.laundry_order_items
     LEFT JOIN laundry_items ON laundry_items.id = laundry_order_items.itemId
