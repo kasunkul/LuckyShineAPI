@@ -220,7 +220,7 @@ router.get('/getAllItemsFromCategories/:CatId', checkAuth, async (req, res) => {
     itemCode,
     itemCategoryId,
     item_categories.itemName as itemCategoryName,
-    (laundry_items.unitPrice * ${tax} ) as unitPrice,
+    round(round((laundry_items.unitPrice * ${tax} ),1),2) as unitPrice,
     ifnull(laundry_items.description,'') as description,
     ifnull(cart_items.units,0) as selected,
     0 as maxQty,
@@ -266,7 +266,7 @@ router.post('/getAllItemsSearch', checkAuth, async (req, res) => {
     itemCode,
     itemCategoryId,
     item_categories.itemName as itemCategoryName,
-    (laundry_items.unitPrice * ${tax} ) as unitPrice,
+    round(round((laundry_items.unitPrice * ${tax} ),1),2) as unitPrice,
     ifnull(laundry_items.description,'') as description,
     ifnull(cart_items.units,0) as selected,
     0 as maxQty,
@@ -312,7 +312,7 @@ router.get('/getCartItems', checkAuth, async (req, res) => {
     itemName,
     itemCode,
     itemCategoryId,
-     (laundry_items.unitPrice * ${tax} ) as unitPrice,
+    round(round((laundry_items.unitPrice * ${tax} ),1),2) as unitPrice,
     ifnull(description,'') as description,
     ifnull(cart_items.units,0) as selected,
     0 as maxQty,
@@ -637,9 +637,9 @@ router.post('/confirmOrder', checkAuth, async (req, res) => {
     // get order calculation
     const query = `SELECT
     sysVars.value as tax_percentage,
-    subtotal.sum as subtotal,
-    (subtotal.sum * ((sysVars.value + 100)/100)) as grandTotal,
-    (subtotal.sum * ((sysVars.value)/100)) as vat,
+    round(round((subtotal.sum ),1),2) as subtotal,
+    (round(round((subtotal.sum ),1),2) * ((sysVars.value + 100)/100)) as grandTotal,
+    (round(round((subtotal.sum ),1),2) * ((sysVars.value)/100)) as vat,
     count.count
     FROM (
 
