@@ -462,7 +462,7 @@ router.get('/getOrderHistory', checkAuth, async (req, res) => {
     const query = `SELECT 
 
     concat('LAVUP','',laundry_orders.id) as orderId,
-    totalOrderAmount,
+    CONVERT( (ROUND(ROUND((totalOrderAmount), 1), 2)) , CHAR) as totalOrderAmount,
     status,
     createdAt
     
