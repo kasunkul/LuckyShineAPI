@@ -600,9 +600,9 @@ router.get('/getCartPrices', checkAuth, async (req, res) => {
     const userId = req.user.id;
     const query = `SELECT
     sysVars.value as tax_percentage,
-    convert(round(round((subtotal.sum ),1),2),CHAR) as subtotal,
-    convert((round(round((subtotal.sum ),1),2) * ((sysVars.value + 100)/100)),CHAR) as grandTotal,
-    convert((round(round((subtotal.sum ),1),2) * ((sysVars.value)/100)),CHAR) as vat
+    convert(round(round((subtotal.sum ),0),1),CHAR) as subtotal,
+    convert((round(round((subtotal.sum ),0),1) * ((sysVars.value + 100)/100)),CHAR) as grandTotal,
+    convert((round(round((subtotal.sum ),0),1) * ((sysVars.value)/100)),CHAR) as vat
     FROM (
 
     SELECT name,label,value, 1 as join_id FROM lavup_db.sysVars 
