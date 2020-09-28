@@ -237,6 +237,8 @@ router.get('/getAllItemsFromCategories/:CatId', checkAuth, async (req, res) => {
       type: db.sequelize.QueryTypes.SELECT,
     });
 
+    console.log("data -- ",data);
+
     return res.status(200).json(data);
   } catch (error) {
     console.error(error);
@@ -326,6 +328,8 @@ router.get('/getCartItems', checkAuth, async (req, res) => {
     const data = await db.sequelize.query(query, {
       type: db.sequelize.QueryTypes.SELECT,
     });
+
+    console.log("data -- ",data);
 
     return res.status(200).json(data);
   } catch (error) {
