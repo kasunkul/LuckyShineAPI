@@ -506,8 +506,8 @@ router.post('/getOrderDetails', checkAuth, async (req, res) => {
     });
 
     const query2 = `SELECT 
-    round(round((laundry_order_items.unitPrice ),1),2) ,
-    round(round((laundry_order_items.subTotal ),1),2) ,
+    round(round((laundry_order_items.unitPrice ),1),2) as unitPrice,
+    round(round((laundry_order_items.subTotal ),1),2) as subTotal,
     laundry_order_items.unitsPurchased,
     laundry_items.itemName
     FROM lavup_db.laundry_order_items
