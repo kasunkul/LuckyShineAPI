@@ -220,7 +220,7 @@ router.get('/getAllItemsFromCategories/:CatId', checkAuth, async (req, res) => {
     itemCode,
     itemCategoryId,
     item_categories.itemName as itemCategoryName,
-    round(round((laundry_items.unitPrice * ${tax} ),1),2) as unitPrice,
+    convert(round(round((laundry_items.unitPrice * ${tax} ),1),2),CHAR) as unitPrice,
     ifnull(laundry_items.description,'') as description,
     ifnull(cart_items.units,0) as selected,
     0 as maxQty,
