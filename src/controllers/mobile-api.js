@@ -611,9 +611,9 @@ router.get('/getCartPrices', checkAuth, async (req, res) => {
     const query = `
     SELECT 
     sysVars.value AS tax_percentage,
-    CONVERT( ROUND(ROUND((subtotal.sum * (100 / (sysVars.value + 100))), 2), 2), CHAR) AS subtotal,
-    CONVERT( (ROUND(ROUND((subtotal.sum), 2), 2)) , CHAR) AS grandTotal,
-    CONVERT( (ROUND(ROUND((subtotal.sum), 2), 2)) - ROUND(ROUND((subtotal.sum * (100 / (sysVars.value + 100))), 2), 2), CHAR) AS vat
+    CONVERT( ROUND(ROUND((subtotal.sum * (100 / (sysVars.value + 100))), 1), 2), CHAR) AS subtotal,
+    CONVERT( (ROUND(ROUND((subtotal.sum), 1), 2)) , CHAR) AS grandTotal,
+    CONVERT( (ROUND(ROUND((subtotal.sum), 1), 2)) - ROUND(ROUND((subtotal.sum * (100 / (sysVars.value + 100))), 2), 2), CHAR) AS vat
 FROM
     (SELECT 
         name, label, value, 1 AS join_id
