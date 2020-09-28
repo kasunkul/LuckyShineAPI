@@ -597,21 +597,41 @@ router.post('/updateCartItemNotes', checkAuth, async (req, res) => {
 
 router.get('/getCartPrices', checkAuth, async (req, res) => {
   try {
+
+    let tax = 0;
+    const tax_query = 'SELECT * FROM lavup_db.sysVars where label = \'Tax value\'';
+
+    const tax_data = await db.sequelize.query(tax_query, {
+      type: db.sequelize.QueryTypes.SELECT,
+    });
+
+    tax = (parseFloat(tax_data[0].value) + 100) / 100;
+
     const userId = req.user.id;
-    const query = `SELECT
-    sysVars.value as tax_percentage,
-    convert(round(round((subtotal.sum ),0),1),CHAR) as subtotal,
-    convert((round(round((subtotal.sum ),0),1) * ((sysVars.value + 100)/100)),CHAR) as grandTotal,
-    convert((round(round((subtotal.sum ),0),1) * ((sysVars.value)/100)),CHAR) as vat
-    FROM (
-
-    SELECT name,label,value, 1 as join_id FROM lavup_db.sysVars 
-    ) sysVars 
-    LEFT JOIN (
-    SELECT SUM(unitPrice * units) sum , 1 as join_id from cart_items where userId = ${userId}
-    ) subtotal on sysVars.join_id = subtotal.join_id
-
-    where sysVars.name = 'tax'`;
+    const query = `
+    SELECT 
+    sysVars.value AS tax_percentage,
+    CONVERT( ROUND(ROUND((subtotal.sum * (100 / (sysVars.value + 100))), 2), 2), CHAR) AS subtotal,
+    CONVERT( (ROUND(ROUND((subtotal.sum), 2), 2)) , CHAR) AS grandTotal,
+    CONVERT( (ROUND(ROUND((subtotal.sum), 2), 2)) - ROUND(ROUND((subtotal.sum * (100 / (sysVars.value + 100))), 2), 2), CHAR) AS vat
+FROM
+    (SELECT 
+        name, label, value, 1 AS join_id
+    FROM
+        lavup_db.sysVars) sysVars
+        LEFT JOIN
+    (SELECT 
+        SUM(unitPrice * ${tax} * units) sum, 1 AS join_id
+    FROM
+        cart_items
+    WHERE
+        userId = ${userId}) subtotal ON sysVars.join_id = subtotal.join_id
+WHERE
+    sysVars.name = 'tax'
+    
+    
+    
+    `;
 
     const data = await db.sequelize.query(query, {
       type: db.sequelize.QueryTypes.SELECT,
