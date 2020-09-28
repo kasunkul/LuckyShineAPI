@@ -463,7 +463,19 @@ router.get('/getOrderHistory', checkAuth, async (req, res) => {
 
     concat('LAVUP','',laundry_orders.id) as orderId,
     CONVERT( (ROUND(ROUND((totalOrderAmount), 1), 2)) , CHAR) as totalOrderAmount,
-    status,
+    CASE 
+    WHEN status = 'pending to pick' then 'In attesa di prelievo' 
+    WHEN status = 'order canceled' then 'Ordine cancellato' 
+    WHEN status = 'accepted to pick' then 'Prelievo Accettato'
+    WHEN status = 'inQueue' then 'in coda'
+    WHEN status = 'accepted by lab' then 'Accettato dal laboratorio'
+    WHEN status = 'processing' then 'In lavorazione'
+    WHEN status = 'ready' then 'Pronto'
+    WHEN status = 'in delivery' then 'In consegna'
+    WHEN status = 'delivered' then 'Consegnato'
+    WHEN status = 'accepted by shop' then 'Accettato dal negozio'
+    WHEN status = 'order completed' then 'Ordine completato'
+    END as status,
     createdAt
     
     FROM lavup_db.laundry_orders where customerId = ${userId}
@@ -496,7 +508,19 @@ router.post('/getOrderDetails', checkAuth, async (req, res) => {
                     CONVERT( (ROUND(ROUND((totalOrderAmount), 1), 2)) , CHAR) as totalOrderAmount,
                     CONVERT( (ROUND(ROUND((orderValue), 1), 2)) , CHAR) as orderValue,
                     CONVERT( (ROUND(ROUND((tax), 1), 2)) , CHAR) as tax,
-                    status,
+                    CASE 
+                    WHEN status = 'pending to pick' then 'In attesa di prelievo' 
+                    WHEN status = 'order canceled' then 'Ordine cancellato' 
+                    WHEN status = 'accepted to pick' then 'Prelievo Accettato'
+                    WHEN status = 'inQueue' then 'in coda'
+                    WHEN status = 'accepted by lab' then 'Accettato dal laboratorio'
+                    WHEN status = 'processing' then 'In lavorazione'
+                    WHEN status = 'ready' then 'Pronto'
+                    WHEN status = 'in delivery' then 'In consegna'
+                    WHEN status = 'delivered' then 'Consegnato'
+                    WHEN status = 'accepted by shop' then 'Accettato dal negozio'
+                    WHEN status = 'order completed' then 'Ordine completato'
+                    END as status,
                     notes,
                     createdAt
     FROM lavup_db.laundry_orders where customerId = ${userId} and laundry_orders.id = '${orderId}'`;
