@@ -506,8 +506,8 @@ router.post('/getOrderDetails', checkAuth, async (req, res) => {
     });
 
     const query2 = `SELECT 
-    laundry_order_items.unitPrice,
-    laundry_order_items.subTotal,
+    round(round((laundry_order_items.unitPrice ),1),2) ,
+    round(round((laundry_order_items.subTotal ),1),2) ,
     laundry_order_items.unitsPurchased,
     laundry_items.itemName
     FROM lavup_db.laundry_order_items
@@ -716,12 +716,21 @@ router.post('/confirmOrder', checkAuth, async (req, res) => {
         },
       });
 
+      let tax_amount = 0;
+      const tax_query = 'SELECT * FROM lavup_db.sysVars where label = \'Tax value\'';
+
+      const tax_data = await db.sequelize.query(tax_query, {
+        type: db.sequelize.QueryTypes.SELECT,
+      });
+
+      tax_amount = (parseFloat(tax_data[0].value) + 100) / 100;
+
       for (const elements of cart_data) {
         await db.laundry_order_item.create({
           laundryOrderId: laundry_order.id,
-          unitPrice: elements.unitPrice,
+          unitPrice: (elements.unitPrice * tax_amount),
           unitsPurchased: elements.units,
-          subTotal: (elements.units * elements.unitPrice),
+          subTotal: (elements.units * (elements.unitPrice * tax_amount)),
           itemId: elements.itemId,
           slotId: '',
           needIron: elements.needIron,
