@@ -506,9 +506,9 @@ router.post('/getOrderDetails', checkAuth, async (req, res) => {
     });
 
     const query2 = `SELECT 
-    laundry_order_items.unitPrice,
-    laundry_order_items.subTotal,
-    laundry_order_items.unitsPurchased,
+    CONVERT( (ROUND(ROUND((laundry_order_items.unitPrice), 1), 2)) , CHAR) as unitPrice,
+    CONVERT( (ROUND(ROUND((laundry_order_items.subTotal), 1), 2)) , CHAR) as subTotal,
+    CONVERT( (ROUND(ROUND((laundry_order_items.unitsPurchased), 1), 2)) , CHAR) as unitsPurchased,
     laundry_items.itemName
     FROM lavup_db.laundry_order_items
     LEFT JOIN laundry_items ON laundry_items.id = laundry_order_items.itemId
