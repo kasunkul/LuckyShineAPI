@@ -147,7 +147,7 @@ router.get('/getProfile', checkAuth, async (req, res) => {
     firstName as name,
       email,
       contactNumber,
-      dob,
+      DATE_FORMAT(dob, '%d/%m/%Y') as dob,
       concat(users.street1,' ',users.street2) as address,
       occupation,
       socialSecurityNumber
