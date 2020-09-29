@@ -529,14 +529,16 @@ router.post('/getOrderDetails', checkAuth, async (req, res) => {
       type: db.sequelize.QueryTypes.SELECT,
     });
 
-    const query2 = `SELECT 
-    round(round((laundry_order_items.unitPrice ),1),2) as unitPrice,
-    round(round((laundry_order_items.subTotal ),1),2) as subTotal,
-    laundry_order_items.unitsPurchased,
+    const query2 = `
+    SELECT 
+    SUM(round(round((laundry_order_items.unitPrice ),1),2)) as unitPrice,
+    SUM(round(round((laundry_order_items.subTotal ),1),2)) as subTotal,
+    SUM(laundry_order_items.unitsPurchased) as unitsPurchased,
     laundry_items.itemName
     FROM lavup_db.laundry_order_items
     LEFT JOIN laundry_items ON laundry_items.id = laundry_order_items.itemId
-    WHERE lavup_db.laundry_order_items.laundryOrderId = '${orderId}'`;
+    WHERE lavup_db.laundry_order_items.laundryOrderId = '${orderId}'
+    GROUP BY laundry_order_items.itemId`;
 
     const data2 = await db.sequelize.query(query2, {
       type: db.sequelize.QueryTypes.SELECT,
@@ -750,16 +752,20 @@ router.post('/confirmOrder', checkAuth, async (req, res) => {
       tax_amount = (parseFloat(tax_data[0].value) + 100) / 100;
 
       for (const elements of cart_data) {
-        await db.laundry_order_item.create({
-          laundryOrderId: laundry_order.id,
-          unitPrice: (elements.unitPrice * tax_amount),
-          unitsPurchased: elements.units,
-          subTotal: (elements.units * (elements.unitPrice * tax_amount)),
-          itemId: elements.itemId,
-          slotId: '',
-          needIron: elements.needIron,
-          notes: elements.notes,
-        });
+        for (i = 1; i <= elements.units; i++) {
+          await db.laundry_order_item.create({
+            laundryOrderId: laundry_order.id,
+            unitPrice: elements.unitPrice,
+            unitsPurchased: 1,
+            subTotal: (elements.unitPrice * tax_amount),
+            itemId: elements.itemId,
+            slotId: '',
+            needIron: elements.needIron,
+            notes: elements.notes,
+          });
+        }
+
+        
       }
     }
 
