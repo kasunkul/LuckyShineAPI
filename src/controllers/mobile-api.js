@@ -170,8 +170,8 @@ router.get('/getAllCategories', checkAuth, async (req, res) => {
     const query = `(SELECT 
       0 as id,
       'All' as itemName,
-      '' as activeImage,
-      '' as inactiveImage
+      'https://firebasestorage.googleapis.com/v0/b/retirement-cal.appspot.com/o/profile%2FVector.png?alt=media&token=d3e40464-9b97-4934-84d2-043e68726fc0' as activeImage,
+      'https://firebasestorage.googleapis.com/v0/b/retirement-cal.appspot.com/o/profile%2FVector-1.png?alt=media&token=92202d54-f96c-4172-b67f-d3ac76b67dfe' as inactiveImage
       )
       UNION ALL
       ( 
