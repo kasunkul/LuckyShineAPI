@@ -1,12 +1,12 @@
-const express = require('express');
+const express = require("express");
 
 const router = express.Router();
-const moment = require('moment');
-const db = require('../../models');
-const { sendEmail } = require('../utils/sendEmail');
+const moment = require("moment");
+const db = require("../../models");
+const { sendEmail } = require("../utils/sendEmail");
 
 const { Op } = db.Sequelize;
-const checkAuth = require('../middleware/auth');
+const checkAuth = require("../middleware/auth");
 // const e = require('express');
 
 async function getIds(id) {
@@ -49,14 +49,14 @@ ORDER BY CONVERT( uniqueId , UNSIGNED)`;
   }
 }
 
-router.get('/', checkAuth, async (req, res) => {
+router.get("/", checkAuth, async (req, res) => {
   try {
     // Total order
     const [itemsCount, pendingCount] = await Promise.all([
       db.laundry_order.count(),
       db.laundry_order.count({
         where: {
-          status: 'pending',
+          status: "pending",
         },
       }),
     ]);
@@ -84,7 +84,7 @@ router.get('/', checkAuth, async (req, res) => {
   }
 });
 
-router.get('/list', checkAuth, async (req, res) => {
+router.get("/list", checkAuth, async (req, res) => {
   try {
     // const data = await db.laundry_order.findAll({
     //   order: db.sequelize.literal("laundry_order.id DESC"),
@@ -123,7 +123,7 @@ router.get('/list', checkAuth, async (req, res) => {
   ORDER BY laundry_orders.id DESC`,
       {
         type: db.sequelize.QueryTypes.SELECT,
-      },
+      }
     );
 
     return res.status(200).json(data);
@@ -133,10 +133,31 @@ router.get('/list', checkAuth, async (req, res) => {
   }
 });
 
-router.post('/list/v2/:type', checkAuth, async (req, res) => {
+router.get("/items/:id", checkAuth, async (req, res) => {
+  let id = req.params.id;
+  try {
+    const query = `SELECT itemId,needIron, CONCAT(laundry_items.itemName,' (',
+    COUNT(*),')     ',IF(needIron, '      =>Need to IRON<=', '')) AS name FROM
+    lavup_db.laundry_order_items INNER JOIN
+    laundry_items ON laundry_order_items.itemId = laundry_items.id
+    WHERE laundryOrderId = ${id}
+GROUP BY itemId , needIron;`;
+
+    const data = await db.sequelize.query(query, {
+      type: db.sequelize.QueryTypes.SELECT,
+    });
+
+    return res.status(200).json(data);
+  } catch (error) {
+    console.log(error);
+    return res.sendStatus(500);
+  }
+});
+
+router.post("/list/v2/:type", checkAuth, async (req, res) => {
   try {
     const { type } = req.params;
-    console.log('type', type);
+    console.log("type", type);
     let query = `SELECT id,customerId, orderValue, tax, totalOrderAmount, totalItems, orderType,
    status, driverId, assignDate, startLocation, notes, orderPayed, toPrint, deliveryDate,
    shopId, isDeliveryOrder, CONCAT(IFNULL(addressline1, ''),
@@ -150,28 +171,25 @@ router.post('/list/v2/:type', checkAuth, async (req, res) => {
    updatedAt
 FROM
    laundry_orders`;
-    if (type === 'app' || type === 'normal') {
+    if (type === "app" || type === "normal") {
       query += ` WHERE orderType='${type}' AND MONTH(createdAt) = MONTH(CURDATE())
       AND YEAR(createdAt) = YEAR(CURDATE())`;
     }
-    if (type === 'new') {
+    if (type === "new") {
       query += ` WHERE status in (\'pending to pick\',\'inQueue\') AND MONTH(createdAt) = MONTH(CURDATE())
       AND YEAR(createdAt) = YEAR(CURDATE())`;
     }
-    if (type === 'all') {
+    if (type === "all") {
       query += ` WHERE MONTH(createdAt) = MONTH(CURDATE())
       AND YEAR(createdAt) = YEAR(CURDATE())`;
     }
-    query += ' ORDER BY laundry_orders.id DESC';
-    const data = await db.sequelize.query(
-      query,
-      {
-        type: db.sequelize.QueryTypes.SELECT,
-        logging: true,
-      },
-    );
+    query += " ORDER BY laundry_orders.id DESC";
+    const data = await db.sequelize.query(query, {
+      type: db.sequelize.QueryTypes.SELECT,
+      logging: true,
+    });
 
-    console.log('type', type, data.length);
+    console.log("type", type, data.length);
 
     return res.status(200).json(data);
   } catch (error) {
@@ -180,7 +198,7 @@ FROM
   }
 });
 
-router.get('/list-this-month', checkAuth, async (req, res) => {
+router.get("/list-this-month", checkAuth, async (req, res) => {
   try {
     // const data = await db.laundry_order.findAll({
     //   order: db.sequelize.literal("laundry_order.id DESC"),
@@ -216,7 +234,7 @@ router.get('/list-this-month', checkAuth, async (req, res) => {
   ORDER BY laundry_orders.id DESC`,
       {
         type: db.sequelize.QueryTypes.SELECT,
-      },
+      }
     );
 
     return res.status(200).json(data);
@@ -225,7 +243,7 @@ router.get('/list-this-month', checkAuth, async (req, res) => {
   }
 });
 
-router.get('/available-slots', checkAuth, async (req, res) => {
+router.get("/available-slots", checkAuth, async (req, res) => {
   try {
     const query = `SELECT 
     *
@@ -241,23 +259,23 @@ FROM
   }
 });
 
-router.get('/v2/:id', checkAuth, async (req, res) => {
+router.get("/v2/:id", checkAuth, async (req, res) => {
   try {
     // 		laundry_order_items
     const meta = await db.laundry_order.findOne({
       attributes: [
-        'id',
-        'customerId',
-        'notes',
-        'orderType',
-        'orderPayed',
-        'createdAt',
-        'assignDate',
-        'totalItems',
-        'totalOrderAmount',
-        'status',
-        'shopId',
-        'isDeliveryOrder',
+        "id",
+        "customerId",
+        "notes",
+        "orderType",
+        "orderPayed",
+        "createdAt",
+        "assignDate",
+        "totalItems",
+        "totalOrderAmount",
+        "status",
+        "shopId",
+        "isDeliveryOrder",
       ],
       where: {
         id: req.params.id,
@@ -267,29 +285,29 @@ router.get('/v2/:id', checkAuth, async (req, res) => {
 
     const items = await db.laundry_order_item.findAll({
       raw: true,
-      attributes: ['id', 'itemId', 'slotId', 'needIron'],
+      attributes: ["id", "itemId", "slotId", "needIron"],
       where: {
         laundryOrderId: req.params.id,
       },
       include: [
         {
           model: db.laundry_item,
-          attributes: ['itemName'],
+          attributes: ["itemName"],
         },
       ],
     });
 
-    if (meta.status === 'processing' && meta.shopId) {
+    if (meta.status === "processing" && meta.shopId) {
       // first get all the available slots
       const ids = await getIds(meta.shopId);
 
-      console.log('ids', ids);
+      console.log("ids", ids);
 
       // if items length = (slot length + 2)
       const equalIdx = ids.findIndex((e) => e.length === items.length + 2);
 
       if (equalIdx >= 0) {
-        console.log('this if');
+        console.log("this if");
         ids[equalIdx].forEach((e, i) => {
           if (i !== 0 && i !== ids[equalIdx].length - 1) {
             items[i - 1].slotId = e;
@@ -302,7 +320,7 @@ router.get('/v2/:id', checkAuth, async (req, res) => {
       if (idx >= 0) {
         ids[idx].forEach((e, i) => {
           if (i !== 0 && i <= items.length) {
-            console.log('if');
+            console.log("if");
             items[i - 1].slotId = e;
           }
         });
@@ -318,7 +336,7 @@ router.get('/v2/:id', checkAuth, async (req, res) => {
   }
 });
 
-router.get('/:id', checkAuth, async (req, res) => {
+router.get("/:id", checkAuth, async (req, res) => {
   try {
     const data = await db.laundry_order.findOne({
       where: {
@@ -350,7 +368,7 @@ router.get('/:id', checkAuth, async (req, res) => {
   }
 });
 
-router.put('/update-status', checkAuth, async (req, res) => {
+router.put("/update-status", checkAuth, async (req, res) => {
   const transaction = await db.sequelize.transaction();
   try {
     const { id, status, items } = req.body;
@@ -381,13 +399,13 @@ router.put('/update-status', checkAuth, async (req, res) => {
           id,
         },
         transaction,
-      },
+      }
     );
 
     if (
-      status === 'accepted by shop'
-      || status === 'in delivery'
-      || status === 'order completed'
+      status === "accepted by shop" ||
+      status === "in delivery" ||
+      status === "order completed"
     ) {
       const orderItemIds = items.map((e) => Number(e.id));
       // FREE ALL THE LAB SLOTS IT TAKE
@@ -402,11 +420,11 @@ router.put('/update-status', checkAuth, async (req, res) => {
             },
           },
           transaction,
-        },
+        }
       );
     }
-    if (status === 'ready' || status === 'ready to pick by customer') {
-      let updateQuery = '';
+    if (status === "ready" || status === "ready to pick by customer") {
+      let updateQuery = "";
       // ASSIGN SLOTS
       for (let index = 0; index < items.length; index++) {
         updateQuery += `UPDATE laundry_order_items SET slotId = '${
@@ -437,7 +455,6 @@ router.put('/update-status', checkAuth, async (req, res) => {
     const cart = await db.sequelize.query(query, {
       type: db.sequelize.QueryTypes.SELECT,
       raw: true,
-
     });
 
     for (let index = 0; index < cart.length; index++) {
@@ -445,21 +462,26 @@ router.put('/update-status', checkAuth, async (req, res) => {
     }
 
     // emailing part
-    let title = 'Il tuo ordine è stato inviato al team lavup';
+    let title = "Il tuo ordine è stato inviato al team lavup";
 
-    if (status === 'in delivery') {
-      title = 'Il tuo ordine è stato completato e pronto per la consegna. Per qualsiasi richiesta contatta il team di assistenza LavUp';
+    if (status === "in delivery") {
+      title =
+        "Il tuo ordine è stato completato e pronto per la consegna. Per qualsiasi richiesta contatta il team di assistenza LavUp";
     }
 
-    if (status === 'order canceled') {
-      title = 'Il tuo ordine è stato annullato';
+    if (status === "order canceled") {
+      title = "Il tuo ordine è stato annullato";
     }
 
-    if (status === 'order canceled' || status === 'in delivery' || status === 'accepted to pick') {
+    if (
+      status === "order canceled" ||
+      status === "in delivery" ||
+      status === "accepted to pick"
+    ) {
       const templateData = {
         name: user.firstName,
         orderNo: id,
-        orderDate: moment(order.createdAt).format('YYYY-MM-DD'),
+        orderDate: moment(order.createdAt).format("YYYY-MM-DD"),
         totalItems: order.totalItems,
         orderValue: order.orderValue,
         items: cart,
@@ -468,10 +490,12 @@ router.put('/update-status', checkAuth, async (req, res) => {
 
       if (order.isDeliveryOrder) {
         templateData.shipping = `${user.street1} ${user.street2} ${user.city} ${user.stateRegion} ${user.postalCode}`;
-        templateData.assignDate = moment(order.deliveryDate).format('YYYY-MM-DD');
+        templateData.assignDate = moment(order.deliveryDate).format(
+          "YYYY-MM-DD"
+        );
         templateData.assignDateTo = moment(order.deliveryDate)
-          .add(7, 'days')
-          .format('YYYY-MM-DD');
+          .add(7, "days")
+          .format("YYYY-MM-DD");
       }
 
       const emailAddress = user.email;
@@ -492,7 +516,7 @@ router.put('/update-status', checkAuth, async (req, res) => {
   }
 });
 
-router.put('/:id', checkAuth, async (req, res) => {
+router.put("/:id", checkAuth, async (req, res) => {
   try {
     await db.laundry_order.update(req.body, {
       where: {
