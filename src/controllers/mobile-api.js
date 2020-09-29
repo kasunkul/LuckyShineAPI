@@ -47,7 +47,11 @@ router.post('/signup', async (req, res) => {
     });
 
     if (isExists) {
-      return res.sendStatus(422);
+      return res.status(200).json({
+        status : 0,
+        title: "Email già esistente.",
+        message: "Account disponibile con il seguente email. Contatta il team di lavup per ulteriori difficoltà",
+      });
     }
 
     const resetToken = Math.floor(1000 + Math.random() * 9000);
@@ -143,7 +147,7 @@ router.get('/getProfile', checkAuth, async (req, res) => {
     firstName as name,
       email,
       contactNumber,
-      dob,
+      DATE_FORMAT(dob, '%d/%m/%Y') as dob,
       concat(users.street1,' ',users.street2) as address,
       occupation,
       socialSecurityNumber
@@ -166,8 +170,8 @@ router.get('/getAllCategories', checkAuth, async (req, res) => {
     const query = `(SELECT 
       0 as id,
       'All' as itemName,
-      '' as activeImage,
-      '' as inactiveImage
+      'https://firebasestorage.googleapis.com/v0/b/retirement-cal.appspot.com/o/profile%2FVector.png?alt=media&token=d3e40464-9b97-4934-84d2-043e68726fc0' as activeImage,
+      'https://firebasestorage.googleapis.com/v0/b/retirement-cal.appspot.com/o/profile%2FVector-1.png?alt=media&token=92202d54-f96c-4172-b67f-d3ac76b67dfe' as inactiveImage
       )
       UNION ALL
       ( 
@@ -216,7 +220,7 @@ router.get('/getAllItemsFromCategories/:CatId', checkAuth, async (req, res) => {
     itemCode,
     itemCategoryId,
     item_categories.itemName as itemCategoryName,
-    (laundry_items.unitPrice * ${tax} ) as unitPrice,
+    convert(round(round((laundry_items.unitPrice * ${tax} ),1),2),CHAR) as unitPrice,
     ifnull(laundry_items.description,'') as description,
     ifnull(cart_items.units,0) as selected,
     0 as maxQty,
@@ -232,6 +236,8 @@ router.get('/getAllItemsFromCategories/:CatId', checkAuth, async (req, res) => {
     const data = await db.sequelize.query(query, {
       type: db.sequelize.QueryTypes.SELECT,
     });
+
+    console.log("data -- ",data);
 
     return res.status(200).json(data);
   } catch (error) {
@@ -262,7 +268,7 @@ router.post('/getAllItemsSearch', checkAuth, async (req, res) => {
     itemCode,
     itemCategoryId,
     item_categories.itemName as itemCategoryName,
-    (laundry_items.unitPrice * ${tax} ) as unitPrice,
+    convert(round(round((laundry_items.unitPrice * ${tax} ),1),2),CHAR) as unitPrice,
     ifnull(laundry_items.description,'') as description,
     ifnull(cart_items.units,0) as selected,
     0 as maxQty,
@@ -308,7 +314,7 @@ router.get('/getCartItems', checkAuth, async (req, res) => {
     itemName,
     itemCode,
     itemCategoryId,
-     (laundry_items.unitPrice * ${tax} ) as unitPrice,
+    convert(round(round((laundry_items.unitPrice * ${tax} ),1),2),CHAR) as unitPrice,
     ifnull(description,'') as description,
     ifnull(cart_items.units,0) as selected,
     0 as maxQty,
@@ -322,6 +328,8 @@ router.get('/getCartItems', checkAuth, async (req, res) => {
     const data = await db.sequelize.query(query, {
       type: db.sequelize.QueryTypes.SELECT,
     });
+
+    console.log("data -- ",data);
 
     return res.status(200).json(data);
   } catch (error) {
@@ -454,8 +462,20 @@ router.get('/getOrderHistory', checkAuth, async (req, res) => {
     const query = `SELECT 
 
     concat('LAVUP','',laundry_orders.id) as orderId,
-    totalOrderAmount,
-    status,
+    CONVERT( (ROUND(ROUND((totalOrderAmount), 1), 2)) , CHAR) as totalOrderAmount,
+    CASE 
+    WHEN status = 'pending to pick' then 'In attesa di prelievo' 
+    WHEN status = 'order canceled' then 'Ordine cancellato' 
+    WHEN status = 'accepted to pick' then 'Prelievo Accettato'
+    WHEN status = 'inQueue' then 'in coda'
+    WHEN status = 'accepted by lab' then 'Accettato dal laboratorio'
+    WHEN status = 'processing' then 'In lavorazione'
+    WHEN status = 'ready' then 'Pronto'
+    WHEN status = 'in delivery' then 'In consegna'
+    WHEN status = 'delivered' then 'Consegnato'
+    WHEN status = 'accepted by shop' then 'Accettato dal negozio'
+    WHEN status = 'order completed' then 'Ordine completato'
+    END as status,
     createdAt
     
     FROM lavup_db.laundry_orders where customerId = ${userId}
@@ -485,10 +505,22 @@ router.post('/getOrderDetails', checkAuth, async (req, res) => {
                     specialLandmarks as specialLandmarks,
                     laundry_orders.id,
                     concat('LAVUP','',laundry_orders.id) as orderId,
-                    totalOrderAmount,
-                    tax,
-                    orderValue,
-                    status,
+                    CONVERT( (ROUND(ROUND((totalOrderAmount), 1), 2)) , CHAR) as totalOrderAmount,
+                    CONVERT( (ROUND(ROUND((orderValue), 1), 2)) , CHAR) as orderValue,
+                    CONVERT( (ROUND(ROUND((tax), 1), 2)) , CHAR) as tax,
+                    CASE 
+                    WHEN status = 'pending to pick' then 'In attesa di prelievo' 
+                    WHEN status = 'order canceled' then 'Ordine cancellato' 
+                    WHEN status = 'accepted to pick' then 'Prelievo Accettato'
+                    WHEN status = 'inQueue' then 'in coda'
+                    WHEN status = 'accepted by lab' then 'Accettato dal laboratorio'
+                    WHEN status = 'processing' then 'In lavorazione'
+                    WHEN status = 'ready' then 'Pronto'
+                    WHEN status = 'in delivery' then 'In consegna'
+                    WHEN status = 'delivered' then 'Consegnato'
+                    WHEN status = 'accepted by shop' then 'Accettato dal negozio'
+                    WHEN status = 'order completed' then 'Ordine completato'
+                    END as status,
                     notes,
                     createdAt
     FROM lavup_db.laundry_orders where customerId = ${userId} and laundry_orders.id = '${orderId}'`;
@@ -497,14 +529,16 @@ router.post('/getOrderDetails', checkAuth, async (req, res) => {
       type: db.sequelize.QueryTypes.SELECT,
     });
 
-    const query2 = `SELECT 
-    laundry_order_items.unitPrice,
-    laundry_order_items.subTotal,
-    laundry_order_items.unitsPurchased,
+    const query2 = `
+    SELECT 
+    SUM(round(round((laundry_order_items.unitPrice ),1),2)) as unitPrice,
+    SUM(round(round((laundry_order_items.subTotal ),1),2)) as subTotal,
+    SUM(laundry_order_items.unitsPurchased) as unitsPurchased,
     laundry_items.itemName
     FROM lavup_db.laundry_order_items
     LEFT JOIN laundry_items ON laundry_items.id = laundry_order_items.itemId
-    WHERE lavup_db.laundry_order_items.laundryOrderId = '${orderId}'`;
+    WHERE lavup_db.laundry_order_items.laundryOrderId = '${orderId}'
+    GROUP BY laundry_order_items.itemId`;
 
     const data2 = await db.sequelize.query(query2, {
       type: db.sequelize.QueryTypes.SELECT,
@@ -589,21 +623,41 @@ router.post('/updateCartItemNotes', checkAuth, async (req, res) => {
 
 router.get('/getCartPrices', checkAuth, async (req, res) => {
   try {
+
+    let tax = 0;
+    const tax_query = 'SELECT * FROM lavup_db.sysVars where label = \'Tax value\'';
+
+    const tax_data = await db.sequelize.query(tax_query, {
+      type: db.sequelize.QueryTypes.SELECT,
+    });
+
+    tax = (parseFloat(tax_data[0].value) + 100) / 100;
+
     const userId = req.user.id;
-    const query = `SELECT
-    sysVars.value as tax_percentage,
-    subtotal.sum as subtotal,
-    (subtotal.sum * ((sysVars.value + 100)/100)) as grandTotal,
-    (subtotal.sum * ((sysVars.value)/100)) as vat
-    FROM (
-
-    SELECT name,label,value, 1 as join_id FROM lavup_db.sysVars 
-    ) sysVars 
-    LEFT JOIN (
-    SELECT SUM(unitPrice * units) sum , 1 as join_id from cart_items where userId = ${userId}
-    ) subtotal on sysVars.join_id = subtotal.join_id
-
-    where sysVars.name = 'tax'`;
+    const query = `
+    SELECT 
+    sysVars.value AS tax_percentage,
+    CONVERT( ROUND(ROUND((subtotal.sum * (100 / (sysVars.value + 100))), 1), 2), CHAR) AS subtotal,
+    CONVERT( (ROUND(ROUND((subtotal.sum), 1), 2)) , CHAR) AS grandTotal,
+    CONVERT( (ROUND(ROUND((subtotal.sum), 1), 2)) - ROUND(ROUND((subtotal.sum * (100 / (sysVars.value + 100))), 2), 2), CHAR) AS vat
+FROM
+    (SELECT 
+        name, label, value, 1 AS join_id
+    FROM
+        lavup_db.sysVars) sysVars
+        LEFT JOIN
+    (SELECT 
+        SUM(unitPrice * ${tax} * units) sum, 1 AS join_id
+    FROM
+        cart_items
+    WHERE
+        userId = ${userId}) subtotal ON sysVars.join_id = subtotal.join_id
+WHERE
+    sysVars.name = 'tax'
+    
+    
+    
+    `;
 
     const data = await db.sequelize.query(query, {
       type: db.sequelize.QueryTypes.SELECT,
@@ -633,9 +687,9 @@ router.post('/confirmOrder', checkAuth, async (req, res) => {
     // get order calculation
     const query = `SELECT
     sysVars.value as tax_percentage,
-    subtotal.sum as subtotal,
-    (subtotal.sum * ((sysVars.value + 100)/100)) as grandTotal,
-    (subtotal.sum * ((sysVars.value)/100)) as vat,
+    round(round((subtotal.sum ),1),2) as subtotal,
+    (round(round((subtotal.sum ),1),2) * ((sysVars.value + 100)/100)) as grandTotal,
+    (round(round((subtotal.sum ),1),2) * ((sysVars.value)/100)) as vat,
     count.count
     FROM (
 
@@ -688,17 +742,30 @@ router.post('/confirmOrder', checkAuth, async (req, res) => {
         },
       });
 
+      let tax_amount = 0;
+      const tax_query = 'SELECT * FROM lavup_db.sysVars where label = \'Tax value\'';
+
+      const tax_data = await db.sequelize.query(tax_query, {
+        type: db.sequelize.QueryTypes.SELECT,
+      });
+
+      tax_amount = (parseFloat(tax_data[0].value) + 100) / 100;
+
       for (const elements of cart_data) {
-        await db.laundry_order_item.create({
-          laundryOrderId: laundry_order.id,
-          unitPrice: elements.unitPrice,
-          unitsPurchased: elements.units,
-          subTotal: (elements.units * elements.unitPrice),
-          itemId: elements.itemId,
-          slotId: '',
-          needIron: elements.needIron,
-          notes: elements.notes,
-        });
+        for (i = 1; i <= elements.units; i++) {
+          await db.laundry_order_item.create({
+            laundryOrderId: laundry_order.id,
+            unitPrice: elements.unitPrice,
+            unitsPurchased: 1,
+            subTotal: (elements.unitPrice * tax_amount),
+            itemId: elements.itemId,
+            slotId: '',
+            needIron: elements.needIron,
+            notes: elements.notes,
+          });
+        }
+
+        
       }
     }
 
