@@ -1,16 +1,23 @@
-const express = require('express');
-const moment = require('moment');
+const express = require("express");
+const moment = require("moment");
 
 const router = express.Router();
-const db = require('../../models');
-const checkAuth = require('../middleware/auth');
+const db = require("../../models");
+const checkAuth = require("../middleware/auth");
 
-const { sendEmail } = require('../utils/sendEmail');
+const { sendEmail } = require("../utils/sendEmail");
 
-router.post('/', checkAuth, async (req, res) => {
+router.post("/", checkAuth, async (req, res) => {
   const transaction = await db.sequelize.transaction();
 
   try {
+    let taxAmount = 0;
+    const tax_query =
+      "SELECT * FROM lavup_db.sysVars where label = 'Tax value'";
+    const tax_data = await db.sequelize.query(tax_query, {
+      type: db.sequelize.QueryTypes.SELECT,
+    });
+    taxAmount = parseFloat(tax_data[0].value);
     const {
       customerId,
       totalItems,
@@ -25,7 +32,7 @@ router.post('/', checkAuth, async (req, res) => {
       email,
     } = req.body;
     const orderValue = cart.map((e) => e.price).reduce((a, b) => a + b);
-    const status = 'inQueue';
+    const status = "inQueue";
 
     let deliveryDate = null;
     if (assignDate) {
@@ -35,8 +42,8 @@ router.post('/', checkAuth, async (req, res) => {
     const orderData = {
       customerId,
       orderValue,
-      tax: orderValue * (22 / 100),
-      totalOrderAmount: orderValue + orderValue * (22 / 100),
+      tax: orderValue * (taxAmount / 100),
+      totalOrderAmount: orderValue + orderValue * (taxAmount / 100),
       totalItems,
       orderType,
       driverId,
@@ -69,6 +76,8 @@ router.post('/', checkAuth, async (req, res) => {
           unitPrice: e.unitPrice,
           itemId: e.id,
           needIron: e.needIron,
+          subTotal: e.unitPrice + e.unitPrice * (taxAmount / 100),
+          unitsPurchased:1
         });
       }
       e.idx = i + 1;
@@ -83,12 +92,12 @@ router.post('/', checkAuth, async (req, res) => {
 
     await db.laundry_order_item.bulkCreate(cartBulk, { transaction });
 
-    const title = 'Il tuo ordine è confermato';
+    const title = "Il tuo ordine è confermato";
 
     const templateData = {
       name: user.firstName,
       orderNo: data.dataValues.id,
-      orderDate: moment().format('YYYY-MM-DD'),
+      orderDate: moment().format("YYYY-MM-DD"),
       totalItems,
       orderValue,
       items: cart,
@@ -97,10 +106,10 @@ router.post('/', checkAuth, async (req, res) => {
 
     if (isDeliveryOrder) {
       templateData.shipping = `${user.street1} ${user.street2} ${user.city} ${user.stateRegion} ${user.postalCode}`;
-      templateData.assignDate = moment(assignDate).format('YYYY-MM-DD');
+      templateData.assignDate = moment(assignDate).format("YYYY-MM-DD");
       templateData.assignDateTo = moment(assignDate)
-        .add(7, 'days')
-        .format('YYYY-MM-DD');
+        .add(7, "days")
+        .format("YYYY-MM-DD");
     }
 
     let emailAddress = user.email;
@@ -121,15 +130,15 @@ router.post('/', checkAuth, async (req, res) => {
   }
 });
 
-router.get('/itemList', checkAuth, async (req, res) => {
+router.get("/itemList", checkAuth, async (req, res) => {
   try {
     const items = await db.laundry_item.findAll({
       attributes: [
-        ['itemName', 'name'],
-        'id',
-        ['unitPrice', 'price'],
-        'unitPrice',
-        'itemCategoryId',
+        ["itemName", "name"],
+        "id",
+        ["unitPrice", "price"],
+        "unitPrice",
+        "itemCategoryId",
       ],
       where: {
         status: true,
@@ -158,33 +167,33 @@ router.get('/itemList', checkAuth, async (req, res) => {
   }
 });
 
-router.get('/list/:type', checkAuth, async (req, res) => {
+router.get("/list/:type", checkAuth, async (req, res) => {
   try {
     const { type } = req.params;
 
     const query = {
-      order: db.sequelize.literal('laundry_order.id DESC'),
+      order: db.sequelize.literal("laundry_order.id DESC"),
       // raw: true,
       include: [
         {
           model: db.user,
-          as: 'driver',
-          attributes: ['firstName', 'lastName', 'fullName'],
+          as: "driver",
+          attributes: ["firstName", "lastName", "fullName"],
           required: false,
         },
         {
           model: db.user,
-          as: 'customer',
+          as: "customer",
           attributes: [
-            'firstName',
-            'lastName',
-            'address',
-            'street1',
-            'street2',
-            'city',
-            'stateRegion',
-            'postalCode',
-            'fullName',
+            "firstName",
+            "lastName",
+            "address",
+            "street1",
+            "street2",
+            "city",
+            "stateRegion",
+            "postalCode",
+            "fullName",
           ],
           required: false,
         },
@@ -195,9 +204,9 @@ router.get('/list/:type', checkAuth, async (req, res) => {
       ],
     };
 
-    if (type !== 'all') {
+    if (type !== "all") {
       query.where = {
-        status: 'returned',
+        status: "returned",
       };
     }
 
