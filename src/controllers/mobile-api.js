@@ -688,8 +688,8 @@ router.post('/confirmOrder', checkAuth, async (req, res) => {
     const query = `SELECT
     sysVars.value as tax_percentage,
     round(round((subtotal.sum ),1),2) as subtotal,
-    (round(round((subtotal.sum ),1),2) * ((sysVars.value + 100)/100)) as grandTotal,
-    (round(round((subtotal.sum ),1),2) * ((sysVars.value)/100)) as vat,
+    (round(round((subtotal.sum * ((sysVars.value + 100)/100) ),1),2) ) as grandTotal,
+    (round(round((subtotal.sum * ((sysVars.value)/100)),1),2) ) as vat,
     count.count
     FROM (
 
