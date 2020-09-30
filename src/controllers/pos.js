@@ -17,7 +17,8 @@ router.post("/", checkAuth, async (req, res) => {
     const tax_data = await db.sequelize.query(tax_query, {
       type: db.sequelize.QueryTypes.SELECT,
     });
-    taxAmount = parseFloat(tax_data[0].value);
+    // 22
+    taxAmount = (parseFloat(tax_data[0].value) + 100) / 100;
     const {
       customerId,
       totalItems,
@@ -42,8 +43,8 @@ router.post("/", checkAuth, async (req, res) => {
     const orderData = {
       customerId,
       orderValue,
-      tax: orderValue * (taxAmount / 100),
-      totalOrderAmount: orderValue + orderValue * (taxAmount / 100),
+      tax: orderValue * taxAmount - orderValue,
+      totalOrderAmount: orderValue * taxAmount,
       totalItems,
       orderType,
       driverId,
@@ -76,8 +77,8 @@ router.post("/", checkAuth, async (req, res) => {
           unitPrice: e.unitPrice,
           itemId: e.id,
           needIron: e.needIron,
-          subTotal: e.unitPrice + e.unitPrice * (taxAmount / 100),
-          unitsPurchased:1
+          subTotal: (e.unitPrice * taxAmount).toFixed(1),
+          unitsPurchased: 1,
         });
       }
       e.idx = i + 1;
@@ -102,6 +103,7 @@ router.post("/", checkAuth, async (req, res) => {
       orderValue,
       items: cart,
       title,
+      // shpping
     };
 
     if (isDeliveryOrder) {
