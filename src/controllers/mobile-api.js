@@ -748,7 +748,7 @@ router.post('/confirmOrder', checkAuth, async (req, res) => {
       const tax_data = await db.sequelize.query(tax_query, {
         type: db.sequelize.QueryTypes.SELECT,
       });
-
+ // tax amount = 22 +100/100 = 1.22
       tax_amount = (parseFloat(tax_data[0].value) + 100) / 100;
 
       for (const elements of cart_data) {
