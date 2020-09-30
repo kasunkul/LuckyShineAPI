@@ -100,7 +100,7 @@ router.post("/", checkAuth, async (req, res) => {
       orderNo: data.dataValues.id,
       orderDate: moment().format("YYYY-MM-DD"),
       totalItems,
-      orderValue,
+      orderValue: (orderValue * taxAmount).toFixed(2),
       items: cart,
       title,
       // shpping
