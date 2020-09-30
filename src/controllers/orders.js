@@ -462,7 +462,7 @@ router.put("/update-status", checkAuth, async (req, res) => {
     }
 
     // emailing part
-    let title = "Il tuo ordine è stato inviato al team lavup";
+    let title = "Il tuo ordine è stato inviato al team LavUp";
 
     if (status === "in delivery") {
       title =

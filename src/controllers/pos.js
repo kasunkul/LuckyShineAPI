@@ -102,6 +102,7 @@ router.post("/", checkAuth, async (req, res) => {
       orderValue,
       items: cart,
       title,
+      // shpping
     };
 
     if (isDeliveryOrder) {
