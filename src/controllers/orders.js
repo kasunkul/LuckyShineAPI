@@ -488,8 +488,8 @@ router.put("/update-status", checkAuth, async (req, res) => {
         title,
       };
 
+      templateData.shipping = `${user.street1} ${user.street2} ${user.city} ${user.stateRegion} ${user.postalCode}`;
       if (order.isDeliveryOrder) {
-        templateData.shipping = `${user.street1} ${user.street2} ${user.city} ${user.stateRegion} ${user.postalCode}`;
         templateData.assignDate = moment(order.deliveryDate).format(
           "YYYY-MM-DD"
         );
