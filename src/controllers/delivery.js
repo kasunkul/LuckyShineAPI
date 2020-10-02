@@ -1,41 +1,41 @@
-const express = require("express");
+const express = require('express');
 
 const router = express.Router();
-const db = require("../../models");
+const db = require('../../models');
 
 const { Op } = db.Sequelize;
-const checkAuth = require("../middleware/auth");
+const checkAuth = require('../middleware/auth');
 
-router.get("/", checkAuth, async (req, res) => {
+router.get('/', checkAuth, async (req, res) => {
   try {
     // Total delivery orders and items
     const [orderToPick, orderToDeliver, items, delivered] = await Promise.all([
       db.laundry_order.count({
         where: {
           status: {
-            [Op.in]: ["pending to pick"],
+            [Op.in]: ['pending to pick'],
           },
           isDeliveryOrder: true,
         },
       }),
       db.laundry_order.count({
         where: {
-          status: "ready",
+          status: 'ready',
         },
         isDeliveryOrder: true,
       }),
       db.laundry_order.findAll({
         attributes: [
-          "id",
-          "assignDate",
-          "d",
-          "startLocation",
-          "status",
-          "addressline1",
-          "addressline2",
-          "city",
-          "specialLandmarks",
-          "address",
+          'id',
+          'assignDate',
+          'd',
+          'startLocation',
+          'status',
+          'addressline1',
+          'addressline2',
+          'city',
+          'specialLandmarks',
+          'address',
         ],
         where: {
           [Op.and]: [
@@ -44,22 +44,22 @@ router.get("/", checkAuth, async (req, res) => {
                 AND YEAR(laundry_order.createdAt) = YEAR(CURDATE())`),
           ],
           status: {
-            [Op.in]: ["delivered", "in delivery", "pending to pick", "ready"],
+            [Op.in]: ['delivered', 'in delivery', 'pending to pick', 'ready'],
           },
           isDeliveryOrder: true,
         },
         include: [
           {
             model: db.user,
-            as: "driver",
+            as: 'driver',
             required: true,
           },
         ],
-        order: db.sequelize.literal("laundry_order.id DESC"),
+        order: db.sequelize.literal('laundry_order.id DESC'),
       }),
       db.laundry_order.count({
         where: {
-          status: "delivered",
+          status: 'delivered',
         },
         isDeliveryOrder: true,
       }),
@@ -76,24 +76,24 @@ router.get("/", checkAuth, async (req, res) => {
   }
 });
 
-router.get("/list/:type", checkAuth, async (req, res) => {
+router.get('/list/:type', checkAuth, async (req, res) => {
   try {
     const { type } = req.params;
 
     const query = {
       attributes: [
-        "id",
-        "assignDate",
-        "d",
-        "startLocation",
-        "status",
-        "addressline1",
-        "addressline2",
-        "city",
-        "specialLandmarks",
-        "address",
+        'id',
+        'assignDate',
+        'd',
+        'startLocation',
+        'status',
+        'addressline1',
+        'addressline2',
+        'city',
+        'specialLandmarks',
+        'address',
       ],
-      order: db.sequelize.literal("laundry_order.id DESC"),
+      order: db.sequelize.literal('laundry_order.id DESC'),
       // raw: true,
       include: [
         // {
@@ -104,30 +104,30 @@ router.get("/list/:type", checkAuth, async (req, res) => {
         // },
         {
           model: db.user,
-          as: "customer",
+          as: 'customer',
           attributes: [
-            "firstName",
-            "lastName",
-            "address",
-            "street1",
-            "street2",
-            "city",
-            "stateRegion",
-            "postalCode",
-            "fullName",
-            "contactNumber",
+            'firstName',
+            'lastName',
+            'address',
+            'street1',
+            'street2',
+            'city',
+            'stateRegion',
+            'postalCode',
+            'fullName',
+            'contactNumber',
           ],
           required: false,
         },
       ],
       where: {
         status: {
-          [Op.in]: ["delivered", "in delivery", "pending to pick", "ready"],
+          [Op.in]: ['delivered', 'in delivery', 'pending to pick', 'ready'],
         },
       },
     };
 
-    if (type !== "all") {
+    if (type !== 'all') {
       query.where = {
         status: type,
       };
@@ -152,7 +152,7 @@ router.get("/list/:type", checkAuth, async (req, res) => {
   }
 });
 
-router.post("/print", async (req, res) => {
+router.post('/print', async (req, res) => {
   try {
     await db.laundry_order.update(
       {
@@ -162,7 +162,7 @@ router.post("/print", async (req, res) => {
         where: {
           id: req.body.orderId,
         },
-      }
+      },
     );
     res.sendStatus(200);
   } catch (error) {

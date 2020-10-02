@@ -114,7 +114,6 @@ router.get('/', checkAuth, async (req, res) => {
       }),
     ]);
 
-
     // Monthly top performers
     const query = `SELECT 
     CONCAT(firstName, ' ', lastName) AS name,
@@ -138,7 +137,6 @@ WHERE
     });
 
     const inactive = totalEmp - activeEmp;
-
 
     return res.status(200).json({
       totalEmp,

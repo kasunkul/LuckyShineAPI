@@ -1,24 +1,17 @@
-const express = require("express");
-const moment = require("moment");
+const express = require('express');
+const moment = require('moment');
 
 const router = express.Router();
-const db = require("../../models");
-const checkAuth = require("../middleware/auth");
+const db = require('../../models');
+const checkAuth = require('../middleware/auth');
 
-const { sendEmail } = require("../utils/sendEmail");
+const { sendEmail } = require('../utils/sendEmail');
+const { cal } = require('../utils/priceCal');
 
-router.post("/", checkAuth, async (req, res) => {
+router.post('/', checkAuth, async (req, res) => {
   const transaction = await db.sequelize.transaction();
 
   try {
-    let taxAmount = 0;
-    const tax_query =
-      "SELECT * FROM lavup_db.sysVars where label = 'Tax value'";
-    const tax_data = await db.sequelize.query(tax_query, {
-      type: db.sequelize.QueryTypes.SELECT,
-    });
-    // 22
-    taxAmount = (parseFloat(tax_data[0].value) + 100) / 100;
     const {
       customerId,
       totalItems,
@@ -32,8 +25,8 @@ router.post("/", checkAuth, async (req, res) => {
       isDeliveryOrder,
       email,
     } = req.body;
-    const orderValue = cart.map((e) => e.price).reduce((a, b) => a + b);
-    const status = "inQueue";
+    // const orderValue = cart.map((e) => e.price).reduce((a, b) => a + b);
+    const status = 'inQueue';
 
     let deliveryDate = null;
     if (assignDate) {
@@ -42,9 +35,9 @@ router.post("/", checkAuth, async (req, res) => {
 
     const orderData = {
       customerId,
-      orderValue,
-      tax: orderValue * taxAmount - orderValue,
-      totalOrderAmount: orderValue * taxAmount,
+      // orderValue,
+      // tax: orderValue * taxAmount - orderValue,
+      // totalOrderAmount: orderValue * taxAmount,
       totalItems,
       orderType,
       driverId,
@@ -69,19 +62,36 @@ router.post("/", checkAuth, async (req, res) => {
 
     const data = await db.laundry_order.create(orderData, { transaction });
 
-    const cartBulk = [];
-    cart.forEach((e, i) => {
-      for (let index = 0; index < e.qty; index++) {
-        cartBulk.push({
-          laundryOrderId: data.dataValues.id,
-          unitPrice: e.unitPrice,
-          itemId: e.id,
-          needIron: e.needIron,
-          subTotal: (e.unitPrice * taxAmount).toFixed(1),
-          unitsPurchased: 1,
-        });
-      }
-      e.idx = i + 1;
+    const {
+      orderValue, tax, totalOrderAmount, cartBulk,
+    } = await cal(
+      cart,
+      data.dataValues.id,
+    );
+
+    // const cartBulk = [];
+    // cart.forEach((e, i) => {
+    //   for (let index = 0; index < e.qty; index++) {
+    //     cartBulk.push({
+    //       laundryOrderId: data.dataValues.id,
+    //       unitPrice: e.unitPrice,
+    //       itemId: e.id,
+    //       needIron: e.needIron,
+    //       subTotal: (e.unitPrice * taxAmount).toFixed(1),
+    //       unitsPurchased: 1,
+    //     });
+    //   }
+    //   e.idx = i + 1;
+    // });
+    await db.laundry_order.update({
+      totalOrderAmount,
+      orderValue,
+      tax,
+    }, {
+      where: {
+        id: data.dataValues.id,
+      },
+      transaction,
     });
 
     const user = await db.user.findOne({
@@ -93,14 +103,14 @@ router.post("/", checkAuth, async (req, res) => {
 
     await db.laundry_order_item.bulkCreate(cartBulk, { transaction });
 
-    const title = "Il tuo ordine è confermato";
+    const title = 'Il tuo ordine è confermato';
 
     const templateData = {
       name: user.firstName,
       orderNo: data.dataValues.id,
-      orderDate: moment().format("YYYY-MM-DD"),
+      orderDate: moment().format('YYYY-MM-DD'),
       totalItems,
-      orderValue: (orderValue * taxAmount).toFixed(2),
+      orderValue: totalOrderAmount,
       items: cart,
       title,
       // shpping
@@ -108,10 +118,10 @@ router.post("/", checkAuth, async (req, res) => {
 
     if (isDeliveryOrder) {
       templateData.shipping = `${user.street1} ${user.street2} ${user.city} ${user.stateRegion} ${user.postalCode}`;
-      templateData.assignDate = moment(assignDate).format("YYYY-MM-DD");
+      templateData.assignDate = moment(assignDate).format('YYYY-MM-DD');
       templateData.assignDateTo = moment(assignDate)
-        .add(7, "days")
-        .format("YYYY-MM-DD");
+        .add(7, 'days')
+        .format('YYYY-MM-DD');
     }
 
     let emailAddress = user.email;
@@ -132,15 +142,15 @@ router.post("/", checkAuth, async (req, res) => {
   }
 });
 
-router.get("/itemList", checkAuth, async (req, res) => {
+router.get('/itemList', checkAuth, async (req, res) => {
   try {
     const items = await db.laundry_item.findAll({
       attributes: [
-        ["itemName", "name"],
-        "id",
-        ["unitPrice", "price"],
-        "unitPrice",
-        "itemCategoryId",
+        ['itemName', 'name'],
+        'id',
+        ['unitPrice', 'price'],
+        'unitPrice',
+        'itemCategoryId',
       ],
       where: {
         status: true,
@@ -169,33 +179,33 @@ router.get("/itemList", checkAuth, async (req, res) => {
   }
 });
 
-router.get("/list/:type", checkAuth, async (req, res) => {
+router.get('/list/:type', checkAuth, async (req, res) => {
   try {
     const { type } = req.params;
 
     const query = {
-      order: db.sequelize.literal("laundry_order.id DESC"),
+      order: db.sequelize.literal('laundry_order.id DESC'),
       // raw: true,
       include: [
         {
           model: db.user,
-          as: "driver",
-          attributes: ["firstName", "lastName", "fullName"],
+          as: 'driver',
+          attributes: ['firstName', 'lastName', 'fullName'],
           required: false,
         },
         {
           model: db.user,
-          as: "customer",
+          as: 'customer',
           attributes: [
-            "firstName",
-            "lastName",
-            "address",
-            "street1",
-            "street2",
-            "city",
-            "stateRegion",
-            "postalCode",
-            "fullName",
+            'firstName',
+            'lastName',
+            'address',
+            'street1',
+            'street2',
+            'city',
+            'stateRegion',
+            'postalCode',
+            'fullName',
           ],
           required: false,
         },
@@ -206,9 +216,9 @@ router.get("/list/:type", checkAuth, async (req, res) => {
       ],
     };
 
-    if (type !== "all") {
+    if (type !== 'all') {
       query.where = {
-        status: "returned",
+        status: 'returned',
       };
     }
 

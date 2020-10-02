@@ -48,9 +48,9 @@ router.post('/signup', async (req, res) => {
 
     if (isExists) {
       return res.status(200).json({
-        status : 0,
-        title: "Email già esistente.",
-        message: "Account disponibile con il seguente email. Contatta il team di lavup per ulteriori difficoltà",
+        status: 0,
+        title: 'Email già esistente.',
+        message: 'Account disponibile con il seguente email. Contatta il team di lavup per ulteriori difficoltà',
       });
     }
 
@@ -212,7 +212,7 @@ router.get('/getAllItemsFromCategories/:CatId', checkAuth, async (req, res) => {
 
     tax = (parseFloat(tax_data[0].value) + 100) / 100;
 
-    console.error("tax -- ",tax);
+    console.error('tax -- ', tax);
 
     const query = `SELECT 
     laundry_items.id,
@@ -237,7 +237,7 @@ router.get('/getAllItemsFromCategories/:CatId', checkAuth, async (req, res) => {
       type: db.sequelize.QueryTypes.SELECT,
     });
 
-    console.log("data -- ",data);
+    console.log('data -- ', data);
 
     return res.status(200).json(data);
   } catch (error) {
@@ -329,7 +329,7 @@ router.get('/getCartItems', checkAuth, async (req, res) => {
       type: db.sequelize.QueryTypes.SELECT,
     });
 
-    console.log("data -- ",data);
+    console.log('data -- ', data);
 
     return res.status(200).json(data);
   } catch (error) {
@@ -623,7 +623,6 @@ router.post('/updateCartItemNotes', checkAuth, async (req, res) => {
 
 router.get('/getCartPrices', checkAuth, async (req, res) => {
   try {
-
     let tax = 0;
     const tax_query = 'SELECT * FROM lavup_db.sysVars where label = \'Tax value\'';
 
@@ -748,7 +747,7 @@ router.post('/confirmOrder', checkAuth, async (req, res) => {
       const tax_data = await db.sequelize.query(tax_query, {
         type: db.sequelize.QueryTypes.SELECT,
       });
- // tax amount = 22 +100/100 = 1.22
+      // tax amount = 22 +100/100 = 1.22
       tax_amount = (parseFloat(tax_data[0].value) + 100) / 100;
 
       for (const elements of cart_data) {
@@ -764,8 +763,6 @@ router.post('/confirmOrder', checkAuth, async (req, res) => {
             notes: elements.notes,
           });
         }
-
-        
       }
     }
 
