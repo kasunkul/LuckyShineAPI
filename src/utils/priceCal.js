@@ -49,19 +49,24 @@ async function cal(cart, orderId) {
       cartBulk.map((e) => Number(e.subTotal)).reduce((a, b) => a + b, 0),
     ).toFixed(2);
 
+    const totalUnitPrices = parseFloat(
+      cartBulk.map((e) => Number(e.unitPrice)).reduce((a, b) => a + b, 0),
+    ).toFixed(2);
+
     // tax
-    const tax = parseFloat(orderValue * taxAmount - orderValue).toFixed(2);
+
+    const tax = parseFloat(orderValue - totalUnitPrices).toFixed(2);
 
     // total amount
-    const totalOrderAmount = parseFloat(tax, 10) + parseFloat(orderValue, 10);
-    console.log(
-      'order value',
-      orderValue,
-      'tax',
-      tax,
-      'total',
-      totalOrderAmount,
-    );
+    const totalOrderAmount = orderValue;
+    // console.log(
+    //   "order value",
+    //   orderValue,
+    //   "tax",
+    //   tax,
+    //   "total",
+    //   totalOrderAmount
+    // );
 
     // ===============> return <===============
     const data = {

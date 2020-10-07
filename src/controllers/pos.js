@@ -148,10 +148,12 @@ router.get('/itemList', checkAuth, async (req, res) => {
       attributes: [
         ['itemName', 'name'],
         'id',
+         'image',
         ['unitPrice', 'price'],
         'unitPrice',
         'itemCategoryId',
       ],
+
       where: {
         status: true,
       },

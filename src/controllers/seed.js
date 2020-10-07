@@ -4,6 +4,7 @@ const db = require('../../models');
 
 const router = express.Router();
 const { sendEmail } = require('../utils/sendEmail');
+const { cal } = require('../utils/priceCal');
 
 router.post('/', async (req, res) => {
   try {
@@ -53,10 +54,38 @@ router.get('/v2', async (req, res) => {
   }
 });
 
-// var req = unirest("POST", "");
+router.get('/shop', async (req, res) => {
+  try {
+    // 3.5 - 2.87 = 0.63
+    const orders = [
+      {
+        qty: 2,
+        unitPrice: 2.87,
+        id: 1,
+        needIron: true,
+      },
+      {
+        qty: 2,
+        unitPrice: 6.15,
+        id: 1,
+        needIron: true,
+      },
+      {
+        qty: 2,
+        unitPrice: 2.62,
+        id: 1,
+        needIron: true,
+      },
+    ];
+    const data = await cal(orders, 1);
+    console.log('order total', data.orderValue); // 28.2
+    console.log('tax', data.tax); //
+    console.log('total order amount', data.totalOrderAmount); // 28.2
 
-// req.headers({
-
-// });
+    res.sendStatus(200);
+  } catch (error) {
+    res.sendStatus(500);
+  }
+});
 
 module.exports = router;

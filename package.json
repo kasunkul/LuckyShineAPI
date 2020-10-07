@@ -32,6 +32,7 @@
     "mysql2": "^2.1.0",
     "request": "^2.88.2",
     "sequelize": "^6.3.3",
+    "swagger-ui-express": "^4.1.4",
     "yamlparser": "0.0.2"
   },
   "devDependencies": {
