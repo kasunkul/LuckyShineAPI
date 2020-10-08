@@ -60,29 +60,29 @@ router.get('/shop', async (req, res) => {
     const orders = [
       {
         qty: 2,
-        unitPrice: 2.87,
+        unitPrice: 0.98,
         id: 1,
         needIron: true,
       },
-      {
-        qty: 2,
-        unitPrice: 6.15,
-        id: 1,
-        needIron: true,
-      },
-      {
-        qty: 2,
-        unitPrice: 2.62,
-        id: 1,
-        needIron: true,
-      },
+      // {
+      //   qty: 2,
+      //   unitPrice: 6.15,
+      //   id: 1,
+      //   needIron: true,
+      // },
+      // {
+      //   qty: 2,
+      //   unitPrice: 2.62,
+      //   id: 1,
+      //   needIron: true,
+      // },
     ];
     const data = await cal(orders, 1);
     console.log('order total', data.orderValue); // 28.2
     console.log('tax', data.tax); //
     console.log('total order amount', data.totalOrderAmount); // 28.2
 
-    res.sendStatus(200);
+    res.status(200).json(data);
   } catch (error) {
     res.sendStatus(500);
   }

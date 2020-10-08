@@ -148,7 +148,7 @@ router.get('/itemList', checkAuth, async (req, res) => {
       attributes: [
         ['itemName', 'name'],
         'id',
-         'image',
+        'image',
         ['unitPrice', 'price'],
         'unitPrice',
         'itemCategoryId',
@@ -170,10 +170,20 @@ router.get('/itemList', checkAuth, async (req, res) => {
         },
       ],
     });
+    let taxAmount = 0;
+    const taxQ = "SELECT * FROM lavup_db.sysVars where label = 'Tax value'";
+    const taxD = await db.sequelize.query(taxQ, {
+      type: db.sequelize.QueryTypes.SELECT,
+    });
+
+    taxAmount = (parseFloat(taxD[0].value) + 100) / 100;
+
     items.forEach((element, i, a) => {
       a[i].qty = 1;
       element.needIron = false;
+      element.price = (Number(element.unitPrice) * Number(taxAmount)).toFixed(1);
     });
+    console.log('items', items);
     res.status(200).json({ items, categories });
   } catch (error) {
     console.log(error);

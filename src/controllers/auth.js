@@ -104,7 +104,7 @@ router.post('/login', async (req, res) => {
         email: req.body.email,
         status: 'active',
         role: {
-          [Op.in]: ['admin', 'storeManager', 'labManager','driver'],
+          [Op.in]: ['admin', 'storeManager', 'labManager', 'driver'],
         },
       },
     });
