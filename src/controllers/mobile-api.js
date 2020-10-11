@@ -8,6 +8,45 @@ const checkAuth = require('../middleware/auth');
 
 const router = express.Router();
 
+router.get('/getPostalAndCities', async (req, res) => {
+  try {
+    
+    const data = {
+      "zipcodes":[
+          "35100",
+          "35121",
+          "35122",
+          "35123",
+          "35124",
+          "35125",
+          "35126",
+          "35127",
+          "35128",
+          "35129",
+          "35131",
+          "35133",
+          "35134",
+          "35135",
+          "35136",
+          "35137",
+          "35138",
+          "35139",
+          "35141"
+      ],
+      "cities":[
+          "Padova",
+          "Albignasego"
+      ]
+  };
+
+    return res.status(200).json(data);
+  } catch (error) {
+    console.error(error);
+    res.sendStatus(500);
+  }
+});
+
+
 router.post('/updateUserField', checkAuth, async (req, res) => {
   try {
     const { fieldName } = req.body;
