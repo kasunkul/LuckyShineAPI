@@ -13,7 +13,8 @@ router.get('/getPostalAndCities', async (req, res) => {
     
     const data = {
       "zipcodes":[
-          "35100",
+          "35010",
+          "35020",
           "35121",
           "35122",
           "35123",
