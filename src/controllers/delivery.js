@@ -36,6 +36,10 @@ router.get('/', checkAuth, async (req, res) => {
           'city',
           'specialLandmarks',
           'address',
+          'pickUpDate',
+          'pickUpTime',
+          'deliveryTime',
+          'deliveryDate'
         ],
         where: {
           [Op.and]: [
@@ -92,6 +96,10 @@ router.get('/list/:type', checkAuth, async (req, res) => {
         'city',
         'specialLandmarks',
         'address',
+        'pickUpDate',
+        'pickUpTime',
+        'deliveryTime',
+        'deliveryDate'
       ],
       order: db.sequelize.literal('laundry_order.id DESC'),
       // raw: true,
@@ -141,10 +149,11 @@ router.get('/list/:type', checkAuth, async (req, res) => {
 
     const data = await db.laundry_order.findAll(query);
 
-    data.forEach((element) => {
-      // element.driver = `${element["driver.firstName"]} ${element["driver.lastName"]}`;
-      // element.customer = `${element["customer.firstName"]} ${element["customer.lastName"]}`;
-    });
+    // data.forEach((element) => {
+    //   console.log(element)
+    //   // element.driver = `${element["driver.firstName"]} ${element["driver.lastName"]}`;
+    //   // element.customer = `${element["customer.firstName"]} ${element["customer.lastName"]}`;
+    // });
 
     return res.status(200).json(data);
   } catch (error) {

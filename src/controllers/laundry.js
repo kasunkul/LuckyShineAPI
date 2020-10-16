@@ -143,12 +143,17 @@ FROM
       }),
       db.sequelize.query(highestItemQuery, {
         type: db.sequelize.QueryTypes.SELECT,
+        logging:console.log
       }),
       db.sequelize.query(leastItemQuery, {
         type: db.sequelize.QueryTypes.SELECT,
+        logging:console.log 
       }),
 
     ]);
+    
+
+    console.log('higest sale',highestSale[0])
 
     return res.status(200).json({
       itemsCount,
