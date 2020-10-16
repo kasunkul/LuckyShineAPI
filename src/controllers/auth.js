@@ -130,6 +130,7 @@ router.post('/login', async (req, res) => {
     );
     let redirectUrl;
     if (isUserExist.role === 'admin') {
+      
       redirectUrl = '/dashboard';
     } else if (isUserExist.role === 'labManager') {
       redirectUrl = '/dashboard';
