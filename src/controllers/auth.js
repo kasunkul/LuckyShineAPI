@@ -57,7 +57,7 @@ router.post('/signup-verify', async (req, res) => {
         where: {
           id,
         },
-      },
+      }
     );
     return res.sendStatus(200);
   } catch (error) {
@@ -88,7 +88,7 @@ router.put('/set-password', async (req, res) => {
         where: {
           id,
         },
-      },
+      }
     );
     return res.sendStatus(200);
   } catch (error) {
@@ -126,14 +126,15 @@ router.post('/login', async (req, res) => {
       {
         id,
       },
-      'lavup',
+      'lavup'
     );
     let redirectUrl;
     if (isUserExist.role === 'admin') {
-      
       redirectUrl = '/dashboard';
     } else if (isUserExist.role === 'labManager') {
       redirectUrl = '/dashboard';
+    } else if (isUserExist.role === 'storeManager') {
+      redirectUrl = '/pos';
     } else {
       redirectUrl = '/dashboard';
     }
@@ -144,7 +145,7 @@ router.post('/login', async (req, res) => {
         where: {
           id: isUserExist.id,
         },
-      },
+      }
     );
 
     return res.status(200).json({
@@ -190,7 +191,7 @@ router.post('/forget-password', async (req, res) => {
         where: {
           email,
         },
-      },
+      }
     );
 
     return res.sendStatus(200);
