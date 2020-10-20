@@ -132,11 +132,11 @@ router.post('/login', async (req, res) => {
     if (isUserExist.role === 'admin') {
       redirectUrl = '/dashboard';
     } else if (isUserExist.role === 'labManager') {
-      redirectUrl = '/dashboard';
+      redirectUrl = '/orders-list';
     } else if (isUserExist.role === 'storeManager') {
       redirectUrl = '/pos';
     } else {
-      redirectUrl = '/dashboard';
+      redirectUrl = '/deliveries';
     }
 
     db.user.update(
