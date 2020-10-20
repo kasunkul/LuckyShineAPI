@@ -1,23 +1,23 @@
 const jwt = require('jsonwebtoken');
 const db = require('../../models');
 
-module.exports = async (req, res, next) => {
-  try {
-    const token = req.headers.authorization.split(' ')[1];
-    const decoded = jwt.verify(token, 'lavup');
-    req.user = decoded;
-    // const { id } = req.user;
+module.exports = async(req, res, next) => {
+    try {
+        const token = req.headers.authorization.split(' ')[1];
+        const decoded = jwt.verify(token, 'lavup');
 
-    db.user.update(
-      { lastSignOff: new Date() },
-      {
-        where: {
-          id: decoded.id,
-        },
-      },
-    );
-    next();
-  } catch (error) {
-    res.sendStatus(401);
-  }
+        console.log("decoded -- ", decoded);
+
+        req.user = decoded;
+        // const { id } = req.user;
+
+        db.user.update({ lastSignOff: new Date() }, {
+            where: {
+                id: decoded.id,
+            },
+        }, );
+        next();
+    } catch (error) {
+        res.sendStatus(401);
+    }
 };
