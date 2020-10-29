@@ -183,18 +183,24 @@ router.get('/itemList', checkAuth, async (req, res) => {
     items.forEach((element, i, a) => {
       a[i].qty = 1;
       element.needIron = false;
-      if (element.DiscountPrice) {
-        console.log('come to this if',element.DiscountPrice)
-        element.price = (
-          Number(element.DiscountPrice) * Number(taxAmount)
-        ).toFixed(1);
-      } else {
-        element.price = (Number(element.unitPrice) * Number(taxAmount)).toFixed(
-          1
-        );
-      }
+      // if (element.DiscountPrice) {
+      //   console.log('come to this if',element.DiscountPrice)
+      //   element.price = (
+      //     Number(element.DiscountPrice) * Number(taxAmount)
+      //   ).toFixed(1);
+      // } else {
+      //   element.price = (Number(element.unitPrice) * Number(taxAmount)).toFixed(
+      //     1
+      //   );
+      // }
+      element.price = (Number(element.unitPrice) * Number(taxAmount)).toFixed(
+        1
+      );
+      element.DiscountPrice = (
+        Number(element.DiscountPrice) * Number(taxAmount)
+      ).toFixed(1);
     });
-    
+
     res.status(200).json({ items, categories });
   } catch (error) {
     console.log(error);

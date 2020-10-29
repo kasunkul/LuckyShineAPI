@@ -62,6 +62,7 @@ router.put('/:id', checkAuth, async (req, res) => {
 
     return res.sendStatus(200);
   } catch (error) {
+    console.log(error)
     return res.sendStatus(500);
   }
 });
