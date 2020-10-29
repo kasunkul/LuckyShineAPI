@@ -1,5 +1,5 @@
-"use strict";
-const { Model } = require("sequelize");
+'use strict';
+const { Model } = require('sequelize');
 module.exports = (sequelize, Sequelize) => {
   class laundry_item extends Model {
     /**
@@ -9,7 +9,7 @@ module.exports = (sequelize, Sequelize) => {
      */
     static associate(models) {
       laundry_item.belongsTo(models.item_category, {
-        foreignKey: "itemCategoryId",
+        foreignKey: 'itemCategoryId',
       });
     }
   }
@@ -24,11 +24,11 @@ module.exports = (sequelize, Sequelize) => {
       itemCategoryId: {
         type: Sequelize.INTEGER,
         references: {
-          model: "item_categories",
-          key: "id",
+          model: 'item_categories',
+          key: 'id',
         },
-        onUpdate: "cascade",
-        onDelete: "cascade",
+        onUpdate: 'cascade',
+        onDelete: 'cascade',
       },
       noOfUnits: {
         type: Sequelize.INTEGER,
@@ -53,10 +53,13 @@ module.exports = (sequelize, Sequelize) => {
       description: {
         type: Sequelize.STRING,
       },
+      DiscountPrice: {
+        type: Sequelize.DOUBLE(11, 2),
+      },
     },
     {
       sequelize,
-      modelName: "laundry_item",
+      modelName: 'laundry_item',
     }
   );
   return laundry_item;

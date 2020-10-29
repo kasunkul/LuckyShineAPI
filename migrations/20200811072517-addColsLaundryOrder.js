@@ -2,6 +2,8 @@
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
+    // return Promise.resolve()
+
     await Promise.all([
       queryInterface.addColumn("laundry_orders", "driverId", {
         type: Sequelize.INTEGER,

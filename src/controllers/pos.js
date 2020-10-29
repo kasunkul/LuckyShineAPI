@@ -62,11 +62,9 @@ router.post('/', checkAuth, async (req, res) => {
 
     const data = await db.laundry_order.create(orderData, { transaction });
 
-    const {
-      orderValue, tax, totalOrderAmount, cartBulk,
-    } = await cal(
+    const { orderValue, tax, totalOrderAmount, cartBulk } = await cal(
       cart,
-      data.dataValues.id,
+      data.dataValues.id
     );
 
     // const cartBulk = [];
@@ -83,16 +81,19 @@ router.post('/', checkAuth, async (req, res) => {
     //   }
     //   e.idx = i + 1;
     // });
-    await db.laundry_order.update({
-      totalOrderAmount,
-      orderValue,
-      tax,
-    }, {
-      where: {
-        id: data.dataValues.id,
+    await db.laundry_order.update(
+      {
+        totalOrderAmount,
+        orderValue,
+        tax,
       },
-      transaction,
-    });
+      {
+        where: {
+          id: data.dataValues.id,
+        },
+        transaction,
+      }
+    );
 
     const user = await db.user.findOne({
       where: {
@@ -152,6 +153,7 @@ router.get('/itemList', checkAuth, async (req, res) => {
         ['unitPrice', 'price'],
         'unitPrice',
         'itemCategoryId',
+        'DiscountPrice',
       ],
 
       where: {
@@ -181,9 +183,18 @@ router.get('/itemList', checkAuth, async (req, res) => {
     items.forEach((element, i, a) => {
       a[i].qty = 1;
       element.needIron = false;
-      element.price = (Number(element.unitPrice) * Number(taxAmount)).toFixed(1);
+      if (element.DiscountPrice) {
+        console.log('come to this if',element.DiscountPrice)
+        element.price = (
+          Number(element.DiscountPrice) * Number(taxAmount)
+        ).toFixed(1);
+      } else {
+        element.price = (Number(element.unitPrice) * Number(taxAmount)).toFixed(
+          1
+        );
+      }
     });
-    console.log('items', items);
+    
     res.status(200).json({ items, categories });
   } catch (error) {
     console.log(error);
