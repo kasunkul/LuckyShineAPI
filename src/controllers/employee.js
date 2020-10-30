@@ -176,6 +176,7 @@ WHERE
 
     const data = await db.sequelize.query(query, {
       type: db.sequelize.QueryTypes.SELECT,
+     
     });
 
     return res.status(200).json(data);
