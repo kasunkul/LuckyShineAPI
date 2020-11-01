@@ -7,12 +7,12 @@ const checkAuth = require('../middleware/auth');
 
 router.post('/sales', checkAuth, async (req, res) => {
   try {
-    const { startDate, endDate, categoryId, shopId } = req.body;
+    const { startDate, endDate, categoryId, shopId, itemId } = req.body;
 
     let query = `SELECT 
     laundry_items.itemName,
-    unitsPurchased,
-    laundry_order_items.unitPrice,
+    SUM(unitsPurchased) AS unitsPurchased,
+    SUM(laundry_order_items.unitPrice * unitsPurchased) AS unitPrice,
     itemId,
     laundry_items.itemCategoryId
 FROM
@@ -57,9 +57,21 @@ FROM
       }
     }
 
+    if (itemId) {
+      if (query.includes('WHERE')) {
+        query += `AND
+        laundry_order_items.itemId = ${itemId}`;
+      } else {
+        query += `WHERE
+        laundry_order_items.itemId =${itemId}`;
+      }
+    }
+
+    query += ` GROUP BY laundry_items.itemName , laundry_order_items.itemId`;
+
     const data = await db.sequelize.query(query, {
       type: db.sequelize.QueryTypes.SELECT,
-      logging:console.log
+      logging: console.log,
     });
 
     return res.status(200).json(data);
