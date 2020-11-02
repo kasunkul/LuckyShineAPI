@@ -1,18 +1,17 @@
-const express = require('express');
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
-const db = require('../../models');
+const express = require("express");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+const db = require("../../models");
 
 const { Op } = db.Sequelize;
-const checkAuth = require('../middleware/auth');
+const checkAuth = require("../middleware/auth");
 
 const router = express.Router();
 
-router.get('/getPostalAndCities', async(req, res) => {
+router.get("/getPostalAndCities", async(req, res) => {
     try {
-
         const data = {
-            "zipcodes": [
+            zipcodes: [
                 "35010",
                 "35020",
                 "35121",
@@ -32,12 +31,9 @@ router.get('/getPostalAndCities', async(req, res) => {
                 "35137",
                 "35138",
                 "35139",
-                "35141"
+                "35141",
             ],
-            "cities": [
-                "Padova",
-                "Albignasego"
-            ]
+            cities: ["Padova", "Albignasego"],
         };
 
         return res.status(200).json(data);
@@ -47,8 +43,7 @@ router.get('/getPostalAndCities', async(req, res) => {
     }
 });
 
-
-router.post('/updateUserField', checkAuth, async(req, res) => {
+router.post("/updateUserField", checkAuth, async(req, res) => {
     try {
         const { fieldName } = req.body;
         const { value } = req.body;
@@ -68,14 +63,14 @@ router.post('/updateUserField', checkAuth, async(req, res) => {
             });
         }
 
-        return res.status(200).json('Successfully updated User.');
+        return res.status(200).json("Successfully updated User.");
     } catch (error) {
         console.error(error);
         res.sendStatus(500);
     }
 });
 
-router.post('/signup', async(req, res) => {
+router.post("/signup", async(req, res) => {
     try {
         const { email } = req.body;
 
@@ -89,8 +84,8 @@ router.post('/signup', async(req, res) => {
         if (isExists) {
             return res.status(200).json({
                 status: 0,
-                title: 'Email già esistente.',
-                message: 'Account disponibile con il seguente email. Contatta il team di lavup per ulteriori difficoltà',
+                title: "Email già esistente.",
+                message: "Account disponibile con il seguente email. Contatta il team di lavup per ulteriori difficoltà",
             });
         }
 
@@ -99,15 +94,15 @@ router.post('/signup', async(req, res) => {
         const password = bcrypt.hashSync(req.body.password, salt);
         await db.user.create({
             firstName: req.body.firstName,
-            lastName: '',
+            lastName: "",
             dob: req.body.dob,
-            socialSecurityNumber: '',
+            socialSecurityNumber: "",
             email: req.body.email,
             contactNumber: req.body.contactNumber,
-            role: 'customer',
-            status: 'active',
+            role: "customer",
+            status: "active",
             password,
-            occupation: '',
+            occupation: "",
             isAppUser: 1,
         });
 
@@ -118,15 +113,15 @@ router.post('/signup', async(req, res) => {
     }
 });
 
-router.post('/login', async(req, res) => {
+router.post("/login", async(req, res) => {
     try {
         // 1. check whether user exists and active
         const isUserExist = await db.user.findOne({
             where: {
                 email: req.body.email,
-                status: 'active',
+                status: "active",
                 role: {
-                    [Op.in]: ['user', 'admin', 'customer'],
+                    [Op.in]: ["user", "admin", "customer"],
                 },
             },
         });
@@ -147,14 +142,14 @@ router.post('/login', async(req, res) => {
         const token = await jwt.sign({
                 id,
             },
-            'lavup',
+            "lavup"
         );
 
         db.user.update({ lastSignIn: new Date() }, {
             where: {
                 id: isUserExist.id,
             },
-        }, );
+        });
 
         return res.status(200).json({
             access_token: token,
@@ -163,7 +158,7 @@ router.post('/login', async(req, res) => {
                 role: [isUserExist.role],
                 data: {
                     displayName: userName,
-                    photoURL: 'assets/images/avatars/Velazquez.jpg',
+                    photoURL: "assets/images/avatars/Velazquez.jpg",
                     email: isUserExist.email,
                 },
             },
@@ -174,7 +169,7 @@ router.post('/login', async(req, res) => {
     }
 });
 
-router.get('/getProfile', checkAuth, async(req, res) => {
+router.get("/getProfile", checkAuth, async(req, res) => {
     try {
         const userId = req.user.id;
 
@@ -201,7 +196,7 @@ router.get('/getProfile', checkAuth, async(req, res) => {
     }
 });
 
-router.get('/getAllCategories', checkAuth, async(req, res) => {
+router.get("/getAllCategories", checkAuth, async(req, res) => {
     try {
         const query = `(SELECT 
       0 as id,
@@ -228,19 +223,20 @@ router.get('/getAllCategories', checkAuth, async(req, res) => {
     }
 });
 
-router.get('/getAllItemsFromCategories/:CatId', checkAuth, async(req, res) => {
+router.get("/getAllItemsFromCategories/:CatId", checkAuth, async(req, res) => {
     try {
         const { CatId } = req.params;
         const userId = req.user.id;
         let tax = 0;
 
-        let CategoryCheck = '';
+        let CategoryCheck = "";
 
         if (CatId > 0) {
             CategoryCheck += `and itemCategoryId = ${CatId}`;
         }
 
-        const tax_query = 'SELECT * FROM lavup_db.sysVars where label = \'Tax value\'';
+        const tax_query =
+            "SELECT * FROM lavup_db.sysVars where label = 'Tax value'";
 
         const tax_data = await db.sequelize.query(tax_query, {
             type: db.sequelize.QueryTypes.SELECT,
@@ -248,7 +244,7 @@ router.get('/getAllItemsFromCategories/:CatId', checkAuth, async(req, res) => {
 
         tax = (parseFloat(tax_data[0].value) + 100) / 100;
 
-        console.error('tax -- ', tax);
+        console.error("tax -- ", tax);
 
         const query = `SELECT 
     laundry_items.id,
@@ -274,7 +270,7 @@ router.get('/getAllItemsFromCategories/:CatId', checkAuth, async(req, res) => {
             type: db.sequelize.QueryTypes.SELECT,
         });
 
-        console.log('data -- ', data);
+        console.log("data -- ", data);
 
         return res.status(200).json(data);
     } catch (error) {
@@ -283,13 +279,14 @@ router.get('/getAllItemsFromCategories/:CatId', checkAuth, async(req, res) => {
     }
 });
 
-router.post('/getAllItemsSearch', checkAuth, async(req, res) => {
+router.post("/getAllItemsSearch", checkAuth, async(req, res) => {
     try {
-        console.log('req.body....', req.body);
+        console.log("req.body....", req.body);
         const { searchQuery } = req.body;
         const userId = req.user.id;
         let tax = 0;
-        const tax_query = 'SELECT * FROM lavup_db.sysVars where label = \'Tax value\'';
+        const tax_query =
+            "SELECT * FROM lavup_db.sysVars where label = 'Tax value'";
 
         const tax_data = await db.sequelize.query(tax_query, {
             type: db.sequelize.QueryTypes.SELECT,
@@ -297,7 +294,7 @@ router.post('/getAllItemsSearch', checkAuth, async(req, res) => {
 
         tax = (parseFloat(tax_data[0].value) + 100) / 100;
 
-        console.log('searchQuery....', req.body.searchQuery);
+        console.log("searchQuery....", req.body.searchQuery);
 
         const query = `SELECT 
     laundry_items.id,
@@ -319,13 +316,13 @@ router.post('/getAllItemsSearch', checkAuth, async(req, res) => {
   LEFT JOIN (SELECT * FROM cart_items WHERE userId = ${userId}) cart_items ON laundry_items.id = cart_items.itemId
   where laundry_items.status = 1 and laundry_items.itemName LIKE '%${searchQuery}%'`;
 
-        console.log('query....', query);
+        console.log("query....", query);
 
         const data = await db.sequelize.query(query, {
             type: db.sequelize.QueryTypes.SELECT,
         });
 
-        console.log('data....', data);
+        console.log("data....", data);
 
         return res.status(200).json(data);
     } catch (error) {
@@ -334,12 +331,13 @@ router.post('/getAllItemsSearch', checkAuth, async(req, res) => {
     }
 });
 
-router.get('/getCartItems', checkAuth, async(req, res) => {
+router.get("/getCartItems", checkAuth, async(req, res) => {
     try {
         const userId = req.user.id;
 
         let tax = 0;
-        const tax_query = 'SELECT * FROM lavup_db.sysVars where label = \'Tax value\'';
+        const tax_query =
+            "SELECT * FROM lavup_db.sysVars where label = 'Tax value'";
 
         const tax_data = await db.sequelize.query(tax_query, {
             type: db.sequelize.QueryTypes.SELECT,
@@ -368,7 +366,7 @@ router.get('/getCartItems', checkAuth, async(req, res) => {
             type: db.sequelize.QueryTypes.SELECT,
         });
 
-        console.log('data -- ', data);
+        console.log("data -- ", data);
 
         return res.status(200).json(data);
     } catch (error) {
@@ -377,7 +375,7 @@ router.get('/getCartItems', checkAuth, async(req, res) => {
     }
 });
 
-router.post('/addToCart', checkAuth, async(req, res) => {
+router.post("/addToCart", checkAuth, async(req, res) => {
     try {
         const { itemId } = req.body;
         const userId = req.user.id;
@@ -391,12 +389,12 @@ router.post('/addToCart', checkAuth, async(req, res) => {
 
         if (isExists) {
             await db.cart_item.update({
-                units: (isExists.units + 1),
+                units: isExists.units + 1,
             }, {
                 where: {
                     id: isExists.id,
                 },
-            }, );
+            });
         } else {
             const laundry_item = await db.laundry_item.findOne({
                 where: {
@@ -418,14 +416,14 @@ router.post('/addToCart', checkAuth, async(req, res) => {
             });
         }
 
-        return res.status(200).json('Successfully added to Cart.');
+        return res.status(200).json("Successfully added to Cart.");
     } catch (error) {
         console.error(error);
         res.sendStatus(500);
     }
 });
 
-router.post('/removeFromCart', checkAuth, async(req, res) => {
+router.post("/removeFromCart", checkAuth, async(req, res) => {
     try {
         const { itemId } = req.body;
         const userId = req.user.id;
@@ -438,31 +436,31 @@ router.post('/removeFromCart', checkAuth, async(req, res) => {
         });
 
         if (isExists) {
-            if ((isExists.units - 1) > 0) {
+            if (isExists.units - 1 > 0) {
                 await db.cart_item.update({
-                    units: (isExists.units - 1),
+                    units: isExists.units - 1,
                 }, {
                     where: {
                         id: isExists.id,
                     },
-                }, );
+                });
             } else {
                 await db.cart_item.destroy({
                     where: {
                         id: isExists.id,
                     },
-                }, );
+                });
             }
         }
 
-        return res.status(200).json('Successfully removed from Cart.');
+        return res.status(200).json("Successfully removed from Cart.");
     } catch (error) {
         console.error(error);
         res.sendStatus(500);
     }
 });
 
-router.post('/deleteFromCart', checkAuth, async(req, res) => {
+router.post("/deleteFromCart", checkAuth, async(req, res) => {
     try {
         const { itemId } = req.body;
         const userId = req.user.id;
@@ -479,17 +477,17 @@ router.post('/deleteFromCart', checkAuth, async(req, res) => {
                 where: {
                     id: isExists.id,
                 },
-            }, );
+            });
         }
 
-        return res.status(200).json('Successfully Deleted from Cart.');
+        return res.status(200).json("Successfully Deleted from Cart.");
     } catch (error) {
         console.error(error);
         res.sendStatus(500);
     }
 });
 
-router.get('/getOrderHistory', checkAuth, async(req, res) => {
+router.get("/getOrderHistory", checkAuth, async(req, res) => {
     try {
         const userId = req.user.id;
 
@@ -528,11 +526,11 @@ router.get('/getOrderHistory', checkAuth, async(req, res) => {
     }
 });
 
-router.post('/getOrderDetails', checkAuth, async(req, res) => {
+router.post("/getOrderDetails", checkAuth, async(req, res) => {
     try {
         const userId = req.user.id;
         let { orderId } = req.body;
-        orderId = orderId.replace('LAVUP', '');
+        orderId = orderId.replace("LAVUP", "");
 
         const query = `SELECT 
                     CONCAT(addressline1,' ',city) as address,
@@ -589,7 +587,7 @@ router.post('/getOrderDetails', checkAuth, async(req, res) => {
     }
 });
 
-router.post('/updateCartItemIronStatus', checkAuth, async(req, res) => {
+router.post("/updateCartItemIronStatus", checkAuth, async(req, res) => {
     try {
         const { itemId } = req.body;
         const { needIron } = req.body;
@@ -609,17 +607,17 @@ router.post('/updateCartItemIronStatus', checkAuth, async(req, res) => {
                 where: {
                     id: isExists.id,
                 },
-            }, );
+            });
         }
 
-        return res.status(200).json('Successfully added to Cart.');
+        return res.status(200).json("Successfully added to Cart.");
     } catch (error) {
         console.error(error);
         res.sendStatus(500);
     }
 });
 
-router.post('/updateCartItemNotes', checkAuth, async(req, res) => {
+router.post("/updateCartItemNotes", checkAuth, async(req, res) => {
     try {
         const { itemId } = req.body;
         const { notes } = req.body;
@@ -639,20 +637,21 @@ router.post('/updateCartItemNotes', checkAuth, async(req, res) => {
                 where: {
                     id: isExists.id,
                 },
-            }, );
+            });
         }
 
-        return res.status(200).json('Successfully added to Cart.');
+        return res.status(200).json("Successfully added to Cart.");
     } catch (error) {
         console.error(error);
         res.sendStatus(500);
     }
 });
 
-router.get('/getCartPrices', checkAuth, async(req, res) => {
+router.get("/getCartPrices", checkAuth, async(req, res) => {
     try {
         let tax = 0;
-        const tax_query = 'SELECT * FROM lavup_db.sysVars where label = \'Tax value\'';
+        const tax_query =
+            "SELECT * FROM lavup_db.sysVars where label = 'Tax value'";
 
         const tax_data = await db.sequelize.query(tax_query, {
             type: db.sequelize.QueryTypes.SELECT,
@@ -699,7 +698,7 @@ WHERE
     }
 });
 
-router.post('/confirmOrder', checkAuth, async(req, res) => {
+router.post("/confirmOrder", checkAuth, async(req, res) => {
     try {
         const userId = req.user.id;
         const { pickUpDate } = req.body;
@@ -713,25 +712,44 @@ router.post('/confirmOrder', checkAuth, async(req, res) => {
         const { specialLandmarks } = req.body;
         // const userId = 46;
 
+        let tax_ratio = 0;
+        const tax_ratio_query =
+            "SELECT * FROM lavup_db.sysVars where label = 'Tax value'";
+
+        const tax_ratio_data = await db.sequelize.query(tax_ratio_query, {
+            type: db.sequelize.QueryTypes.SELECT,
+        });
+
+        tax_ratio = (parseFloat(tax_ratio_data[0].value) + 100) / 100;
+
         // get order calculation
-        const query = `SELECT
-    sysVars.value as tax_percentage,
-    round(round((subtotal.sum ),2),2) as subtotal,
-    (round(round((subtotal.sum * ((sysVars.value + 100)/100) ),1),2) ) as grandTotal,
-    (round(round((subtotal.sum * ((sysVars.value)/100)),2),2) ) as vat,
-    count.count
-    FROM (
+        const query = `
+    SELECT 
+    sysVars.value AS tax_percentage,
+    CONVERT( ROUND(ROUND((subtotal.sum * (100 / (sysVars.value + 100))), 1), 2), CHAR) AS subtotal,
+    CONVERT( (ROUND(ROUND((subtotal.sum), 1), 2)) , CHAR) AS grandTotal,
+    CONVERT( (ROUND(ROUND((subtotal.sum), 1), 2)) - ROUND(ROUND((subtotal.sum * (100 / (sysVars.value + 100))), 2), 2), CHAR) AS vat,
+    count.count AS count
+FROM
+    (SELECT 
+        name, label, value, 1 AS join_id
+    FROM
+        lavup_db.sysVars) sysVars
+        LEFT JOIN
+    (SELECT 
+        SUM(ROUND((unitPrice * ${tax_ratio}), 1) * units) sum, 1 AS join_id
+    FROM
+        cart_items
+    WHERE
+        userId = ${userId}) subtotal ON sysVars.join_id = subtotal.join_id
+        LEFT JOIN (
+          SELECT SUM(units) count , 1 as join_id from cart_items where userId = ${userId}
+          ) count on sysVars.join_id = count.join_id
+WHERE
+    sysVars.name = 'tax'
+  
 
-    SELECT name,label,value, 1 as join_id FROM lavup_db.sysVars 
-    ) sysVars 
-    LEFT JOIN (
-    SELECT SUM(unitPrice * units) sum , 1 as join_id from cart_items where userId = ${userId}
-    ) subtotal on sysVars.join_id = subtotal.join_id
-    LEFT JOIN (
-    SELECT SUM(units) count , 1 as join_id from cart_items where userId = ${userId}
-    ) count on sysVars.join_id = count.join_id
-
-    where sysVars.name = 'tax'`;
+    `;
 
         const data = await db.sequelize.query(query, {
             type: db.sequelize.QueryTypes.SELECT,
@@ -757,8 +775,8 @@ router.post('/confirmOrder', checkAuth, async(req, res) => {
             tax,
             totalOrderAmount,
             totalItems,
-            orderType: 'app',
-            status: 'pending to pick',
+            orderType: "app",
+            status: "pending to pick",
             orderPayed: 0,
             toPrint: 0,
             isDeliveryOrder: 1,
@@ -772,7 +790,8 @@ router.post('/confirmOrder', checkAuth, async(req, res) => {
             });
 
             let tax_amount = 0;
-            const tax_query = 'SELECT * FROM lavup_db.sysVars where label = \'Tax value\'';
+            const tax_query =
+                "SELECT * FROM lavup_db.sysVars where label = 'Tax value'";
 
             const tax_data = await db.sequelize.query(tax_query, {
                 type: db.sequelize.QueryTypes.SELECT,
@@ -786,9 +805,9 @@ router.post('/confirmOrder', checkAuth, async(req, res) => {
                         laundryOrderId: laundry_order.id,
                         unitPrice: elements.unitPrice,
                         unitsPurchased: 1,
-                        subTotal: (elements.unitPrice * tax_amount),
+                        subTotal: elements.unitPrice * tax_amount,
                         itemId: elements.itemId,
-                        slotId: '',
+                        slotId: "",
                         needIron: elements.needIron,
                         notes: elements.notes,
                     });
@@ -800,9 +819,9 @@ router.post('/confirmOrder', checkAuth, async(req, res) => {
             where: {
                 userId,
             },
-        }, );
+        });
 
-        return res.status(200).json('Successfully confirmed the Order.');
+        return res.status(200).json("Successfully confirmed the Order.");
     } catch (error) {
         console.error(error);
         res.sendStatus(500);
