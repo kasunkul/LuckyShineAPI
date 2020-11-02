@@ -12,7 +12,7 @@ router.post('/sales', checkAuth, async (req, res) => {
     let query = `SELECT 
     laundry_items.itemName,
     SUM(unitsPurchased) AS unitsPurchased,
-    SUM(laundry_order_items.unitPrice * unitsPurchased) AS unitPrice,
+    SUM(laundry_order_items.subTotal * unitsPurchased) AS unitPrice,
     itemId,
     laundry_items.itemCategoryId,
     item_categories.itemName as category
