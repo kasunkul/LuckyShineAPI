@@ -31,7 +31,7 @@ FROM
     }
     if (endDate) {
       if (query.includes('WHERE')) {
-        query += `AND
+        query += ` AND
                 (DATE(laundry_orders.createdAt) <= DATE('${endDate}'))`;
       } else {
         query += `WHERE
@@ -41,7 +41,7 @@ FROM
 
     if (shopId) {
       if (query.includes('WHERE')) {
-        query += `AND
+        query += ` AND
             laundry_orders.shopId = ${shopId}`;
       } else {
         query += `WHERE
@@ -51,7 +51,7 @@ FROM
 
     if (categoryId) {
       if (query.includes('WHERE')) {
-        query += `AND
+        query += ` AND
             laundry_items.itemCategoryId = ${categoryId}`;
       } else {
         query += `WHERE
@@ -61,7 +61,7 @@ FROM
 
     if (itemId) {
       if (query.includes('WHERE')) {
-        query += `AND
+        query += ` AND
         laundry_order_items.itemId = ${itemId}`;
       } else {
         query += `WHERE
@@ -78,6 +78,7 @@ FROM
 
     return res.status(200).json(data);
   } catch (error) {
+    console.log(error)
     return res.sendStatus(500);
   }
 });
