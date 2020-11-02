@@ -14,13 +14,15 @@ router.post('/sales', checkAuth, async (req, res) => {
     SUM(unitsPurchased) AS unitsPurchased,
     SUM(laundry_order_items.unitPrice * unitsPurchased) AS unitPrice,
     itemId,
-    laundry_items.itemCategoryId
+    laundry_items.itemCategoryId,
+    item_categories.itemName as category
 FROM
     lavup_db.laundry_order_items
         INNER JOIN
     laundry_items ON laundry_order_items.itemId = laundry_items.id
         INNER JOIN
     laundry_orders ON laundry_order_items.laundryOrderId = laundry_orders.id
+    INNER JOIN item_categories on laundry_items.itemCategoryId = item_categories.id
         `;
 
     if (startDate) {
