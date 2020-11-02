@@ -674,7 +674,7 @@ FROM
         lavup_db.sysVars) sysVars
         LEFT JOIN
     (SELECT 
-        SUM(unitPrice * ${tax} * units) sum, 1 AS join_id
+        SUM(ROUND((unitPrice * ${tax} * units), 1)) sum, 1 AS join_id
     FROM
         cart_items
     WHERE
