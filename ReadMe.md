@@ -24,12 +24,12 @@
 ## Start Staging
 * `npm install`
 * `npm run staging`
-* `API docs link : http://localhost:[port]/api-docs`
+* `API docs link : [HostedURL]/api-docs`
 
 ## Start Production
 * `npm install`
 * `npm run production`
-* `API docs link : http://localhost:[port]/api-docs`
+* `API docs link : [HostedURL]/api-docs`
 
 
 # Deploy to Heruko 
