@@ -145,7 +145,7 @@
                         "example": 16.12312
                     },
                     "name": {
-                        "type": "double",
+                        "type": "string",
                         "example": 16.12312
                     },
                     "amt": {
