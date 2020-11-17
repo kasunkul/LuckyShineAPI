@@ -90,16 +90,16 @@
                                 "Find Treasure by Distance": {
                                     "summary": "An Find treasure boxes within 1km/10 (km)",
                                     "value": {
-                                        "longitude": 126.2312,
-                                        "latitude": 24.7676,
+                                        "longitude": 103.8756757,
+                                        "latitude": 1.3273451,
                                         "distance": 1
                                     }
                                 },
                                 "Find Treasure By Distance and Prize": {
                                     "summary": "An Find treasure boxes that have a value of more than $10 (inclusive) prize value within 1 km / 10(km)",
                                     "value": {
-                                        "longitude": 126.2312,
-                                        "latitude": 24.7676,
+                                        "longitude": 103.8756757,
+                                        "latitude": 1.3273451,
                                         "distance": 1,
                                         "prize": 20
                                     }
@@ -138,7 +138,7 @@
                 "properties": {
                     "latitude": {
                         "type": "double",
-                        "example": 128.3423
+                        "example": 1.3273451
                     },
                     "longitude": {
                         "type": "double",

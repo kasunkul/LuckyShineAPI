@@ -57,46 +57,9 @@ async function findTreasureBoxes(req, res) {
         const { latitude, longitude, distance, prize } = req.body;
         let data = [];
 
-        console.log(prize);
-
-        if (Number.isInteger(distance)) {
-            console.log(distance);
-            if (distance != 1 && distance != 10) {
-                return res.send({
-                    status: 0,
-                    message: "Distance should be 1 KM or 10 KM",
-                    data: {},
-                });
-            }
-        } else {
-            return res.send({
-                status: 0,
-                message: "Distance should be an Integer",
-                data: {},
-            });
-        }
-
-
         if (!prize) {
             data = await findTreasureBoxesGivenKM(latitude, longitude, distance);
         } else {
-            if (Number.isInteger(prize)) {
-                console.log(prize);
-                if (!(prize >= 10 && prize <= 30)) {
-                    return res.send({
-                        status: 0,
-                        message: "Prize should be between $10 KM or $30",
-                        data: {},
-                    });
-                }
-            } else {
-                return res.send({
-                    status: 0,
-                    message: "Prize should be an Integer",
-                    data: {},
-                });
-            }
-
             data = await findTreasureBoxesGivenKMGivenPrize(
                 latitude,
                 longitude,
