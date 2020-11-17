@@ -1,7 +1,5 @@
 const { assert } = require("chai");
 const axios = require("axios");
-const jwt = require("jsonwebtoken");
-const db = require("../models");
 let api_token = "";
 
 describe("treasure/findTreasureBoxes POST", () => {
