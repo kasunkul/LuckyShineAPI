@@ -16,7 +16,15 @@ module.exports = {
             },
             name: {
                 type: Sequelize.STRING,
-            }
+            },
+            createdAt: {
+                allowNull: true,
+                type: Sequelize.DATE,
+            },
+            updatedAt: {
+                allowNull: true,
+                type: Sequelize.DATE,
+            },
         });
     },
     down: async(queryInterface, Sequelize) => {

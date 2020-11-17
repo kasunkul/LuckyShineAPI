@@ -1,14 +1,9 @@
-const express = require('express');
-const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
 const db = require('../../models');
 
-const { Op } = db.Sequelize;
 
-const router = express.Router();
-
-
-router.post('/login', async(req, res) => {
+async function login(req, res) {
     try {
 
         // 1. check whether user exists by email
@@ -52,8 +47,9 @@ router.post('/login', async(req, res) => {
         console.log(error);
         return res.sendStatus(500);
     }
-});
+}
 
 
-
-module.exports = router;
+module.exports = {
+    login
+};

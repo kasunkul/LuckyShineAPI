@@ -1,0 +1,95 @@
+{
+    "openapi": "3.0.1",
+    "info": {
+        "version": "1.0.0",
+        "title": "APIs Document",
+        "description": "Swagger Documentation",
+        "termsOfService": "",
+        "contact": {
+            "name": "Kasun Kulathunga",
+            "email": "kasun.kulathunga@gmail.com",
+            "url": "https://kasun.kulathunga"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
+        }
+    },
+    "servers": [{
+        "url": "http://localhost:5000/",
+        "description": "Local server"
+    }],
+    "tags": [{
+            "name": "Auth",
+            "description": "User Authorization"
+        },
+        {
+            "name": "Treasure",
+            "description": "Treasure Endpoints"
+        }
+    ],
+    "paths": {
+        "/auth/login": {
+            "post": {
+                "tags": ["Auth"],
+                "description": "Issue a new AUTH Token for the User",
+                "operationId": "getAuthorized",
+                "summary": "Authorize User",
+                "security": [{}],
+                "responses": {
+                    "200": {
+                        "description": "Authorization Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "requestBody": {
+                    "description": "Please enter your email and password to get authorized",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/User"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "x-codegen-request-body-name": "body"
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "User": {
+                "required": [
+                    "email",
+                    "password"
+                ],
+                "type": "object",
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "example": "kasun.kulathunge@gmail.com"
+                    },
+                    "password": {
+                        "type": "string",
+                        "example": "-Your Password-"
+                    }
+                }
+            }
+        },
+        "securitySchemes": {
+            "api_key": {
+                "type": "apiKey",
+                "name": "api_key",
+                "in": "header"
+            }
+        }
+    },
+    "security": {
+        "adapter_auth": []
+    }
+}
