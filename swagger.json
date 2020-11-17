@@ -59,6 +59,58 @@
                 },
                 "x-codegen-request-body-name": "body"
             }
+        },
+        "/treasure/findTreasureBoxes": {
+            "post": {
+                "tags": ["Treasure"],
+                "description": "Find Treasure Boxes Between 1/10KM",
+                "operationId": "getAuthorized",
+                "summary": "Authorize User",
+                "security": [{
+                    "api_auth": []
+                }],
+                "responses": {
+                    "200": {
+                        "description": "Find Treasure Boxes Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "requestBody": {
+                    "description": "Please enter the Longitude, Latitude and Distance 1/10 KM",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Treasure"
+                            },
+                            "examples": {
+                                "Find Treasure by Distance": {
+                                    "summary": "An Find treasure boxes within 1km/10 (km)",
+                                    "value": {
+                                        "longitude": 126.2312,
+                                        "latitude": 24.7676,
+                                        "distance": 1
+                                    }
+                                },
+                                "Find Treasure By Distance and Prize": {
+                                    "summary": "An Find treasure boxes that have a value of more than $10 (inclusive) prize value within 1 km / 10(km)",
+                                    "value": {
+                                        "longitude": 126.2312,
+                                        "latitude": 24.7676,
+                                        "distance": 1,
+                                        "prize": 20
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "x-codegen-request-body-name": "body"
+            }
         }
     },
     "components": {
@@ -72,24 +124,46 @@
                 "properties": {
                     "email": {
                         "type": "string",
-                        "example": "kasun.kulathunge@gmail.com"
+                        "example": "u1@luckyshine.xyz"
                     },
                     "password": {
                         "type": "string",
-                        "example": "-Your Password-"
+                        "example": "luckyshine001"
+                    }
+                }
+            },
+            "Treasure": {
+                "required": [],
+                "type": "object",
+                "properties": {
+                    "latitude": {
+                        "type": "double",
+                        "example": 128.3423
+                    },
+                    "longitude": {
+                        "type": "double",
+                        "example": 16.12312
+                    },
+                    "name": {
+                        "type": "double",
+                        "example": 16.12312
+                    },
+                    "amt": {
+                        "type": "integer",
+                        "example": 16
                     }
                 }
             }
         },
         "securitySchemes": {
-            "api_key": {
-                "type": "apiKey",
-                "name": "api_key",
-                "in": "header"
+            "api_auth": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT"
             }
         }
     },
     "security": {
-        "adapter_auth": []
+        "api_auth": []
     }
 }

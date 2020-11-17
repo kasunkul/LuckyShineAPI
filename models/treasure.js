@@ -22,7 +22,7 @@ module.exports = (sequelize, Sequelize) => {
         activeImage: {
             type: Sequelize.DOUBLE,
         },
-        longtitude: {
+        longitude: {
             type: Sequelize.DOUBLE,
         },
         name: {
