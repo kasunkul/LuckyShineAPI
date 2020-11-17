@@ -4,12 +4,15 @@
     "description": "",
     "main": "app.js",
     "scripts": {
-        "lint": "eslint \"./src/**/*.js\" app.js  --fix",
-        "start": "nodemon",
-        "stop": "Taskkill /IM node.exe /F",
-        "build": "NODE_ENV=production pm2 start app.js --name 'LuckShine-API'",
+        "start": "NODE_ENV=development node app.js",
+        "pm2": "NODE_ENV=development pm2 start app.js --name 'API-SERVER'",
+        "staging": "NODE_ENV=staging  pm2 start app.js --name 'API-SERVER'",
+        "production": "NODE_ENV=production pm2 start app.js --name 'API-SERVER'",
+        "development": "nodemon app.js",
         "migrate": "npx sequelize db:migrate",
-        "test": "mocha"
+        "test": "mocha",
+        "stop": "Taskkill /IM node.exe /F",
+        "lint": "eslint \"./src/**/*.js\" app.js  --fix"
     },
     "engines": {
         "node": "12.3.1"
