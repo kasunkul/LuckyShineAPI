@@ -8,7 +8,8 @@
         "start": "nodemon",
         "stop": "Taskkill /IM node.exe /F",
         "build": "NODE_ENV=production pm2 start app.js --name 'LuckShine-API'",
-        "migrate": "npx sequelize db:migrate"
+        "migrate": "npx sequelize db:migrate",
+        "test": "mocha"
     },
     "engines": {
         "node": "12.3.1"
@@ -21,12 +22,14 @@
         "axios": "^0.20.0",
         "bcrypt": "^5.0.0",
         "body-parser": "^1.19.0",
+        "chai": "^4.2.0",
         "config": "^3.3.1",
         "cors": "^2.8.5",
         "express": "^4.17.1",
         "express-joi-validation": "^4.0.3",
         "express-validator": "^6.6.1",
         "jsonwebtoken": "^8.5.1",
+        "mocha": "^8.2.1",
         "moment": "^2.27.0",
         "morgan": "^1.10.0",
         "mysql2": "^2.1.0",

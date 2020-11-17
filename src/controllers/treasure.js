@@ -1,5 +1,13 @@
 const db = require("../../models");
 
+/**
+ * @desc find the treasure boxes given for the distance
+ * * @param double $latitude - the location latitude
+ * * @param double $longitude - the location longitude
+ * * @param integer $distance - the location distance
+ * @return array - array of treasure entities with distance
+ */
+
 async function findTreasureBoxesGivenKM(latitude, longitude, distance) {
     const query = `SELECT 
     *
@@ -21,6 +29,15 @@ ORDER BY treasure_distance.distance ASC
 
     return data;
 }
+
+/**
+ * @desc find the treasure boxes given for the distance and given prize
+ * * @param double $latitude - the location latitude
+ * * @param double $longitude - the location longitude
+ * * @param integer $distance - the location distance
+ * * @param integer $prize - the prize filter
+ * @return array - array of treasure entities with prizes
+ */
 
 async function findTreasureBoxesGivenKMGivenPrize(
     latitude,
@@ -81,7 +98,6 @@ async function findTreasureBoxes(req, res) {
             message: "Success",
             data: data,
         });
-
     } catch (error) {
         console.log(error);
         return res.sendStatus(500);
