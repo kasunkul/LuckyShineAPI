@@ -41,7 +41,7 @@ describe("treasure/findTreasureBoxes POST", () => {
         assert.strictEqual(response_data.status, 1, 'message/status is incorrect');
     });
 
-    it("should successfully get a list of treasures [ Only Distance and Prize Filter ] ", async() => {
+    it("should successfully get a list of treasures [ Distance and Prize Filter ] ", async() => {
         let response = await axios.post(
             "http://localhost:5000/treasure/findTreasureBoxes", {
                 longitude: 103.8756757,
