@@ -18,6 +18,9 @@
     "servers": [{
         "url": "http://localhost:5000/",
         "description": "Local server"
+    }, {
+        "url": "https://api-server-luck-shine-dindinn.herokuapp.com/",
+        "description": "Heruko server"
     }],
     "tags": [{
             "name": "Auth",
