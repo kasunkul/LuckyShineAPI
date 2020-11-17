@@ -9,7 +9,7 @@ module.exports = async(req, res, next) => {
             req.user = { id: 0, iat: 1603211581 };
             next();
         } else {
-            const decoded = jwt.verify(token, 'lavup');
+            const decoded = jwt.verify(token, 'luck_shine');
 
             console.log("decoded -- ", decoded);
 

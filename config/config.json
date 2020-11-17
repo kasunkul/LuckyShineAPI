@@ -1,38 +1,41 @@
 {
-  "development": {
-    "username": "sammy",
-    "password": "password",
-    "database": "delivery_any",
-    "host": "127.0.0.1",
-    "dialect": "mysql",
-    "operatorsAliases": false,
-    "dialectOptions": {
-      "multipleStatements": true
+    "development": {
+        "username": "doadmin",
+        "password": "stiwut700rkzowe2",
+        "database": "treasures",
+        "host": "earltechdatabasecluster-do-user-6980403-0.a.db.ondigitalocean.com",
+        "dialect": "mysql",
+        "port": 25060,
+        "logging": false,
+        "multipleStatements": true,
+        "dialectOptions": {
+            "multipleStatements": true
+        }
+    },
+    "test": {
+        "username": "doadmin",
+        "password": "stiwut700rkzowe2",
+        "database": "treasures",
+        "host": "earltechdatabasecluster-do-user-6980403-0.a.db.ondigitalocean.com",
+        "dialect": "mysql",
+        "port": 25060,
+        "logging": false,
+        "multipleStatements": true,
+        "dialectOptions": {
+            "multipleStatements": true
+        }
+    },
+    "production": {
+        "username": "doadmin",
+        "password": "stiwut700rkzowe2",
+        "database": "treasures",
+        "host": "earltechdatabasecluster-do-user-6980403-0.a.db.ondigitalocean.com",
+        "dialect": "mysql",
+        "port": 25060,
+        "logging": false,
+        "multipleStatements": true,
+        "dialectOptions": {
+            "multipleStatements": true
+        }
     }
-  },
-  "test": {
-    "username": "doadmin",
-    "password": "stiwut700rkzowe2",
-    "database": "lavup_db",
-    "host": "earltechdatabasecluster-do-user-6980403-0.a.db.ondigitalocean.com",
-    "dialect": "mysql",
-    "port": 25060,
-    "multipleStatements": true,
-    "dialectOptions": {
-      "multipleStatements": true
-    }
-  },
-  "production": {
-    "username": "doadmin",
-    "password": "stiwut700rkzowe2",
-    "database": "lavup_db",
-    "host": "earltechdatabasecluster-do-user-6980403-0.a.db.ondigitalocean.com",
-    "dialect": "mysql",
-    "port": 25060,
-    "logging": false,
-    "multipleStatements": true,
-    "dialectOptions": {
-      "multipleStatements": true
-    }
-  }
 }

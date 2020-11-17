@@ -1,46 +1,46 @@
 {
-  "name": "API",
-  "version": "1.0.0",
-  "description": "",
-  "main": "app.js",
-  "scripts": {
-    "lint": "eslint \"./src/**/*.js\" app.js  --fix",
-    "start": "nodemon",
-    "stop": "Taskkill /IM node.exe /F",
-    "build": "NODE_ENV=production pm2 start app.js --name 'Lavup-API'",
-    "migrate": "npx sequelize db:migrate"
-  },
-  "engines": {
-    "node": "12.3.1"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "@sendgrid/mail": "^7.2.5",
-    "axios": "^0.20.0",
-    "bcrypt": "^5.0.0",
-    "body-parser": "^1.19.0",
-    "config": "^3.3.1",
-    "cors": "^2.8.5",
-    "express": "^4.17.1",
-    "express-joi-validation": "^4.0.3",
-    "express-validator": "^6.6.0",
-    "jsonwebtoken": "^8.5.1",
-    "moment": "^2.27.0",
-    "morgan": "^1.10.0",
-    "mysql2": "^2.1.0",
-    "request": "^2.88.2",
-    "sequelize": "^6.3.3",
-    "swagger-ui-express": "^4.1.4",
-    "yamlparser": "0.0.2"
-  },
-  "devDependencies": {
-    "eslint": "^7.6.0",
-    "eslint-config-airbnb-base": "^14.2.0",
-    "eslint-plugin-import": "^2.22.0",
-    "eslint-plugin-promise": "^4.2.1",
-    "nodemon": "^2.0.4",
-    "sequelize-cli": "^6.2.0"
-  }
+    "name": "API",
+    "version": "1.0.0",
+    "description": "",
+    "main": "app.js",
+    "scripts": {
+        "lint": "eslint \"./src/**/*.js\" app.js  --fix",
+        "start": "nodemon",
+        "stop": "Taskkill /IM node.exe /F",
+        "build": "NODE_ENV=production pm2 start app.js --name 'LuckShine-API'",
+        "migrate": "npx sequelize db:migrate"
+    },
+    "engines": {
+        "node": "12.3.1"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "@sendgrid/mail": "^7.2.5",
+        "axios": "^0.20.0",
+        "bcrypt": "^5.0.0",
+        "body-parser": "^1.19.0",
+        "config": "^3.3.1",
+        "cors": "^2.8.5",
+        "express": "^4.17.1",
+        "express-joi-validation": "^4.0.3",
+        "express-validator": "^6.6.0",
+        "jsonwebtoken": "^8.5.1",
+        "moment": "^2.27.0",
+        "morgan": "^1.10.0",
+        "mysql2": "^2.1.0",
+        "request": "^2.88.2",
+        "sequelize": "^6.3.3",
+        "swagger-ui-express": "^4.1.4",
+        "yamlparser": "0.0.2"
+    },
+    "devDependencies": {
+        "eslint": "^7.6.0",
+        "eslint-config-airbnb-base": "^14.2.0",
+        "eslint-plugin-import": "^2.22.0",
+        "eslint-plugin-promise": "^4.2.1",
+        "nodemon": "^2.0.4",
+        "sequelize-cli": "^6.2.0"
+    }
 }
